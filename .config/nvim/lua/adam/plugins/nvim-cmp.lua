@@ -20,7 +20,7 @@ return {
 		cmp.setup({
 			snippet = {
 				expand = function(args)
-					luasnip.lsp_exapnd(args.body)
+					luasnip.lsp_expand(args.body)
 				end,
 			},
 			mapping = cmp.mapping.preset.insert({
@@ -39,6 +39,10 @@ return {
 				{ name = "buffer" },
 				{ name = "path" },
 			}),
+			window = {
+				completion = cmp.config.window.bordered(),
+				documentation = cmp.config.window.bordered(),
+			},
 			-- config lspkind vscode icons
 			-- formatting = {
 			--   format = lspkind.cmp_format({
