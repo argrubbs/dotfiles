@@ -37,3 +37,11 @@ opt.splitright = true
 opt.splitbelow = true
 
 opt.iskeyword:append("-")
+
+-- set yaml filetypes
+vim.filetype.add({
+	extension = {
+		yml = "yaml.ansible",
+		yaml = "yaml",
+	},
+})

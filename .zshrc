@@ -29,3 +29,6 @@ if type brew &>/dev/null; then
     autoload -Uz compinit
     compinit
 fi
+
+# Zoxide config
+eval "$(zoxide init zsh)"
