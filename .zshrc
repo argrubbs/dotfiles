@@ -17,11 +17,14 @@ plug "romkatv/powerlevel10k"
 autoload -Uz compinit
 compinit
 
+# Add addiutional dirs to PATH
+export PATH="$HOME/.local/bin:/opt/nvim-linux64/bin:/home/linuxbrew/.linuxbrew/bin:$PATH"
+
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 # eza alias to ls
-alias ls='eza -alh'
+alias ls='eza --long --git --no-filesize --icons=always --no-time --no-user'
 
 # Extra eza config
 if type brew &>/dev/null; then
@@ -32,3 +35,31 @@ fi
 
 # Zoxide config
 eval "$(zoxide init zsh)"
+alias cd="z"
+
+alias dnf="sudo dnf5"
+
+# The Fuck
+eval $(thefuck --alias)
+
+# FZF
+# Set up fzf for ZSH
+eval "$(fzf --zsh)"
+# fzf previews
+export FZF_CTRL_T_OPTS="--preview 'bat -n --color=always --line-range :500 {}'"
+export FZF_ALT_C_OPTS="--preview 'eza --tree --color=always {} | head -200'"
+
+# FZF comprun
+_fzf_comprun() {
+  local command=$1
+  shift
+
+  case "$command" in
+    cd)           fzf --preview 'eza --tree --color=always {} | head -200'               "$@" ;;
+    export|unset) fzf --preview "eval 'echo \$' {}"                                      "$@" ;;
+    ssh)          fzf --preview 'dig {}'                                                 "$@" ;;
+    *)            fzf --preview "--preview 'bat -n --color=always --line-range :500 {}'" "$@" ;;
+  esac
+}
+
+eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
