@@ -431,15 +431,15 @@ Defining the various fonts that Emacs will use.
 ** Setting the Font Face
 #+begin_src emacs-lisp
   (set-face-attribute 'default nil
-    :font "Hack Nerd Font"
+    :font "MesloLGS Nerd Font"
     :height 110
     :weight 'medium)
   (set-face-attribute 'variable-pitch nil
-    :font "Hack Nerd Font"
+    :font "MesloLGS Nerd Font"
     :height 120
     :weight 'medium)
   (set-face-attribute 'fixed-pitch nil
-    :font "Hack Nerd Font Mono"
+    :font "MesloLGS Nerd Font Mono"
     :height 110
     :weight 'medium)
   ;; Makes commented text and keywords italics.
