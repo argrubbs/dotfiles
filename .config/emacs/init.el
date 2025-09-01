@@ -6,8 +6,14 @@
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
  '(package-selected-packages
-   '(ansible autothemer company counsel go-mode js2-mode lsp-ivy lsp-ui
-	     python-mode typescript-mode vterm web-mode yaml-mode)))
+   '(ansible autothemer claude-code-ide company company-box counsel
+	     dockerfile-mode evil evil-collection general go-mode
+	     js2-mode json-mode lsp-ivy lsp-ui python-mode rust-mode
+	     terraform-mode typescript-mode vterm web-mode yaml-mode
+	     yasnippet-snippets))
+ '(package-vc-selected-packages
+   '((claude-code-ide :vc-backend Git :url
+		      "https://github.com/manzaltu/claude-code-ide.el"))))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.

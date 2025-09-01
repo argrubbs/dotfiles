@@ -1,0 +1,8 @@
+**/elpa
+**/auto-save-list
+**/eln-cache
+**/emacs/.local
+**/eshell
+**/transient
+config.el
+projects

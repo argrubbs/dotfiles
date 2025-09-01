@@ -1,6 +1,7 @@
 #+TITLE: Emacs Configuration
 #+AUTHOR: Adam
 #+STARTUP: overview
+#+PROPERTY: header-args:emacs-lisp :tangle config.el
 
 * Essential Functions
 ** Reload Configuration
@@ -125,8 +126,10 @@
 ;; Basic vterm configuration
 (use-package vterm
   :ensure t
-  :bind ("C-c t" . vterm))
- #+end_src
+  :bind ("C-c t" . vterm)
+  :config
+  (setq vterm-always-compile-module t))
+#+end_src
   
 * Navigation & Completion
 
@@ -134,7 +137,41 @@
 #+begin_src emacs-lisp
 (use-package which-key
   :config
-  (which-key-mode 1))
+  (which-key-mode 1)
+  ;; Vertical layout
+  (setq which-key-popup-type 'side-window)
+  (setq which-key-side-window-location 'right)
+  (setq which-key-side-window-max-width 0.33)
+  (setq which-key-side-window-max-height 0.25)
+  
+  ;; Better sorting and display
+  (setq which-key-sort-order 'which-key-key-order-alpha)
+  (setq which-key-sort-uppercase-first nil)
+  (setq which-key-add-column-separators t)
+  (setq which-key-max-display-columns nil)
+  (setq which-key-min-display-lines 6)
+  (setq which-key-separator " → ")
+  
+  ;; Custom replacements for better labels
+  (which-key-add-key-based-replacements
+    "C-c &" "yasnippet"
+    "C-c l" "lsp"
+    "C-c p" "projectile"
+    "C-c C-'" "claude-code"
+    "C-x r" "register/rectangle"
+    "C-x v" "version-control"
+    "C-x g" "magit"
+    "C-x t" "tab-bar"
+    "C-c t" "terminal")
+  
+  ;; Better descriptions for common prefixes
+  (which-key-add-major-mode-key-based-replacements 'org-mode
+    "C-c C-e" "export"
+    "C-c C-t" "todo"
+    "C-c C-s" "schedule"
+    "C-c C-d" "deadline"
+    "C-c C-a" "attach"
+    "C-c C-l" "link"))
 #+end_src
 
 ** Ivy Completion Framework
@@ -143,7 +180,9 @@
   :config
   (ivy-mode 1)
   (setq ivy-use-virtual-buffers t)
-  (setq enable-recursive-minibuffers t))
+  (setq enable-recursive-minibuffers t)
+  ;; Remove initial ^ from all ivy commands for fuzzy matching
+  (setq ivy-initial-inputs-alist nil))
 
 (use-package counsel
   :after ivy
@@ -160,8 +199,37 @@
 (use-package company
   :config
   (global-company-mode 1)
-  (setq company-idle-delay 0.3)
-  (setq company-minimum-prefix-length 2))
+  ;; VSCode-like IntelliSense settings
+  (setq company-idle-delay 0.0)  ; Show completions immediately
+  (setq company-minimum-prefix-length 1)  ; Start after 1 character
+  (setq company-selection-wrap-around t)
+  (setq company-tooltip-align-annotations t)
+  (setq company-tooltip-flip-when-above t)
+  (setq company-show-numbers t)  ; Show numbers for quick selection
+  (setq company-require-match nil)  ; Allow typing without selecting
+  (setq company-dabbrev-downcase nil)
+  (setq company-dabbrev-ignore-case nil)
+  
+  ;; Better sorting and filtering
+  (setq company-transformers '(company-sort-by-occurrence))
+  
+  ;; VSCode-like keybindings
+  :bind
+  (:map company-active-map
+        ("C-n" . company-select-next)
+        ("C-p" . company-select-previous)
+        ("<tab>" . company-complete-selection)
+        ("RET" . nil)  ; Don't complete on enter
+        ("<return>" . nil)))
+
+;; Company box for better popup UI (VSCode-like)
+(use-package company-box
+  :hook (company-mode . company-box-mode)
+  :config
+  (setq company-box-icons-alist 'company-box-icons-all-the-icons)
+  (setq company-box-backends-colors nil)
+  (setq company-box-show-single-candidate t)
+  (setq company-box-max-candidates 50))
 #+end_src
 
 * Language Server Protocol (LSP)
@@ -172,32 +240,50 @@
   :init
   (setq lsp-keymap-prefix "C-c l")
   :hook
-  (python-mode . lsp-deferred)
-  (go-mode . lsp-deferred)
-  (js-mode . lsp-deferred)
+  ;; Programming languages with proper LSP servers
+  (python-mode . lsp-deferred)  ; Requires: pip install python-lsp-server
+  (go-mode . lsp-deferred)      ; Requires: go install golang.org/x/tools/gopls@latest
+  (js2-mode . lsp-deferred)     ; Requires: npm i -g typescript-language-server typescript
   (typescript-mode . lsp-deferred)
-  (web-mode . lsp-deferred)
-  (css-mode . lsp-deferred)
-  (html-mode . lsp-deferred)
-  (yaml-mode . lsp-deferred)
-  (ansible-mode . lsp-deferred)
-  (emacs-lisp-mode . lsp-deferred)
+  (web-mode . lsp-deferred)     ; For React/JSX files
+  (css-mode . lsp-deferred)     ; Requires: npm i -g vscode-langservers-extracted
+  (scss-mode . lsp-deferred)
+  (sass-mode . lsp-deferred)
+  (html-mode . lsp-deferred)    ; Requires: npm i -g vscode-langservers-extracted
+  (yaml-mode . lsp-deferred)    ; Requires: npm i -g yaml-language-server
+  (json-mode . lsp-deferred)    ; Requires: npm i -g vscode-langservers-extracted
+  (rust-mode . lsp-deferred)    ; Requires: rustup component add rust-analyzer
+  (c-mode . lsp-deferred)       ; Requires: clangd
+  (c++-mode . lsp-deferred)
+  (java-mode . lsp-deferred)    ; Requires: Eclipse JDT Language Server
+  (sh-mode . lsp-deferred)      ; Requires: npm i -g bash-language-server
+  (dockerfile-mode . lsp-deferred) ; Requires: npm i -g dockerfile-language-server-nodejs
+  (terraform-mode . lsp-deferred)  ; Requires: terraform-ls
+  ;; Remove emacs-lisp-mode - use built-in completion instead
   (lsp-mode . lsp-enable-which-key-integration)
   :commands (lsp lsp-deferred)
   :config
   (setq lsp-prefer-flymake nil)
   (setq lsp-enable-snippet t)
-  (setq lsp-enable-completion-at-point t))
+  (setq lsp-enable-completion-at-point t)
+  (setq lsp-completion-provider :company-capf)
+  (setq lsp-idle-delay 0.1)
+  (setq lsp-log-io nil)  ; Improve performance
+  (setq lsp-keep-workspace-alive nil))
 
 (use-package lsp-ui
-  :commands lsp-ui-mode
+  :hook (lsp-mode . lsp-ui-mode)
   :config
   (setq lsp-ui-doc-enable t)
-  (setq lsp-ui-doc-position 'bottom)
+  (setq lsp-ui-doc-position 'at-point)
+  (setq lsp-ui-doc-delay 0.5)
   (setq lsp-ui-sideline-enable t)
-  (setq lsp-ui-flycheck-enable t))
+  (setq lsp-ui-sideline-show-hover t)
+  (setq lsp-ui-flycheck-enable t)
+  (setq lsp-ui-peek-enable t))
 
 (use-package lsp-ivy
+  :after (lsp-mode ivy)
   :commands lsp-ivy-workspace-symbol)
 #+end_src
 * Programming Languages
@@ -222,27 +308,45 @@
 ** JavaScript/TypeScript
 #+begin_src emacs-lisp
 (use-package js2-mode
-  :mode "\\.js\\'"
-  :hook (js2-mode . lsp-deferred))
+  :mode ("\\.js\\'" "\\.mjs\\'")
+  :config
+  (setq js2-basic-offset 2))
 
 (use-package typescript-mode
-  :mode "\\.ts\\'"
-  :hook (typescript-mode . lsp-deferred))
+  :mode ("\\.ts\\'" "\\.tsx\\'"))
+
+(use-package json-mode
+  :mode "\\.json\\'")
 #+end_src
 
 ** Web Development
 #+begin_src emacs-lisp
 (use-package web-mode
-  :mode ("\\.html\\'" "\\.css\\'" "\\.tsx\\'")
-  :hook (web-mode . lsp-deferred)
+  :mode ("\\.html\\'" "\\.htm\\'" "\\.jsx\\'" "\\.tsx\\'" "\\.vue\\'" "\\.svelte\\'")
   :config
   (setq web-mode-content-types-alist
-        '(("jsx" . "\\.tsx\\'")
-          ("javascript" . "\\.js\\'"))))
+        '(("jsx" . "\\.jsx\\'")
+          ("tsx" . "\\.tsx\\'")))
+  (setq web-mode-markup-indent-offset 2)
+  (setq web-mode-css-indent-offset 2)
+  (setq web-mode-code-indent-offset 2))
 
 (use-package css-mode
-  :mode "\\.css\\'"
-  :hook (css-mode . lsp-deferred))
+  :mode ("\\.css\\'" "\\.scss\\'" "\\.sass\\'")
+  :config
+  (setq css-indent-offset 2))
+#+end_src
+
+** Systems Languages
+#+begin_src emacs-lisp
+(use-package rust-mode
+  :mode "\\.rs\\'")
+
+(use-package dockerfile-mode
+  :mode "Dockerfile\\'")
+
+(use-package terraform-mode
+  :mode "\\.tf\\'")
 #+end_src
 
 ** YAML and Ansible
@@ -280,7 +384,9 @@
 #+begin_src emacs-lisp
 (use-package elisp-mode
   :ensure nil
-  :hook (emacs-lisp-mode . lsp-deferred))
+  :config
+  ;; Use built-in completion for Emacs Lisp instead of LSP
+  (add-hook 'emacs-lisp-mode-hook 'eldoc-mode))
 #+end_src
 
 * Snippets
@@ -295,16 +401,156 @@
 (use-package yasnippet-snippets
   :after yasnippet)
 
+* Version Control
+** Magit
+#+begin_src emacs-lisp
+(use-package magit
+  :bind ("C-x g" . magit-status)
+  :config
+  (setq magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+#+end_src
+
+* Editor Enhancements  
+** Evil Mode
+#+begin_src emacs-lisp
+(use-package evil
+  :init
+  (setq evil-want-integration t)
+  (setq evil-want-keybinding nil)
+  (setq evil-want-C-u-scroll t)
+  (setq evil-want-C-i-jump nil)
+  :config
+  (evil-mode 1)
+  (define-key evil-insert-state-map (kbd "C-g") 'evil-normal-state)
+  (define-key evil-insert-state-map (kbd "C-h") 'evil-delete-backward-char-and-join)
+
+  ;; Use visual line motions even outside of visual-line-mode buffers
+  (evil-global-set-key 'motion "j" 'evil-next-visual-line)
+  (evil-global-set-key 'motion "k" 'evil-previous-visual-line)
+
+  (evil-set-initial-state 'messages-buffer-mode 'normal)
+  (evil-set-initial-state 'dashboard-mode 'normal))
+#+end_src
+
+** Evil Collection
+#+begin_src emacs-lisp
+(use-package evil-collection
+  :after evil
+  :config
+  (evil-collection-init))
+#+end_src
+
+** General (Leader Key)
+#+begin_src emacs-lisp
+(use-package general
+  :after evil
+  :config
+  (general-create-definer my/leader-keys
+    :keymaps '(normal insert visual emacs)
+    :prefix "SPC"
+    :global-prefix "C-SPC")
+  
+  ;; Core bindings like Doom Emacs
+  (my/leader-keys
+    "SPC" '(counsel-M-x :which-key "M-x")
+    "." '(find-file :which-key "find file")
+    "," '(counsel-switch-buffer :which-key "switch buffer")
+    "<" '(counsel-switch-buffer-other-window :which-key "switch buffer other window")
+    ":" '(eval-expression :which-key "eval expression")
+    ";" '(eval-last-sexp :which-key "eval last sexp")
+    
+    ;; File operations
+    "f" '(:ignore t :which-key "file")
+    "ff" '(find-file :which-key "find file")
+    "fr" '(counsel-recentf :which-key "recent files")
+    "fs" '(save-buffer :which-key "save file")
+    "fS" '(evil-write-all :which-key "save all files")
+    "fd" '(dired :which-key "dired")
+    
+    ;; Buffer operations
+    "b" '(:ignore t :which-key "buffer")
+    "bb" '(counsel-switch-buffer :which-key "switch buffer")
+    "bd" '(evil-delete-buffer :which-key "delete buffer")
+    "bk" '(kill-current-buffer :which-key "kill buffer")
+    "br" '(revert-buffer :which-key "revert buffer")
+    "bn" '(next-buffer :which-key "next buffer")
+    "bp" '(previous-buffer :which-key "previous buffer")
+    
+    ;; Window operations
+    "w" '(:ignore t :which-key "window")
+    "wv" '(evil-window-vsplit :which-key "vertical split")
+    "ws" '(evil-window-split :which-key "horizontal split")
+    "wh" '(evil-window-left :which-key "window left")
+    "wj" '(evil-window-down :which-key "window down")
+    "wk" '(evil-window-up :which-key "window up")
+    "wl" '(evil-window-right :which-key "window right")
+    "wd" '(evil-window-delete :which-key "delete window")
+    "wo" '(delete-other-windows :which-key "delete other windows")
+    
+    ;; Git/Magit
+    "g" '(:ignore t :which-key "git")
+    "gg" '(magit-status :which-key "magit status")
+    "gb" '(magit-blame :which-key "git blame")
+    "gl" '(magit-log :which-key "git log")
+    "gd" '(magit-diff :which-key "git diff")
+    
+    ;; Search
+    "s" '(:ignore t :which-key "search")
+    "ss" '(swiper :which-key "search buffer")
+    "sp" '(counsel-rg :which-key "search project")
+    "sf" '(counsel-fzf :which-key "fzf files")
+    
+    ;; LSP
+    "l" '(:ignore t :which-key "lsp")
+    "la" '(lsp-execute-code-action :which-key "code action")
+    "lr" '(lsp-rename :which-key "rename")
+    "lf" '(lsp-format-buffer :which-key "format buffer")
+    "ld" '(lsp-find-definition :which-key "find definition")
+    "lD" '(lsp-find-declaration :which-key "find declaration")
+    "lr" '(lsp-find-references :which-key "find references")
+    "li" '(lsp-find-implementation :which-key "find implementation")
+    "ls" '(lsp-ivy-workspace-symbol :which-key "workspace symbols")
+    
+    ;; Toggle
+    "t" '(:ignore t :which-key "toggle")
+    "tt" '(vterm :which-key "terminal")
+    "tn" '(display-line-numbers-mode :which-key "line numbers")
+    "tw" '(whitespace-mode :which-key "whitespace")
+    "th" '(global-hl-line-mode :which-key "highlight line")
+    
+    ;; Claude Code
+    "a" '(:ignore t :which-key "ai")
+    "aa" '(claude-code-ide-menu :which-key "claude menu")
+    "ac" '(claude-code-ide :which-key "claude code")
+    
+    ;; Quit/Session
+    "q" '(:ignore t :which-key "quit")
+    "qq" '(evil-quit :which-key "quit")
+    "qQ" '(evil-quit-all :which-key "quit all")
+    "qr" '(restart-emacs :which-key "restart emacs")
+    
+    ;; Help
+    "h" '(:ignore t :which-key "help")
+    "hf" '(describe-function :which-key "describe function")
+    "hv" '(describe-variable :which-key "describe variable")
+    "hk" '(describe-key :which-key "describe key")
+    "hm" '(describe-mode :which-key "describe mode")))
+#+end_src
+
 * AI coding
 ** Claude Code
 
 #+begin_src emacs-lisp
-  (use-package claude-code-ide
-    :vc (:url "https://github.com/manzaltu/claude-code-ide.el" :rev :newest)
-    :bind ("C-c C-'" . claude-code-ide-menu) ; Set your favorite keybinding
-    :config
-    (claude-code-ide-emacs-tools-setup)) ; Optionally enable Emacs MCP tools
+;; Install claude-code-ide manually if not available
+(unless (package-installed-p 'claude-code-ide)
+  (package-vc-install "https://github.com/manzaltu/claude-code-ide.el"))
 
-  ;; Test Claude Installation
-  (message "Claude found at: %s" (executable-find "claude"))
+(use-package claude-code-ide
+  :ensure nil
+  :bind ("C-c C-'" . claude-code-ide-menu)
+  :config
+  (claude-code-ide-emacs-tools-setup))
+
+;; Test Claude Installation
+(message "Claude found at: %s" (executable-find "claude"))
 #+end_src
