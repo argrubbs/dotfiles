@@ -124,6 +124,7 @@ source $ZSH/oh-my-zsh.sh
 #             }
 #
 alias ls='eza --color=always --all --long --git --icons --classify --group-directories-first'
+alias cat=bat
 
 # Add global npm to path
 export PATH=~/.npm-global/bin:~/.local/bin:$PATH
