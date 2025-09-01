@@ -103,24 +103,24 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-eval "$(/opt/homebrew/bin/brew shellenv)"
-source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
-export ZSH_HIGHLIGHT_HIGHLIGHTERS_DIR=/opt/homebrew/share/zsh-syntax-highlighting/highlighters
-eval 
-            fuck () {
-                TF_PYTHONIOENCODING=$PYTHONIOENCODING;
-                export TF_SHELL=zsh;
-                export TF_ALIAS=fuck;
-                TF_SHELL_ALIASES=$(alias);
-                export TF_SHELL_ALIASES;
-                TF_HISTORY="$(fc -ln -10)";
-                export TF_HISTORY;
-                export PYTHONIOENCODING=utf-8;
-                TF_CMD=$(
-                    thefuck THEFUCK_ARGUMENT_PLACEHOLDER $@
-                ) && eval $TF_CMD;
-                unset TF_HISTORY;
-                export PYTHONIOENCODING=$TF_PYTHONIOENCODING;
-                test -n "$TF_CMD" && print -s $TF_CMD
-            }
-        
+# source /opt/homebrew/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+# export ZSH_HIGHLIGHT_HIGHLIGHTERS_DIR=/opt/homebrew/share/zsh-syntax-highlighting/highlighters
+# eval 
+#             fuck () {
+#                 TF_PYTHONIOENCODING=$PYTHONIOENCODING;
+#                 export TF_SHELL=zsh;
+#                 export TF_ALIAS=fuck;
+#                 TF_SHELL_ALIASES=$(alias);
+#                 export TF_SHELL_ALIASES;
+#                 TF_HISTORY="$(fc -ln -10)";
+#                 export TF_HISTORY;
+#                 export PYTHONIOENCODING=utf-8;
+#                 TF_CMD=$(
+#                     thefuck THEFUCK_ARGUMENT_PLACEHOLDER $@
+#                 ) && eval $TF_CMD;
+#                 unset TF_HISTORY;
+#                 export PYTHONIOENCODING=$TF_PYTHONIOENCODING;
+#                 test -n "$TF_CMD" && print -s $TF_CMD
+#             }
+#
+alias ls='eza --color=always --all --long --git --icons --classify --group-directories-first'
