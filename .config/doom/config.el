@@ -74,16 +74,15 @@
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
-(defun my-transcode-ffmpeg-hevc ()
-  "Transcode a file to HEVC using ffmpeg with HVC1 tag."
-  (interactive)
-  (dired-do-shell-command
-   "ffmpeg -i `?` -c:v hevc_videotoolbox -tag:v hvc1 -profile:v main -b:v 4M -c:a aac -b:a 192k `?`.mov"
-   nil))
+(doom-big-font-mode)
 
 (map! :map dired-mode-map
       "C-c t" #'my-transcode-ffmpeg-hevc)
 
-(add-to-list 'default-frame-alist '(.width, 240))
-(add-to-list 'default-frame-alist '(.height, 100))
-(doom-big-font-mode)
+(use-package! claude-code-ide
+  :bind ("C-c C-'" . claude-code-ide-menu) ; Set your favorite keybinding
+  :config
+  (claude-code-ide-emacs-tools-setup)) ; Optionally enable Emacs MCP tools
+
+(setq exec-path (append exec-path '("/home/adam/.npm-global/bin" "/home/adam/.local/bin")))
+(setenv "PATH" (concat (getenv "PATH") ":/home/adam/.npm-global/bin:/home/adam/.local/bin"))
