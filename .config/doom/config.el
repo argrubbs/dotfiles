@@ -84,5 +84,5 @@
   :config
   (claude-code-ide-emacs-tools-setup)) ; Optionally enable Emacs MCP tools
 
-(setq exec-path (append exec-path '("/home/adam/.npm-global/bin" "/home/adam/.local/bin")))
-(setenv "PATH" (concat (getenv "PATH") ":/home/adam/.npm-global/bin:/home/adam/.local/bin"))
+(setq exec-path (append exec-path '("~/.npm-global/bin" "~/.local/bin")))
+(setenv "PATH" (concat (getenv "PATH") ":~/.npm-global/bin:~/.local/bin"))
