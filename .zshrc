@@ -128,3 +128,7 @@ alias cat=bat
 
 # Add global npm to path
 export PATH=~/.npm-global/bin:~/.local/bin:$PATH
+export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig"
+export LDFLAGS="-L/opt/homebrew/lib"
+export CPPFLAGS="-I/opt/homebrew/include"
+export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"

@@ -49,3 +49,10 @@
 ;; (unpin! pinned-package another-pinned-package)
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;; (unpin! t)
+
+(package! restclient)
+(package! restclient-test)
+(package! ob-restclient)
+(package! verb)
+(package! telega)
+(package! gptel :recipe (:nonrecursive t))

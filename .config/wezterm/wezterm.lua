@@ -10,7 +10,7 @@ wezterm.on("gui-startup", function(cmd)
 	window:gui_window():maximize()
 end)
 
-wezconf.color_scheme = "rose-pine"
+wezconf.color_scheme = "Gruvbox dark, medium (base16)"
 
 wezconf.window_decorations = "RESIZE"
 wezconf.enable_tab_bar = false

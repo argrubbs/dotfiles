@@ -32,7 +32,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
+(setq doom-theme 'doom-gruvbox)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -80,9 +80,41 @@
       "C-c t" #'my-transcode-ffmpeg-hevc)
 
 (use-package! claude-code-ide
-  :bind ("C-c C-'" . claude-code-ide-menu) ; Set your favorite keybinding
   :config
   (claude-code-ide-emacs-tools-setup)) ; Optionally enable Emacs MCP tools
 
+;; Homebrew stuff
+(setenv "PKG_CONFIG_PATH"
+        (concat "/opt/homebrew/lib/pkgconfig:" (getenv "PKG_CONFIG_PATH")))
+(setenv "LDFLAGS" "-L/opt/homebrew/lib")
+(setenv "CPPFLAGS" "-I/opt/homebrew/include")
+(setenv "DYLD_LIBRARY_PATH" "/opt/homebrew/lib")
+
+;; Claude Code IDE keybindings - Evil mode compatible
+(map! :leader
+      (:prefix "c"
+       (:prefix ("A" . "ai")
+        :desc "Claude Code IDE Menu" "m" #'claude-code-ide-menu
+        :desc "Start Claude Code" "s" #'claude-code-ide
+        :desc "Send Prompt" "p" #'claude-code-ide-send-prompt
+        :desc "Continue Conversation" "c" #'claude-code-ide-continue
+        :desc "Resume Conversation" "r" #'claude-code-ide-resume
+        :desc "Stop Claude Code" "q" #'claude-code-ide-stop
+        :desc "Switch to Claude Buffer" "b" #'claude-code-ide-switch-to-buffer
+        :desc "List Sessions" "l" #'claude-code-ide-list-sessions)))
+
 (setq exec-path (append exec-path '("~/.npm-global/bin" "~/.local/bin")))
 (setenv "PATH" (concat (getenv "PATH") ":~/.npm-global/bin:~/.local/bin"))
+
+(use-package telega
+  :commands telega
+  :config
+  (setq telega-app-id (string-to-number
+                       (auth-source-pick-first-password :host "telegram.org" :user "telega-app-id")))
+  (setq telega-app-hash (auth-source-pick-first-password :host "telegram.org" :user "telega-app-hash"))
+  (setq telega-server-libs-prefix "~/dev/td/tdlib/"))
+
+(setq auth-sources '("~/.authinfo.gpg" "~/.authinfo"))
+(gptel-make-anthropic "Claude"          ;Any name you want
+  :stream t                             ;Streaming responses
+  :key gptel-api-key)
