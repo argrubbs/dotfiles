@@ -75,6 +75,14 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
 (doom-big-font-mode)
+(map! :map global-map
+      "C-c j j" #'avy-goto-char-timer
+      "C-c j l" #'avy-goto-line
+      "C-c j w" #'avy-goto-word-1
+      "C-c j c" #'avy-goto-char
+      "M-g c"   #'avy-goto-char-timer
+      "M-g l"   #'avy-goto-line
+      "M-g w"   #'avy-goto-word-1)
 
 (map! :map dired-mode-map
       "C-c t" #'my-transcode-ffmpeg-hevc)
@@ -93,15 +101,15 @@
 ;; Claude Code IDE keybindings - Evil mode compatible
 (map! :leader
       (:prefix "c"
-       (:prefix ("A" . "ai")
-        :desc "Claude Code IDE Menu" "m" #'claude-code-ide-menu
-        :desc "Start Claude Code" "s" #'claude-code-ide
-        :desc "Send Prompt" "p" #'claude-code-ide-send-prompt
-        :desc "Continue Conversation" "c" #'claude-code-ide-continue
-        :desc "Resume Conversation" "r" #'claude-code-ide-resume
-        :desc "Stop Claude Code" "q" #'claude-code-ide-stop
-        :desc "Switch to Claude Buffer" "b" #'claude-code-ide-switch-to-buffer
-        :desc "List Sessions" "l" #'claude-code-ide-list-sessions)))
+               (:prefix ("A" . "ai")
+                :desc "Claude Code IDE Menu" "m" #'claude-code-ide-menu
+                :desc "Start Claude Code" "s" #'claude-code-ide
+                :desc "Send Prompt" "p" #'claude-code-ide-send-prompt
+                :desc "Continue Conversation" "c" #'claude-code-ide-continue
+                :desc "Resume Conversation" "r" #'claude-code-ide-resume
+                :desc "Stop Claude Code" "q" #'claude-code-ide-stop
+                :desc "Switch to Claude Buffer" "b" #'claude-code-ide-switch-to-buffer
+                :desc "List Sessions" "l" #'claude-code-ide-list-sessions)))
 
 (setq exec-path (append exec-path '("~/.npm-global/bin" "~/.local/bin")))
 (setenv "PATH" (concat (getenv "PATH") ":~/.npm-global/bin:~/.local/bin"))
@@ -118,3 +126,5 @@
 (gptel-make-anthropic "Claude"          ;Any name you want
   :stream t                             ;Streaming responses
   :key gptel-api-key)
+
+(add-hook 'vterm-mode-hook #'yas-minor-mode)
