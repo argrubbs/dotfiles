@@ -3,7 +3,7 @@
 \.svn
 \.hg
 \.gitignore
-
+\.gitconfig
 # Documentation
 README.*
 LICENSE
