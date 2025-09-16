@@ -525,6 +525,10 @@ Configuration for Emacs package system using MELPA, Org, and GNU ELPA repositori
 
 (require 'use-package)
 (setq use-package-always-ensure t)
+
+;; Install hydra for transient menus
+(use-package hydra
+  :ensure t)
 #+end_src
 
 #+begin_src emacs-lisp
@@ -3185,9 +3189,6 @@ Foundation setup for Org-mode with sensible defaults and essential features. Con
 
 ** Transient Menus - Hydra for Org
 #+begin_src emacs-lisp
-(use-package hydra
-  :ensure t)
-
 (defhydra hydra-org (:color blue :hint nil)
   "
 ^Navigate^        ^Edit^              ^Insert^         ^Export^           ^Query^
