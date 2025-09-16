@@ -44,6 +44,23 @@
   (when (boundp 'warning-suppress-log-types)
     (add-to-list 'warning-suppress-log-types cat)))
 
+;; Environment: Inherit PATH from shell (crucial for GUI Emacs)
+;; This ensures tools like pandoc, language servers, and other binaries are found
+(use-package exec-path-from-shell
+  :ensure t
+  :if (memq window-system '(mac ns x pgtk))  ; Only for GUI Emacs
+  :config
+  (exec-path-from-shell-initialize))
+
+;; Fallback: Add common binary paths for Linux systems
+(when (and (not (memq window-system '(mac ns)))
+           (eq system-type 'gnu/linux))
+  (let ((common-paths '("/usr/local/bin" "/usr/bin" "/bin")))
+    (dolist (path common-paths)
+      (when (and (file-directory-p path)
+                 (not (member path exec-path)))
+        (add-to-list 'exec-path path t)))))
+
 ;; Better defaults
 (setq-default indent-tabs-mode nil
               tab-width 4
@@ -67,8 +84,26 @@
 (set-fringe-mode 10) ; Add area for easier viewing
 (menu-bar-mode -1) ; Disable the menu bar
 
-;; Set up visible bell
-(setq visible-bell t)
+;; Bell configuration - disable the annoying yellow triangle
+;; Option 1: Completely disable all bell sounds/visuals
+;; (setq ring-bell-function 'ignore)
+
+Option 2: Use a subtle mode-line flash instead (uncomment to use)
+(defun my/mode-line-visual-bell ()
+  "Flash the mode line as a visual bell."
+  (let ((orig-bg (face-background 'mode-line)))
+    (set-face-background 'mode-line "red")
+    (run-with-idle-timer 0.1 nil
+                         (lambda (bg) (set-face-background 'mode-line bg))
+                         orig-bg)))
+(setq ring-bell-function #'my/mode-line-visual-bell)
+
+;; Option 3: Invert mode-line briefly (uncomment to use)
+;; (defun my/mode-line-invert-bell ()
+;;   "Invert the mode line as a visual bell."
+;;   (invert-face 'mode-line)
+;;   (run-with-timer 0.1 nil 'invert-face 'mode-line))
+;; (setq ring-bell-function #'my/mode-line-invert-bell)
 
 (set-face-attribute 'default nil :font "Hack Nerd Font" :height 200)
 
@@ -78,6 +113,27 @@
   (catppuccin-flavor 'macchiato)  ; Options: latte, frappe, macchiato, mocha
   :config
   (load-theme 'catppuccin :no-confirm))
+
+(use-package beacon
+  :ensure t
+  :config
+  (beacon-mode 1)
+
+  :custom
+  ;; Beacon appearance
+  (beacon-size 40)          ; Size of the beacon
+  (beacon-color "#ff6c6b")  ; Color (red-ish, adjust to match your theme)
+
+  ;; When to show beacon
+  (beacon-blink-when-point-moves-vertically 10)  ; Blink when moving 10+ lines
+  (beacon-blink-when-point-moves-horizontally 20) ; Blink when moving 20+ chars
+  (beacon-blink-when-buffer-changes t)           ; Blink on buffer switch
+  (beacon-blink-when-window-changes t)           ; Blink on window switch
+  (beacon-blink-when-window-scrolls t)           ; Blink on scroll
+
+  ;; Duration
+  (beacon-blink-duration 0.3)  ; How long the beacon lasts
+  (beacon-blink-delay 0.3))    ; Delay before showing
 
 ;; Initialize whitespace-mode early to define faces
 (require 'whitespace)
@@ -412,10 +468,10 @@ status via `message'."
   ;; Replace bindings. Lazily loaded due by `use-package'.
   :bind (;; C-c bindings in `mode-specific-map'
          ("C-c M-x" . consult-mode-command)
-         ("C-c h" . consult-history)
-         ("C-c k" . consult-kmacro)
-         ("C-c m" . consult-man)
-         ("C-c i" . consult-info)
+         ("C-c H" . consult-history)  ; Moved to capital H to free C-c h for help
+         ("C-c K" . consult-kmacro)   ; Moved to capital K to free C-c k
+         ("C-c M" . consult-man)      ; Moved to capital M to free C-c m
+         ("C-c I" . consult-info)     ; Moved to capital I to free C-c i
          ([remap Info-search] . consult-info)
          ;; C-x bindings in `ctl-x-map'
          ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
@@ -617,13 +673,146 @@ status via `message'."
   :config
   (setq wgrep-auto-save-buffer t))
 
+;; Enhanced search and navigation
 (global-set-key (kbd "C-s") 'consult-line)
 (global-set-key (kbd "C-c r") 'consult-recent-file)
 (global-set-key (kbd "C-c b p") 'consult-project-buffer)
-(global-set-key (kbd "C-c t a") #'my/toggle-completion-auto)
 (global-set-key (kbd "M-/") #'completion-at-point)
+
+;; File operations (C-c f prefix - move format to C-c F)
+(global-set-key (kbd "C-c f f") 'find-file)
+(global-set-key (kbd "C-c f r") 'consult-recent-file)
+(global-set-key (kbd "C-c f s") 'save-buffer)
+(global-set-key (kbd "C-c f S") 'save-some-buffers)
+(global-set-key (kbd "C-c f d") 'dired)
+(global-set-key (kbd "C-c f j") 'dired-jump)
+(global-set-key (kbd "C-c f c") 'copy-file)
+(global-set-key (kbd "C-c f R") 'rename-file)
+(global-set-key (kbd "C-c f D") 'delete-file)
+
+;; Buffer operations (keep C-c b, expand existing)
+(global-set-key (kbd "C-c b b") 'consult-buffer)
+(global-set-key (kbd "C-c b k") 'kill-buffer)
+(global-set-key (kbd "C-c b r") 'revert-buffer)
+(global-set-key (kbd "C-c b n") 'next-buffer)
+(global-set-key (kbd "C-c b P") 'previous-buffer)  ; Capital P to avoid conflict with existing C-c b p
+(global-set-key (kbd "C-c b s") 'save-buffer)
+(global-set-key (kbd "C-c b i") 'ibuffer)
+
+;; Window management (keep C-c w)
+(global-set-key (kbd "C-c w s") 'split-window-below)
+(global-set-key (kbd "C-c w v") 'split-window-right)
+(global-set-key (kbd "C-c w d") 'delete-window)
+(global-set-key (kbd "C-c w o") 'delete-other-windows)
+(global-set-key (kbd "C-c w w") 'other-window)
+(global-set-key (kbd "C-c w h") 'windmove-left)
+(global-set-key (kbd "C-c w j") 'windmove-down)
+(global-set-key (kbd "C-c w k") 'windmove-up)
+(global-set-key (kbd "C-c w l") 'windmove-right)
+(global-set-key (kbd "C-c w =") 'balance-windows)
+(global-set-key (kbd "C-c w m") 'maximize-window)
+(global-set-key (kbd "C-c w u") 'winner-undo)
+(global-set-key (kbd "C-c w R") 'winner-redo)  ; Capital R to avoid conflicts
+
+;; Text editing and manipulation (C-c e prefix - move org export to C-c E)
+(global-set-key (kbd "C-c e l") 'downcase-word)
+(global-set-key (kbd "C-c e u") 'upcase-word)
+(global-set-key (kbd "C-c e c") 'capitalize-word)
+(global-set-key (kbd "C-c e L") 'downcase-region)
+(global-set-key (kbd "C-c e U") 'upcase-region)
+(global-set-key (kbd "C-c e s") 'sort-lines)
+(global-set-key (kbd "C-c e r") 'reverse-region)
+(global-set-key (kbd "C-c e d") 'duplicate-line)
+(global-set-key (kbd "C-c e k") 'kill-whole-line)
+(global-set-key (kbd "C-c e w") 'delete-trailing-whitespace)
+(global-set-key (kbd "C-c e i") 'indent-region)
+
+;; Search and replace (C-c s prefix - move org super-agenda to C-c S)
+(global-set-key (kbd "C-c s s") 'consult-line)
+(global-set-key (kbd "C-c s r") 'query-replace)
+(global-set-key (kbd "C-c s R") 'query-replace-regexp)
+(global-set-key (kbd "C-c s g") 'consult-grep)
+(global-set-key (kbd "C-c s G") 'consult-git-grep)
+(global-set-key (kbd "C-c s i") 'consult-imenu)
+(global-set-key (kbd "C-c s o") 'occur)
+(global-set-key (kbd "C-c s m") 'consult-mark)
+
+;; Toggles (C-c t prefix - expand existing)
+(global-set-key (kbd "C-c t a") #'my/toggle-completion-auto)
 (global-set-key (kbd "C-c t f") #'my/toggle-all-formatting)
-(global-set-key (kbd "C-c w o") #'my/project-overview)
+(global-set-key (kbd "C-c t w") #'my/toggle-which-key)
+(global-set-key (kbd "C-c t l") 'toggle-truncate-lines)
+(global-set-key (kbd "C-c t n") 'display-line-numbers-mode)
+(global-set-key (kbd "C-c t h") 'hl-line-mode)
+(global-set-key (kbd "C-c t v") 'visual-line-mode)
+(global-set-key (kbd "C-c t r") 'read-only-mode)
+
+;; Help and documentation (C-c h prefix - move consult-history to C-c H)
+(global-set-key (kbd "C-c h f") 'describe-function)
+(global-set-key (kbd "C-c h v") 'describe-variable)
+(global-set-key (kbd "C-c h k") 'describe-key)
+(global-set-key (kbd "C-c h m") 'describe-mode)
+(global-set-key (kbd "C-c h b") 'describe-bindings)
+(global-set-key (kbd "C-c h a") 'apropos)
+(global-set-key (kbd "C-c h i") 'info)
+(global-set-key (kbd "C-c h w") 'where-is)
+
+;; Less common functions moved to capitals
+;; Format functions (move from C-c f to C-c F)
+(global-set-key (kbd "C-c F") #'my/toggle-all-formatting)  ; Quick format toggle
+;; History (move from C-c h to C-c H)
+;; Info functions (move from C-c i to C-c I)
+;; Macro functions (move from C-c k to C-c K)
+;; Man pages (move from C-c m to C-c M)
+;; Note: These will override existing package bindings - packages should be updated
+
+;; Enhanced C-x bindings (traditional Emacs enhanced)
+(global-set-key (kbd "C-x C-r") 'consult-recent-file)
+(global-set-key (kbd "C-x C-j") 'dired-jump)
+(global-set-key (kbd "C-x M-k") 'kill-buffer-and-window)
+;; Note: C-x C-b is already used by perspective (persp-list-buffers)
+
+;; Quick access shortcuts (avoiding conflicts)
+;; Note: M-o is already used by ace-window
+(global-set-key (kbd "M-K") 'kill-whole-line)  ; Capital K instead of M-k
+(global-set-key (kbd "M-D") 'kill-word)
+(global-set-key (kbd "M-j") 'join-line)
+(global-set-key (kbd "M-z") 'zap-up-to-char)
+(global-set-key (kbd "M-Z") 'zap-to-char)
+
+;; Enable winner-mode for window configuration undo/redo
+(winner-mode 1)
+
+;; Utility functions for keybindings
+(defun duplicate-line ()
+  "Duplicate current line."
+  (interactive)
+  (let ((column (- (point) (point-at-bol)))
+        (line (let ((s (thing-at-point 'line t)))
+                (if (string-match "\\(.*\\)\n$" s) (match-string 1 s) s))))
+    (move-end-of-line 1)
+    (newline)
+    (insert line)
+    (move-beginning-of-line 1)
+    (forward-char column)))
+
+(defun reverse-region (beg end)
+  "Reverse characters in region."
+  (interactive "r")
+  (let ((region (buffer-substring beg end)))
+    (delete-region beg end)
+    (insert (nreverse (string-to-list region)))))
+
+(defun kill-buffer-and-window ()
+  "Kill the current buffer and delete its window."
+  (interactive)
+  (kill-buffer)
+  (delete-window))
+
+(defun maximize-window ()
+  "Maximize current window."
+  (interactive)
+  (delete-other-windows))
 
 (use-package which-key
   :ensure t
@@ -1103,6 +1292,167 @@ status via `message'."
                    (setq-local cape-dabbrev-min-length 3)
                    (add-to-list 'completion-at-point-functions #'cape-keyword t))))
 
+;; Base keybindings for all programming modes
+(defun my/setup-prog-mode-keybindings ()
+  "Set up common programming mode keybindings."
+  ;; LSP/Language Server actions (C-c l prefix)
+  (when (bound-and-true-p eglot--managed-mode)
+    (local-set-key (kbd "C-c l d") 'eglot-find-declaration)
+    (local-set-key (kbd "C-c l D") 'eglot-find-definition)
+    (local-set-key (kbd "C-c l r") 'eglot-find-references)
+    (local-set-key (kbd "C-c l i") 'eglot-find-implementation)
+    (local-set-key (kbd "C-c l t") 'eglot-find-typeDefinition)
+    (local-set-key (kbd "C-c l s") 'eglot-workspace-symbols)
+    (local-set-key (kbd "C-c l S") 'consult-eglot-symbols)
+    (local-set-key (kbd "C-c l R") 'eglot-rename)
+    (local-set-key (kbd "C-c l a") 'eglot-code-actions)
+    (local-set-key (kbd "C-c l f") 'eglot-format)
+    (local-set-key (kbd "C-c l F") 'eglot-format-buffer)
+    (local-set-key (kbd "C-c l h") 'eldoc)
+    (local-set-key (kbd "C-c l =") 'eglot-format-buffer))
+
+  ;; Code/Compile actions (C-c c prefix)
+  (local-set-key (kbd "C-c c c") 'compile)
+  (local-set-key (kbd "C-c c r") 'recompile)
+  (local-set-key (kbd "C-c c f") 'apheleia-format-buffer)
+  (local-set-key (kbd "C-c c R") 'apheleia-format-region)
+
+  ;; Documentation (C-c d prefix - move org-download elsewhere)
+  (local-set-key (kbd "C-c d d") 'eldoc)
+  (local-set-key (kbd "C-c d h") 'eldoc-doc-buffer)
+  (local-set-key (kbd "C-c d a") 'apropos)
+
+  ;; REPL/Run (C-c r prefix - will override consult-recent-file in prog modes)
+  (local-set-key (kbd "C-c r r") 'eval-last-sexp)  ; Default for lisp modes
+  (local-set-key (kbd "C-c r b") 'eval-buffer)
+  (local-set-key (kbd "C-c r e") 'eval-expression)
+
+  ;; Import/Insert (C-c i prefix - move consult-info elsewhere)
+  (local-set-key (kbd "C-c i i") 'yas-insert-snippet)
+  (local-set-key (kbd "C-c i s") 'yas-visit-snippet-file))
+
+;; Apply to all programming modes
+(add-hook 'prog-mode-hook #'my/setup-prog-mode-keybindings)
+
+(defun my/setup-python-keybindings ()
+  "Python-specific keybindings inspired by Doom Emacs."
+  ;; REPL interactions
+  (local-set-key (kbd "C-c r r") 'run-python)
+  (local-set-key (kbd "C-c r s") 'python-shell-send-statement)
+  (local-set-key (kbd "C-c r d") 'python-shell-send-defun)
+  (local-set-key (kbd "C-c r f") 'python-shell-send-file)
+  (local-set-key (kbd "C-c r b") 'python-shell-send-buffer)
+  (local-set-key (kbd "C-c r R") 'python-shell-send-region)
+
+  ;; Testing (if pytest is available)
+  (when (executable-find "pytest")
+    (local-set-key (kbd "C-c c t") 'python-pytest)
+    (local-set-key (kbd "C-c c T") 'python-pytest-file-dwim))
+
+  ;; Virtual environments
+  (local-set-key (kbd "C-c v a") 'pyvenv-activate)
+  (local-set-key (kbd "C-c v d") 'pyvenv-deactivate)
+  (local-set-key (kbd "C-c v w") 'pyvenv-workon)
+
+  ;; Import sorting (if isort available)
+  (when (executable-find "isort")
+    (local-set-key (kbd "C-c i s") 'python-isort-buffer)
+    (local-set-key (kbd "C-c i r") 'python-isort-region)))
+
+(add-hook 'python-mode-hook #'my/setup-python-keybindings)
+(add-hook 'python-ts-mode-hook #'my/setup-python-keybindings)
+
+(defun my/setup-js-keybindings ()
+  "JavaScript/TypeScript-specific keybindings."
+  ;; Node.js REPL
+  (when (executable-find "node")
+    (local-set-key (kbd "C-c r r") 'nodejs-repl)
+    (local-set-key (kbd "C-c r s") 'nodejs-repl-send-last-expression)
+    (local-set-key (kbd "C-c r d") 'nodejs-repl-send-line)
+    (local-set-key (kbd "C-c r R") 'nodejs-repl-send-region)
+    (local-set-key (kbd "C-c r b") 'nodejs-repl-send-buffer))
+
+  ;; npm/yarn commands
+  (local-set-key (kbd "C-c n i") (lambda () (interactive) (compile "npm install")))
+  (local-set-key (kbd "C-c n s") (lambda () (interactive) (compile "npm start")))
+  (local-set-key (kbd "C-c n t") (lambda () (interactive) (compile "npm test")))
+  (local-set-key (kbd "C-c n b") (lambda () (interactive) (compile "npm run build")))
+  (local-set-key (kbd "C-c n r") 'npm-mode)  ; if npm-mode available
+
+  ;; Import helpers
+  (local-set-key (kbd "C-c i a") 'js-import-path-add)  ; if available
+  (local-set-key (kbd "C-c i o") 'js2-mode-toggle-hide-functions)  ; code folding
+
+  ;; Documentation
+  (local-set-key (kbd "C-c d m") (lambda () (interactive)
+                                   (browse-url "https://developer.mozilla.org/en-US/"))))
+
+(add-hook 'js-mode-hook #'my/setup-js-keybindings)
+(add-hook 'js2-mode-hook #'my/setup-js-keybindings)
+(add-hook 'js-ts-mode-hook #'my/setup-js-keybindings)
+(add-hook 'typescript-mode-hook #'my/setup-js-keybindings)
+(add-hook 'typescript-ts-mode-hook #'my/setup-js-keybindings)
+
+(defun my/setup-rust-keybindings ()
+  "Rust-specific keybindings inspired by Doom Emacs."
+  ;; Cargo commands
+  (local-set-key (kbd "C-c c b") 'rust-compile)
+  (local-set-key (kbd "C-c c t") 'rust-test)
+  (local-set-key (kbd "C-c c r") 'rust-run)
+  (local-set-key (kbd "C-c c C") 'rust-check)
+  (local-set-key (kbd "C-c c c") (lambda () (interactive) (compile "cargo build")))
+  (local-set-key (kbd "C-c c R") (lambda () (interactive) (compile "cargo run")))
+
+  ;; Cargo project commands
+  (local-set-key (kbd "C-c p n") (lambda () (interactive) (compile "cargo new")))
+  (local-set-key (kbd "C-c p i") (lambda () (interactive) (compile "cargo init")))
+  (local-set-key (kbd "C-c p u") (lambda () (interactive) (compile "cargo update")))
+
+  ;; Clippy (Rust linter)
+  (when (executable-find "cargo-clippy")
+    (local-set-key (kbd "C-c c l") (lambda () (interactive) (compile "cargo clippy"))))
+
+  ;; Documentation
+  (local-set-key (kbd "C-c d d") 'rust-dbg-wrap-or-unwrap)
+  (local-set-key (kbd "C-c d o") (lambda () (interactive) (compile "cargo doc --open")))
+
+  ;; Format
+  (when (executable-find "rustfmt")
+    (local-set-key (kbd "C-c c f") 'rust-format-buffer)))
+
+(add-hook 'rust-mode-hook #'my/setup-rust-keybindings)
+(add-hook 'rust-ts-mode-hook #'my/setup-rust-keybindings)
+
+(defun my/setup-web-keybindings ()
+  "Web development keybindings for HTML/CSS/web-mode."
+  ;; Tag navigation and manipulation
+  (local-set-key (kbd "C-c t n") 'web-mode-tag-next)
+  (local-set-key (kbd "C-c t p") 'web-mode-tag-previous)
+  (local-set-key (kbd "C-c t s") 'web-mode-tag-select)
+  (local-set-key (kbd "C-c t k") 'web-mode-tag-kill)
+
+  ;; Element operations
+  (local-set-key (kbd "C-c e w") 'web-mode-element-wrap)
+  (local-set-key (kbd "C-c e k") 'web-mode-element-kill)
+  (local-set-key (kbd "C-c e c") 'web-mode-element-clone)
+  (local-set-key (kbd "C-c e r") 'web-mode-element-rename)
+
+  ;; Attribute operations
+  (local-set-key (kbd "C-c a n") 'web-mode-attribute-next)
+  (local-set-key (kbd "C-c a k") 'web-mode-attribute-kill)
+  (local-set-key (kbd "C-c a s") 'web-mode-attribute-select)
+
+  ;; Live reload (if available)
+  (local-set-key (kbd "C-c l r") 'web-mode-reload)
+
+  ;; Documentation
+  (local-set-key (kbd "C-c d h") (lambda () (interactive)
+                                   (browse-url "https://developer.mozilla.org/en-US/"))))
+
+(add-hook 'web-mode-hook #'my/setup-web-keybindings)
+(add-hook 'html-mode-hook #'my/setup-web-keybindings)
+(add-hook 'css-mode-hook #'my/setup-web-keybindings)
+
 (use-package js2-mode
   :mode "\\.js\\'"
   :hook
@@ -1254,37 +1604,6 @@ status via `message'."
   :after yasnippet
   :config
   (yasnippet-snippets-initialize))
-
-(with-eval-after-load 'yasnippet
-  ;; Install if needed using package-vc (Emacs 29+), otherwise skip gracefully.
-  (when (and (not (package-installed-p 'doom-snippets))
-             (fboundp 'package-vc-install))
-    (ignore-errors
-      (package-vc-install "https://github.com/doomemacs/snippets")))
-
-  ;; Load if available and refresh yasnippet tables to include new snippets.
-  (when (locate-library "doom-snippets")
-    ;; Provide compatibility functions for Doom Emacs functions used in snippets
-    (unless (fboundp 'doom-project-root)
-      (defun doom-project-root ()
-        "Compatibility function for doom-project-root."
-        (or (when (bound-and-true-p projectile-mode)
-              (projectile-project-root))
-            (vc-root-dir)
-            default-directory)))
-    
-    (unless (boundp 'doom-modules-dir)
-      (defvar doom-modules-dir (expand-file-name "modules" user-emacs-directory)
-        "Compatibility variable for doom-modules-dir."))
-    
-    (unless (boundp 'doom-private-dir)
-      (defvar doom-private-dir (expand-file-name "private" user-emacs-directory)
-        "Compatibility variable for doom-private-dir."))
-    
-    (require 'doom-snippets)
-    ;; Ensure yas sees newly added snippet directories.
-    (when (bound-and-true-p yas-minor-mode)
-      (yas-reload-all))))
 
 (with-eval-after-load 'yasnippet
   (defun my/try-install-snippet-pack (pkg lib-name)

@@ -1,4 +1,4 @@
-#+TITLE: Emacs Configuration
++TITLE: Emacs Configuration
 #+AUTHOR: Adam
 #+DESCRIPTION: A comprehensive Emacs configuration with modern completion, project management, and productivity tools
 #+PROPERTY: header-args:emacs-lisp :tangle yes
@@ -52,6 +52,7 @@ This configuration provides a modern, IDE-like Emacs experience with focus on pr
   - [[#font-settings][Font Settings]]
   - [[#theme][Theme]]
   - [[#visual-enhancements][Visual Enhancements]]
+    - [[#beacon-mode][Beacon Mode]]
     - [[#rainbow-delimiters][Rainbow Delimiters]]
     - [[#highlight-indent-guides][Highlight Indent Guides]]
     - [[#highlight-numbers][Highlight Numbers]]
@@ -91,11 +92,24 @@ This configuration provides a modern, IDE-like Emacs experience with focus on pr
     - [[#corfu-prescient][corfu-prescient]]
   - [[#language-enhancements][Language Enhancements]]
     - [[#python][Python]]
+  - [[#mode-specific-keybindings][Mode-Specific Keybindings]]
+    - [[#programming-mode-base-keybindings][Programming Mode Base Keybindings]]
+    - [[#python-mode-specific][Python Mode Specific]]
+    - [[#javascripttypescript-mode-specific][JavaScript/TypeScript Mode Specific]]
+    - [[#rust-mode-specific][Rust Mode Specific]]
+    - [[#web-development-mode-specific][Web Development Mode Specific]]
     - [[#javascripttypescript][JavaScript/TypeScript]]
     - [[#web][Web]]
     - [[#additional-language-modes][Additional Language Modes]]
   - [[#snippets][Snippets]]
+    - [[#additional-language-snippet-packs-optional][Additional language snippet packs (optional)]]
+    - [[#corfucape-integration][Corfu/Cape Integration]]
   - [[#support-functions-and-settings][Support Functions and Settings]]
+  - [[#text-manipulation][Text Manipulation]]
+    - [[#electric-pair-mode][Electric Pair Mode]]
+    - [[#smartparens][Smartparens]]
+    - [[#expand-region][Expand Region]]
+    - [[#embrace][Embrace]]
   - [[#formatters][Formatters]]
     - [[#apheleia][Apheleia]]
   - [[#window-management][Window Management]]
@@ -266,17 +280,17 @@ Basic frame configuration that removes clutter and provides a minimal interface 
 
 ;; Bell configuration - disable the annoying yellow triangle
 ;; Option 1: Completely disable all bell sounds/visuals
-(setq ring-bell-function 'ignore)
+;; (setq ring-bell-function 'ignore)
 
-;; Option 2: Use a subtle mode-line flash instead (uncomment to use)
-;; (defun my/mode-line-visual-bell ()
-;;   "Flash the mode line as a visual bell."
-;;   (let ((orig-bg (face-background 'mode-line)))
-;;     (set-face-background 'mode-line "red")
-;;     (run-with-idle-timer 0.1 nil
-;;                          (lambda (bg) (set-face-background 'mode-line bg))
-;;                          orig-bg)))
-;; (setq ring-bell-function #'my/mode-line-visual-bell)
+Option 2: Use a subtle mode-line flash instead (uncomment to use)
+(defun my/mode-line-visual-bell ()
+  "Flash the mode line as a visual bell."
+  (let ((orig-bg (face-background 'mode-line)))
+    (set-face-background 'mode-line "red")
+    (run-with-idle-timer 0.1 nil
+                         (lambda (bg) (set-face-background 'mode-line bg))
+                         orig-bg)))
+(setq ring-bell-function #'my/mode-line-visual-bell)
 
 ;; Option 3: Invert mode-line briefly (uncomment to use)
 ;; (defun my/mode-line-invert-bell ()
@@ -285,6 +299,10 @@ Basic frame configuration that removes clutter and provides a minimal interface 
 ;;   (run-with-timer 0.1 nil 'invert-face 'mode-line))
 ;; (setq ring-bell-function #'my/mode-line-invert-bell)
 #+end_src
+
+#+RESULTS:
+: ignore
+
 ** Font Settings
 
 Typography configuration using Hack Nerd Font for better readability and icon support. The height setting (280) provides comfortable text size for extended coding sessions.
