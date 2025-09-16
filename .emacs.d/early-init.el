@@ -6,6 +6,10 @@
 (setq gc-cons-threshold (* 100 1024 1024))  ; 100MB
 (setq gc-cons-percentage 0.6)
 (setq package-native-compile t)
+(setq tls-checktrust nil)
+(setq gnutls-verify-error nil)
+(setq network-security-level 'low)
+(setq package-check-signature nil)
 
 ;; Disable GUI elements early
 (push '(menu-bar-lines . 0) default-frame-alist)
