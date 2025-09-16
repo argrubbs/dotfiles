@@ -3068,7 +3068,7 @@ The most powerful Git interface for Emacs, providing an intuitive and efficient 
   :after magit
   :config
   ;; Enable globally as intended by the author
-  (magit-todos-mode 1)
+  (magit-todos-mode 1))
 #+end_src
 *** Git Modes (gitconfig, gitignore, etc.)
 #+begin_src emacs-lisp
