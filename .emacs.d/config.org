@@ -1783,59 +1783,6 @@ Code template expansion system that provides language-specific snippets for fast
   (yasnippet-snippets-initialize))
 #+end_src
 
-*** Doom Snippets (doomemacs/snippets)
-
-High-quality, comprehensive snippets covering many languages and frameworks.
-Not on MELPA; install directly from Git (Emacs 29+ provides package-vc).
-
-#+begin_src emacs-lisp
-(with-eval-after-load 'yasnippet
-  ;; Install if needed using package-vc (Emacs 29+), otherwise skip gracefully.
-  (when (and (not (package-installed-p 'doom-snippets))
-             (fboundp 'package-vc-install))
-    (ignore-errors
-      (package-vc-install "https://github.com/doomemacs/snippets"))
-    ;; Add package-generated files to gitignore to prevent checkout conflicts
-    (let ((snippets-dir (locate-library "doom-snippets")))
-      (when snippets-dir
-        (let ((gitignore-path (expand-file-name ".gitignore"
-                                                (file-name-directory snippets-dir))))
-          (with-temp-buffer
-            (when (file-exists-p gitignore-path)
-              (insert-file-contents gitignore-path))
-            (goto-char (point-max))
-            (unless (search-backward "snippets-autoloads.el" nil t)
-              (when (> (point-max) 1)
-                (insert "\n"))
-              (insert "# Package-generated files\n")
-              (insert "snippets-autoloads.el\n")
-              (insert "snippets-pkg.el\n"))
-            (write-region (point-min) (point-max) gitignore-path))))))
-
-  ;; Load if available and refresh yasnippet tables to include new snippets.
-  (when (locate-library "doom-snippets")
-    ;; Provide compatibility functions for Doom Emacs functions used in snippets
-    (unless (fboundp 'doom-project-root)
-      (defun doom-project-root ()
-        "Compatibility function for doom-project-root."
-        (or (when (bound-and-true-p projectile-mode)
-              (projectile-project-root))
-            (vc-root-dir)
-            default-directory)))
-    
-    (unless (boundp 'doom-modules-dir)
-      (defvar doom-modules-dir (expand-file-name "modules" user-emacs-directory)
-        "Compatibility variable for doom-modules-dir."))
-    
-    (unless (boundp 'doom-private-dir)
-      (defvar doom-private-dir (expand-file-name "private" user-emacs-directory)
-        "Compatibility variable for doom-private-dir."))
-    
-    (require 'doom-snippets)
-    ;; Ensure yas sees newly added snippet directories.
-    (when (bound-and-true-p yas-minor-mode)
-      (yas-reload-all))))
-#+end_src
 
 *** Additional language snippet packs (optional)
 
