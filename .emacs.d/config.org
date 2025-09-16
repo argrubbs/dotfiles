@@ -2037,6 +2037,42 @@ Doom Emacs-inspired mode-specific keybindings for programming languages, adapted
 (add-hook 'html-mode-hook #'my/setup-web-keybindings)
 (add-hook 'css-mode-hook #'my/setup-web-keybindings)
 #+end_src
+
+*** Ansible Mode Specific
+#+begin_src emacs-lisp
+(defun my/setup-ansible-keybindings ()
+  "Ansible-specific keybindings inspired by Doom Emacs."
+  ;; Documentation and help
+  (local-set-key (kbd "C-c d d") 'ansible-doc)
+  (local-set-key (kbd "C-c d a") 'ansible-doc-at-point)
+  (local-set-key (kbd "C-c d m") (lambda () (interactive) (ansible-doc "")))
+
+  ;; Vault operations
+  (local-set-key (kbd "C-c v e") 'ansible-vault-encrypt-buffer)
+  (local-set-key (kbd "C-c v d") 'ansible-vault-decrypt-buffer)
+  (local-set-key (kbd "C-c v v") 'ansible-vault-view-file)
+
+  ;; Execution and testing
+  (local-set-key (kbd "C-c c p") (lambda () (interactive)
+                                   (compile (read-string "Ansible playbook: " "ansible-playbook "))))
+  (local-set-key (kbd "C-c c t") (lambda () (interactive)
+                                   (compile (read-string "Ansible task: " "ansible "))))
+  (local-set-key (kbd "C-c c c") (lambda () (interactive)
+                                   (compile (read-string "Ansible check: " "ansible-playbook --check "))))
+  (local-set-key (kbd "C-c c s") (lambda () (interactive)
+                                   (compile "ansible-playbook --syntax-check site.yml")))
+
+  ;; Navigation helpers
+  (local-set-key (kbd "C-c g r") (lambda () (interactive) (find-file "roles/")))
+  (local-set-key (kbd "C-c g t") (lambda () (interactive) (find-file "tasks/")))
+  (local-set-key (kbd "C-c g v") (lambda () (interactive) (find-file "vars/")))
+  (local-set-key (kbd "C-c g i") (lambda () (interactive) (find-file "inventory")))
+
+  ;; Quick hydra access
+  (local-set-key (kbd "C-c A") 'hydra-ansible/body))
+
+(add-hook 'ansible-mode-hook #'my/setup-ansible-keybindings)
+#+end_src
 *** JavaScript/TypeScript
 #+begin_src emacs-lisp
 (use-package js2-mode
@@ -2082,24 +2118,53 @@ Doom Emacs-inspired mode-specific keybindings for programming languages, adapted
   :ensure t
   :mode "\\.json\\'")
 
+;; Enhanced Ansible support with proper mode detection
+(defun my/is-ansible-file ()
+  "Check if current file is an Ansible file."
+  (when buffer-file-name
+    (or
+     ;; Ansible directory patterns
+     (string-match-p "/\\(group\\|host\\)_vars/" buffer-file-name)
+     (string-match-p "/playbooks/.*\\.ya?ml\\'" buffer-file-name)
+     (string-match-p "/roles/.*/\\(tasks\\|handlers\\|vars\\|defaults\\|meta\\)/.*\\.ya?ml\\'" buffer-file-name)
+     (string-match-p "ansible.*\\.cfg\\'" buffer-file-name)
+     (string-match-p "/inventory" buffer-file-name)
+     ;; Common Ansible filenames
+     (string-match-p "\\(playbook\\|site\\|main\\|local\\)\\.ya?ml\\'" buffer-file-name)
+     ;; Check file contents for Ansible indicators
+     (and (derived-mode-p 'yaml-mode)
+          (save-excursion
+            (goto-char (point-min))
+            (or (re-search-forward "^\\s-*-\\s-*hosts:\\s-*" nil t)
+                (re-search-forward "^\\s-*-\\s-*name:\\s-*" nil t)
+                (re-search-forward "^\\s-*ansible_" nil t)
+                (re-search-forward "^\\s-*gather_facts:" nil t)
+                (re-search-forward "^\\s-*vars:" nil t)))))))
+
 (use-package ansible
   :ensure t
-  :hook ((yaml-mode . ansible)
-         (ansible . ansible-auto-decrypt-encrypt))
+  :hook ((yaml-mode . (lambda ()
+                        (when (my/is-ansible-file)
+                          (ansible-mode 1))))
+         (ansible-mode . ansible-auto-decrypt-encrypt))
   :custom
   (ansible-vault-password-file "~/.ansible-vault")  ; Adjust path as needed
   :config
-  ;; Auto-detect Ansible files
-  (add-to-list 'auto-mode-alist '("/\\(group\\|host\\)_vars/" . yaml-mode))
+  ;; Auto-detect Ansible files and set proper modes
+  (add-to-list 'auto-mode-alist '("/\\(group\\|host\\)_vars/.*\\.ya?ml\\'" . yaml-mode))
   (add-to-list 'auto-mode-alist '("/playbooks/.*\\.ya?ml\\'" . yaml-mode))
-  (add-to-list 'auto-mode-alist '("/roles/.*/tasks/.*\\.ya?ml\\'" . yaml-mode))
-  (add-to-list 'auto-mode-alist '("/roles/.*/handlers/.*\\.ya?ml\\'" . yaml-mode))
-  (add-to-list 'auto-mode-alist '("/roles/.*/vars/.*\\.ya?ml\\'" . yaml-mode))
-  (add-to-list 'auto-mode-alist '("/roles/.*/defaults/.*\\.ya?ml\\'" . yaml-mode))
-  (add-to-list 'auto-mode-alist '("/roles/.*/meta/.*\\.ya?ml\\'" . yaml-mode))
+  (add-to-list 'auto-mode-alist '("/roles/.*/\\(tasks\\|handlers\\|vars\\|defaults\\|meta\\)/.*\\.ya?ml\\'" . yaml-mode))
+  (add-to-list 'auto-mode-alist '("\\(playbook\\|site\\|main\\|local\\)\\.ya?ml\\'" . yaml-mode))
   (add-to-list 'auto-mode-alist '("ansible.*\\.cfg\\'" . conf-mode))
-  (add-to-list 'auto-mode-alist '("inventory\\'" . conf-mode))
-  (add-to-list 'auto-mode-alist '("\\.j2\\'" . jinja2-mode)))
+  (add-to-list 'auto-mode-alist '("/inventory\\'" . conf-mode))
+  (add-to-list 'auto-mode-alist '("\\.j2\\'" . jinja2-mode))
+
+  ;; Add Ansible language server support via eglot
+  (with-eval-after-load 'eglot
+    (add-to-list 'eglot-server-programs
+                 '((ansible-mode yaml-mode) . ("ansible-language-server" "--stdio")))
+    ;; Auto-start eglot for Ansible files
+    (add-hook 'ansible-mode-hook #'eglot-ensure)))
 
 (use-package ansible-doc
   :ensure t
