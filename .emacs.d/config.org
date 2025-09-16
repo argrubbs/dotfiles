@@ -264,8 +264,26 @@ Basic frame configuration that removes clutter and provides a minimal interface 
 (set-fringe-mode 10) ; Add area for easier viewing
 (menu-bar-mode -1) ; Disable the menu bar
 
-;; Set up visible bell
-(setq visible-bell t)
+;; Bell configuration - disable the annoying yellow triangle
+;; Option 1: Completely disable all bell sounds/visuals
+(setq ring-bell-function 'ignore)
+
+;; Option 2: Use a subtle mode-line flash instead (uncomment to use)
+;; (defun my/mode-line-visual-bell ()
+;;   "Flash the mode line as a visual bell."
+;;   (let ((orig-bg (face-background 'mode-line)))
+;;     (set-face-background 'mode-line "red")
+;;     (run-with-idle-timer 0.1 nil
+;;                          (lambda (bg) (set-face-background 'mode-line bg))
+;;                          orig-bg)))
+;; (setq ring-bell-function #'my/mode-line-visual-bell)
+
+;; Option 3: Invert mode-line briefly (uncomment to use)
+;; (defun my/mode-line-invert-bell ()
+;;   "Invert the mode line as a visual bell."
+;;   (invert-face 'mode-line)
+;;   (run-with-timer 0.1 nil 'invert-face 'mode-line))
+;; (setq ring-bell-function #'my/mode-line-invert-bell)
 #+end_src
 ** Font Settings
 
@@ -297,6 +315,40 @@ Catppuccin is a community-driven pastel theme that aims to be the middle ground 
 ** Visual Enhancements
 
 Programming-focused visual improvements that enhance code readability and navigation. These packages use color coding and highlighting to make code structure more apparent.
+
+*** Beacon Mode
+
+Beacon mode highlights your cursor position whenever you scroll or jump to a new location, making it easier to track where your cursor ended up after large movements.
+
+*Project:* [[https://github.com/Malabarba/beacon][GitHub - Malabarba/beacon]]
+*Key Features:*
+- Brief highlight when cursor moves far
+- Customizable colors and duration
+- Automatic activation on scrolling, window switching, buffer switching
+- Smart detection of significant cursor movements
+
+#+begin_src emacs-lisp
+(use-package beacon
+  :ensure t
+  :config
+  (beacon-mode 1)
+
+  :custom
+  ;; Beacon appearance
+  (beacon-size 40)          ; Size of the beacon
+  (beacon-color "#ff6c6b")  ; Color (red-ish, adjust to match your theme)
+
+  ;; When to show beacon
+  (beacon-blink-when-point-moves-vertically 10)  ; Blink when moving 10+ lines
+  (beacon-blink-when-point-moves-horizontally 20) ; Blink when moving 20+ chars
+  (beacon-blink-when-buffer-changes t)           ; Blink on buffer switch
+  (beacon-blink-when-window-changes t)           ; Blink on window switch
+  (beacon-blink-when-window-scrolls t)           ; Blink on scroll
+
+  ;; Duration
+  (beacon-blink-duration 0.3)  ; How long the beacon lasts
+  (beacon-blink-delay 0.3))    ; Delay before showing
+#+end_src
 
 *** Rainbow Delimiters
 
