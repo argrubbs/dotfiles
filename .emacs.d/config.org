@@ -280,9 +280,9 @@ Basic frame configuration that removes clutter and provides a minimal interface 
 
 ;; Bell configuration - disable the annoying yellow triangle
 ;; Option 1: Completely disable all bell sounds/visuals
-;; (setq ring-bell-function 'ignore)
+(setq ring-bell-function 'ignore)
 
-Option 2: Use a subtle mode-line flash instead (uncomment to use)
+;; Option 2: Use a subtle mode-line flash instead (uncomment to use)
 (defun my/mode-line-visual-bell ()
   "Flash the mode line as a visual bell."
   (let ((orig-bg (face-background 'mode-line)))
