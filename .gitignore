@@ -4,5 +4,5 @@
 **/emacs/.local
 **/eshell
 **/transient
-**/config.el
+.emacs.d/config.el
 projects
