@@ -2175,42 +2175,6 @@ Doom Emacs-inspired mode-specific keybindings for programming languages, adapted
   (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . poly-markdown+r-mode))
   (add-to-list 'auto-mode-alist '("\\.rmd\\'" . poly-markdown+r-mode)))
 
-;; Web development - HTML with embedded CSS/JS
-(use-package poly-web
-  :ensure t
-  :after polymode
-  :config
-  ;; HTML with embedded CSS and JavaScript
-  (add-to-list 'auto-mode-alist '("\\.html\\'" . poly-html-mode))
-  (add-to-list 'auto-mode-alist '("\\.htm\\'" . poly-html-mode))
-
-  ;; Vue.js single file components
-  (add-to-list 'auto-mode-alist '("\\.vue\\'" . poly-vue-mode))
-
-  ;; Django templates
-  (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . poly-django-html-mode)))
-
-;; Python + various embedded languages
-(use-package poly-python
-  :ensure t
-  :after polymode
-  :config
-  ;; Jupyter notebooks (if using python-mode for .py files with cells)
-  ;; SQL in Python strings
-  (define-auto-innermode poly-python-sql-innermode
-    :mode 'sql-mode
-    :head-matcher "\\(sql\\s-*=\\s-*\\|execute\\s-*(\\s-*\\)[\"']"
-    :tail-matcher "[\"']"
-    :head-mode 'host
-    :tail-mode 'host))
-
-;; Dockerfile with embedded shell scripts
-(use-package poly-dockerfile
-  :ensure t
-  :after polymode
-  :config
-  (add-to-list 'auto-mode-alist '("Dockerfile\\'" . poly-dockerfile-mode))
-  (add-to-list 'auto-mode-alist '("\\.dockerfile\\'" . poly-dockerfile-mode)))
 
 ;; YAML with embedded scripts (like GitHub Actions, GitLab CI)
 (define-auto-innermode poly-yaml-script-innermode
@@ -2246,7 +2210,7 @@ Doom Emacs-inspired mode-specific keybindings for programming languages, adapted
   (with-eval-after-load 'eglot
     (add-to-list 'eglot-server-programs
                  '(ansible-mode . ("ansible-language-server" "--stdio")))
-    (add-hook 'ansible-mode-hook #'eglot-ensure))))
+    (add-hook 'ansible-mode-hook #'eglot-ensure)))
 
 (use-package ansible-doc
   :ensure t
@@ -2569,7 +2533,7 @@ Advanced parentheses management with intelligent pairing, navigation, and manipu
 
   ;; Show matching parens
   (show-paren-mode 1)
-  (setq show-paren-delay 0)))
+  (setq show-paren-delay 0))
 #+end_src
 
 *** Expand Region
