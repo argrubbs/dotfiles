@@ -132,3 +132,6 @@ export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig"
 export LDFLAGS="-L/opt/homebrew/lib"
 export CPPFLAGS="-I/opt/homebrew/include"
 export DYLD_LIBRARY_PATH="/opt/homebrew/lib:$DYLD_LIBRARY_PATH"
+
+# Set Emacs config directory
+export EMACS_USER_DIRECTORY="$HOME/.config/emacs"

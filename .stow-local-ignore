@@ -1,0 +1,23 @@
+# Version control
+\.git
+\.svn
+\.hg
+\.gitignore
+
+# Documentation
+README.*
+LICENSE
+CHANGELOG.*
+
+# Backup files
+.*~
+\.bak$
+\.orig$
+
+# Compiled files
+\.o$
+\.pyc$
+
+# OS files
+\.DS_Store
+Thumbs\.db
