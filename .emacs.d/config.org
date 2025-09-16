@@ -1794,7 +1794,23 @@ Not on MELPA; install directly from Git (Emacs 29+ provides package-vc).
   (when (and (not (package-installed-p 'doom-snippets))
              (fboundp 'package-vc-install))
     (ignore-errors
-      (package-vc-install "https://github.com/doomemacs/snippets")))
+      (package-vc-install "https://github.com/doomemacs/snippets"))
+    ;; Add package-generated files to gitignore to prevent checkout conflicts
+    (let ((snippets-dir (locate-library "doom-snippets")))
+      (when snippets-dir
+        (let ((gitignore-path (expand-file-name ".gitignore"
+                                                (file-name-directory snippets-dir))))
+          (with-temp-buffer
+            (when (file-exists-p gitignore-path)
+              (insert-file-contents gitignore-path))
+            (goto-char (point-max))
+            (unless (search-backward "snippets-autoloads.el" nil t)
+              (when (> (point-max) 1)
+                (insert "\n"))
+              (insert "# Package-generated files\n")
+              (insert "snippets-autoloads.el\n")
+              (insert "snippets-pkg.el\n"))
+            (write-region (point-min) (point-max) gitignore-path))))))
 
   ;; Load if available and refresh yasnippet tables to include new snippets.
   (when (locate-library "doom-snippets")
