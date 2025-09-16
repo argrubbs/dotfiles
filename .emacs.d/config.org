@@ -3067,10 +3067,8 @@ The most powerful Git interface for Emacs, providing an intuitive and efficient 
   :ensure t
   :after magit
   :config
+  ;; Enable globally as intended by the author
   (magit-todos-mode 1)
-  :custom
-  (magit-todos-ignore-file-suffixes '(".map" ".min.js" ".min.css"))
-  (magit-todos-exclude-globs '("node_modules" "*.log" "*.tmp")))
 #+end_src
 *** Git Modes (gitconfig, gitignore, etc.)
 #+begin_src emacs-lisp
