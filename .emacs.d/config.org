@@ -1693,7 +1693,7 @@ Automatically configured for Python, JavaScript/TypeScript, Rust, Go, C/C++, Jav
     (use-package eldoc-box
       :custom
       (eldoc-box-max-pixel-width 600)
-      (eldoc-box-max-pixel-height 400))))
+      (eldoc-box-max-pixel-height 400)))))
 #+end_src
 ** Corfu
 #+begin_src emacs-lisp
