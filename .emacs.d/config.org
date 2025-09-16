@@ -1139,7 +1139,8 @@ Context-aware action framework that provides a unified interface for performing 
     (dired-rainbow-define fonts "#6cb2eb" ("afm" "fon" "fnt" "pfb" "pfm" "ttf" "otf"))
     (dired-rainbow-define partition "#e3342f" ("dmg" "iso" "bin" "nrg" "qcow" "toast" "vcd" "vmdk" "bak"))
     (dired-rainbow-define vc "#0074d9" ("git" "gitignore" "gitattributes" "gitmodules"))
-    (dired-rainbow-define-chmod executable-unix "#38c172" "-.*x.*")))
+  (dired-rainbow-define-chmod executable-unix "#38c172" "-.*x.*")
+))
 #+end_src
 
 *** All The Icons Dired
@@ -1692,8 +1693,9 @@ Automatically configured for Python, JavaScript/TypeScript, Rust, Go, C/C++, Jav
   (when (display-graphic-p)
     (use-package eldoc-box
       :custom
-      (eldoc-box-max-pixel-width 600)
-      (eldoc-box-max-pixel-height 400)))))
+  (eldoc-box-max-pixel-width 600)
+  (eldoc-box-max-pixel-height 400)))
+)
 #+end_src
 ** Corfu
 #+begin_src emacs-lisp
@@ -2507,9 +2509,9 @@ Built-in Emacs mode for automatic pairing of brackets, quotes, and parentheses.
           (lambda ()
             ;; Only set electric-pair-inhibit-predicate if it exists (Emacs 24.4+)
             (when (boundp 'electric-pair-inhibit-predicate)
-              (setq-local electric-pair-inhibit-predicate
-                          `(lambda (c)
-                             (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c)))))))
+          (setq-local electric-pair-inhibit-predicate
+                  `(lambda (c)
+                    (if (char-equal c ?<) t (,electric-pair-inhibit-predicate c)))))))
 #+end_src
 
 *** Smartparens
@@ -2567,7 +2569,7 @@ Advanced parentheses management with intelligent pairing, navigation, and manipu
 
   ;; Show matching parens
   (show-paren-mode 1)
-  (setq show-paren-delay 0))
+  (setq show-paren-delay 0)))
 #+end_src
 
 *** Expand Region
