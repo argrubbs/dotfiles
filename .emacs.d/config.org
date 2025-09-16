@@ -1620,7 +1620,11 @@ Automatically configured for Python, JavaScript/TypeScript, Rust, Go, C/C++, Jav
   ((css-mode css-ts-mode) . eglot-ensure)
   ((html-mode html-ts-mode) . eglot-ensure)
   ((json-mode json-ts-mode) . eglot-ensure)
-  ((yaml-mode yaml-ts-mode) . eglot-ensure)
+  ((yaml-mode yaml-ts-mode) . (lambda ()
+                                  ;; Only start eglot if it's not an Ansible file
+                                  (unless (and (fboundp 'my/is-ansible-file)
+                                               (my/is-ansible-file))
+                                    (eglot-ensure))))
   ((sh-mode bash-ts-mode) . eglot-ensure)
 
   :bind (:map eglot-mode-map
@@ -2072,6 +2076,7 @@ Doom Emacs-inspired mode-specific keybindings for programming languages, adapted
   (local-set-key (kbd "C-c A") 'hydra-ansible/body))
 
 (add-hook 'ansible-mode-hook #'my/setup-ansible-keybindings)
+(add-hook 'poly-ansible-mode-hook #'my/setup-ansible-keybindings)
 #+end_src
 *** JavaScript/TypeScript
 #+begin_src emacs-lisp
@@ -2118,53 +2123,128 @@ Doom Emacs-inspired mode-specific keybindings for programming languages, adapted
   :ensure t
   :mode "\\.json\\'")
 
-;; Enhanced Ansible support with proper mode detection
-(defun my/is-ansible-file ()
-  "Check if current file is an Ansible file."
-  (when buffer-file-name
-    (or
-     ;; Ansible directory patterns
-     (string-match-p "/\\(group\\|host\\)_vars/" buffer-file-name)
-     (string-match-p "/playbooks/.*\\.ya?ml\\'" buffer-file-name)
-     (string-match-p "/roles/.*/\\(tasks\\|handlers\\|vars\\|defaults\\|meta\\)/.*\\.ya?ml\\'" buffer-file-name)
-     (string-match-p "ansible.*\\.cfg\\'" buffer-file-name)
-     (string-match-p "/inventory" buffer-file-name)
-     ;; Common Ansible filenames
-     (string-match-p "\\(playbook\\|site\\|main\\|local\\)\\.ya?ml\\'" buffer-file-name)
-     ;; Check file contents for Ansible indicators
-     (and (derived-mode-p 'yaml-mode)
-          (save-excursion
-            (goto-char (point-min))
-            (or (re-search-forward "^\\s-*-\\s-*hosts:\\s-*" nil t)
-                (re-search-forward "^\\s-*-\\s-*name:\\s-*" nil t)
-                (re-search-forward "^\\s-*ansible_" nil t)
-                (re-search-forward "^\\s-*gather_facts:" nil t)
-                (re-search-forward "^\\s-*vars:" nil t)))))))
-
-(use-package ansible
+;; Polymode - Multi-mode support for files with mixed languages
+(use-package polymode
   :ensure t
-  :hook ((yaml-mode . (lambda ()
-                        (when (my/is-ansible-file)
-                          (ansible-mode 1))))
-         (ansible-mode . ansible-auto-decrypt-encrypt))
-  :custom
-  (ansible-vault-password-file "~/.ansible-vault")  ; Adjust path as needed
   :config
-  ;; Auto-detect Ansible files and set proper modes
-  (add-to-list 'auto-mode-alist '("/\\(group\\|host\\)_vars/.*\\.ya?ml\\'" . yaml-mode))
-  (add-to-list 'auto-mode-alist '("/playbooks/.*\\.ya?ml\\'" . yaml-mode))
-  (add-to-list 'auto-mode-alist '("/roles/.*/\\(tasks\\|handlers\\|vars\\|defaults\\|meta\\)/.*\\.ya?ml\\'" . yaml-mode))
-  (add-to-list 'auto-mode-alist '("\\(playbook\\|site\\|main\\|local\\)\\.ya?ml\\'" . yaml-mode))
-  (add-to-list 'auto-mode-alist '("ansible.*\\.cfg\\'" . conf-mode))
-  (add-to-list 'auto-mode-alist '("/inventory\\'" . conf-mode))
-  (add-to-list 'auto-mode-alist '("\\.j2\\'" . jinja2-mode))
+  ;; Better syntax highlighting for code blocks
+  (setq polymode-prefix-key (kbd "C-c m"))  ; Polymode commands prefix (C-c n conflicts with org-roam)
+
+  ;; Enable syntax highlighting in all polymodes
+  (add-hook 'polymode-mode-hook
+            (lambda ()
+              (when (fboundp 'font-lock-ensure)
+                (font-lock-ensure)))))
+
+;; Ansible + YAML
+(use-package poly-ansible
+  :ensure t
+  :after (polymode ansible)
+  :config
+  ;; Auto-detect Ansible files and use poly-ansible-mode
+  (add-to-list 'auto-mode-alist '("/\\(group\\|host\\)_vars/.*\\.ya?ml\\'" . poly-ansible-mode))
+  (add-to-list 'auto-mode-alist '("/playbooks/.*\\.ya?ml\\'" . poly-ansible-mode))
+  (add-to-list 'auto-mode-alist '("/roles/.*/\\(tasks\\|handlers\\|vars\\|defaults\\|meta\\)/.*\\.ya?ml\\'" . poly-ansible-mode))
+  (add-to-list 'auto-mode-alist '("\\(playbook\\|site\\|main\\|local\\)\\.ya?ml\\'" . poly-ansible-mode))
 
   ;; Add Ansible language server support via eglot
   (with-eval-after-load 'eglot
     (add-to-list 'eglot-server-programs
-                 '((ansible-mode yaml-mode) . ("ansible-language-server" "--stdio")))
-    ;; Auto-start eglot for Ansible files
-    (add-hook 'ansible-mode-hook #'eglot-ensure)))
+                 '(poly-ansible-mode . ("ansible-language-server" "--stdio")))
+    ;; Auto-start eglot for poly-ansible files
+    (add-hook 'poly-ansible-mode-hook #'eglot-ensure)))
+
+;; Markdown + Code blocks (R, Python, Shell, etc.)
+(use-package poly-markdown
+  :ensure t
+  :after polymode
+  :config
+  (add-to-list 'auto-mode-alist '("\\.md\\'" . poly-markdown-mode))
+  (add-to-list 'auto-mode-alist '("\\.markdown\\'" . poly-markdown-mode))
+
+  ;; Enable specific language modes in code blocks
+  (setq polymode-display-output-file t))
+
+;; R Markdown support
+(use-package poly-R
+  :ensure t
+  :after polymode
+  :config
+  (add-to-list 'auto-mode-alist '("\\.Rmd\\'" . poly-markdown+r-mode))
+  (add-to-list 'auto-mode-alist '("\\.rmd\\'" . poly-markdown+r-mode)))
+
+;; Web development - HTML with embedded CSS/JS
+(use-package poly-web
+  :ensure t
+  :after polymode
+  :config
+  ;; HTML with embedded CSS and JavaScript
+  (add-to-list 'auto-mode-alist '("\\.html\\'" . poly-html-mode))
+  (add-to-list 'auto-mode-alist '("\\.htm\\'" . poly-html-mode))
+
+  ;; Vue.js single file components
+  (add-to-list 'auto-mode-alist '("\\.vue\\'" . poly-vue-mode))
+
+  ;; Django templates
+  (add-to-list 'auto-mode-alist '("\\.djhtml\\'" . poly-django-html-mode)))
+
+;; Python + various embedded languages
+(use-package poly-python
+  :ensure t
+  :after polymode
+  :config
+  ;; Jupyter notebooks (if using python-mode for .py files with cells)
+  ;; SQL in Python strings
+  (define-auto-innermode poly-python-sql-innermode
+    :mode 'sql-mode
+    :head-matcher "\\(sql\\s-*=\\s-*\\|execute\\s-*(\\s-*\\)[\"']"
+    :tail-matcher "[\"']"
+    :head-mode 'host
+    :tail-mode 'host))
+
+;; Dockerfile with embedded shell scripts
+(use-package poly-dockerfile
+  :ensure t
+  :after polymode
+  :config
+  (add-to-list 'auto-mode-alist '("Dockerfile\\'" . poly-dockerfile-mode))
+  (add-to-list 'auto-mode-alist '("\\.dockerfile\\'" . poly-dockerfile-mode)))
+
+;; YAML with embedded scripts (like GitHub Actions, GitLab CI)
+(define-auto-innermode poly-yaml-script-innermode
+  :mode 'sh-mode
+  :head-matcher "\\(run\\|script\\):\\s-*[|>][-+]?\\s-*\n"
+  :tail-matcher "^\\s-*[a-zA-Z]"
+  :head-mode 'host
+  :tail-mode 'host
+  :keep-in-mode 'host)
+
+(define-polymode poly-yaml-script-mode
+  :hostmode 'pm-host/yaml
+  :innermodes '(poly-yaml-script-innermode))
+
+;; Apply to CI/CD files
+(add-to-list 'auto-mode-alist '("\\.github/workflows/.*\\.ya?ml\\'" . poly-yaml-script-mode))
+(add-to-list 'auto-mode-alist '("\\.gitlab-ci\\.ya?ml\\'" . poly-yaml-script-mode))
+(add-to-list 'auto-mode-alist '("azure-pipelines\\.ya?ml\\'" . poly-yaml-script-mode))
+
+;; Enhanced Ansible support with traditional ansible-mode as fallback
+(use-package ansible
+  :ensure t
+  :hook ((ansible-mode . ansible-auto-decrypt-encrypt))
+  :custom
+  (ansible-vault-password-file "~/.ansible-vault")  ; Adjust path as needed
+  :config
+  ;; Fallback patterns for files not using poly-ansible
+  (add-to-list 'auto-mode-alist '("ansible.*\\.cfg\\'" . conf-mode))
+  (add-to-list 'auto-mode-alist '("/inventory\\'" . conf-mode))
+  (add-to-list 'auto-mode-alist '("\\.j2\\'" . jinja2-mode))
+
+  ;; Add traditional ansible-mode LSP support as backup
+  (with-eval-after-load 'eglot
+    (add-to-list 'eglot-server-programs
+                 '(ansible-mode . ("ansible-language-server" "--stdio")))
+    (add-hook 'ansible-mode-hook #'eglot-ensure))))
 
 (use-package ansible-doc
   :ensure t
