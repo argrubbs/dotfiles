@@ -6,6 +6,12 @@
 (setq gc-cons-threshold (* 100 1024 1024))  ; 100MB
 (setq gc-cons-percentage 0.6)
 (setq package-native-compile t)
+
+(require 'auth-source)
+(when-let* ((cert-entry (car (auth-source-search :host "local" :port "cert" :machine "gnutls-cert")))
+            (cert-file (plist-get cert-entry :file)))
+  (when (file-exists-p cert-file)
+    (add-to-list 'gnutls-trustfiles cert-file)))
 (setq tls-checktrust nil)
 (setq gnutls-verify-error nil)
 (setq network-security-level 'low)

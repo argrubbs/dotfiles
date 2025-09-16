@@ -2745,6 +2745,7 @@ The most powerful Git interface for Emacs, providing an intuitive and efficient 
   :ensure t
   :bind (;; Global magit keybindings
          ("C-x g" . magit-status)           ; Main entry point
+         ("C-c g g" . magit-status)         ; Quick access to magit status
          ("C-x M-g" . magit-dispatch)       ; Command dispatcher
          ("C-c g c" . magit-clone)          ; Clone repository
          ("C-c g i" . magit-init)           ; Initialize repository

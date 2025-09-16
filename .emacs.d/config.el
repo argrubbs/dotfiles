@@ -86,9 +86,9 @@
 
 ;; Bell configuration - disable the annoying yellow triangle
 ;; Option 1: Completely disable all bell sounds/visuals
-;; (setq ring-bell-function 'ignore)
+(setq ring-bell-function 'ignore)
 
-Option 2: Use a subtle mode-line flash instead (uncomment to use)
+;; Option 2: Use a subtle mode-line flash instead (uncomment to use)
 (defun my/mode-line-visual-bell ()
   "Flash the mode line as a visual bell."
   (let ((orig-bg (face-background 'mode-line)))
@@ -2044,6 +2044,7 @@ LIB-NAME is the library file to `locate-library' (often the same as PKG)."
   :ensure t
   :bind (;; Global magit keybindings
          ("C-x g" . magit-status)           ; Main entry point
+         ("C-c g g" . magit-status)         ; Quick access to magit status
          ("C-x M-g" . magit-dispatch)       ; Command dispatcher
          ("C-c g c" . magit-clone)          ; Clone repository
          ("C-c g i" . magit-init)           ; Initialize repository
