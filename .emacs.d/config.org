@@ -2320,6 +2320,10 @@ Code template expansion system that provides language-specific snippets for fast
               (local-set-key (kbd "<tab>") #'my/smart-tab)
               (local-set-key (kbd "S-TAB") #'my/smart-shift-tab)
               (local-set-key (kbd "<backtab>") #'my/smart-shift-tab))))
+;; DOOM Snippets
+(use-package doom-snippets
+  :load-path "~/.emacs.d/snippets"
+  :after yasnippet)
 
 ;; Additional snippet collections
 (use-package yasnippet-snippets
@@ -2327,6 +2331,7 @@ Code template expansion system that provides language-specific snippets for fast
   :after yasnippet
   :config
   (yasnippet-snippets-initialize))
+
 #+end_src
 
 
