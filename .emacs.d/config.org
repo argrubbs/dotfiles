@@ -813,10 +813,10 @@ Comprehensive collection of commands that enhance Emacs' built-in functionality 
   ;; Replace bindings. Lazily loaded due by `use-package'.
   :bind (;; C-c bindings in `mode-specific-map'
          ("C-c M-x" . consult-mode-command)
-         ("C-c h" . consult-history)
-         ("C-c k" . consult-kmacro)
-         ("C-c m" . consult-man)
-         ("C-c i" . consult-info)
+         ("C-c H" . consult-history)  ; Moved to capital H to free C-c h for help
+         ("C-c K" . consult-kmacro)   ; Moved to capital K to free C-c k
+         ("C-c M" . consult-man)      ; Moved to capital M to free C-c m
+         ("C-c I" . consult-info)     ; Moved to capital I to free C-c i
          ([remap Info-search] . consult-info)
          ;; C-x bindings in `ctl-x-map'
          ("C-x M-:" . consult-complex-command)     ;; orig. repeat-complex-command
@@ -1757,6 +1757,8 @@ Automatically configured for Python, JavaScript/TypeScript, Rust, Go, C/C++, Jav
 ** Mode-Specific Keybindings
 
 Doom Emacs-inspired mode-specific keybindings for programming languages, adapted for traditional Emacs C-c prefix system.
+
+*Note:* These keybindings use `local-set-key` and only apply in specific programming modes. They intentionally override some global bindings in those contexts (e.g., `C-c r` runs REPL commands in Python mode but `consult-recent-file` elsewhere).
 
 *** Programming Mode Base Keybindings
 #+begin_src emacs-lisp
