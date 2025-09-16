@@ -215,6 +215,23 @@ Essential Emacs settings that provide better defaults and improved user experien
   (when (boundp 'warning-suppress-log-types)
     (add-to-list 'warning-suppress-log-types cat)))
 
+;; Environment: Inherit PATH from shell (crucial for GUI Emacs)
+;; This ensures tools like pandoc, language servers, and other binaries are found
+(use-package exec-path-from-shell
+  :ensure t
+  :if (memq window-system '(mac ns x pgtk))  ; Only for GUI Emacs
+  :config
+  (exec-path-from-shell-initialize))
+
+;; Fallback: Add common binary paths for Linux systems
+(when (and (not (memq window-system '(mac ns)))
+           (eq system-type 'gnu/linux))
+  (let ((common-paths '("/usr/local/bin" "/usr/bin" "/bin")))
+    (dolist (path common-paths)
+      (when (and (file-directory-p path)
+                 (not (member path exec-path)))
+        (add-to-list 'exec-path path t)))))
+
 ;; Better defaults
 (setq-default indent-tabs-mode nil
               tab-width 4
