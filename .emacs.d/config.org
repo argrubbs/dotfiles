@@ -98,6 +98,7 @@ This configuration provides a modern, IDE-like Emacs experience with focus on pr
     - [[#javascripttypescript-mode-specific][JavaScript/TypeScript Mode Specific]]
     - [[#rust-mode-specific][Rust Mode Specific]]
     - [[#web-development-mode-specific][Web Development Mode Specific]]
+    - [[#ansible-mode-specific][Ansible Mode Specific]]
     - [[#javascripttypescript][JavaScript/TypeScript]]
     - [[#web][Web]]
     - [[#additional-language-modes][Additional Language Modes]]
@@ -2937,7 +2938,7 @@ The most powerful Git interface for Emacs, providing an intuitive and efficient 
 
   :config
   ;; Enable magit-file-mode for better integration
-  (global-magit-file-mode t)
+  ;; (global-magit-file-mode t)
 
   ;; Configure section visibility
   (magit-add-section-hook 'magit-status-sections-hook
@@ -2995,6 +2996,9 @@ The most powerful Git interface for Emacs, providing an intuitive and efficient 
   (transient-append-suffix 'magit-pull "p"
     '("r" "Rebase" magit-pull-from-upstream)))
 #+end_src
+
+#+RESULTS:
+
 *** git-commit
 #+begin_src emacs-lisp
 (use-package git-commit
