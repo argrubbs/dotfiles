@@ -1,0 +1,40 @@
+vim dotfiles/nushell/dot-config/nushell/config.nu
+exit
+mkdir ($nu.cache-dir)<\n>carapace _carapace nushell | save --force $"($nu.cache-dir)/carapace.nu"
+exit
+brew
+clear
+ls
+clear
+cat
+cat dotfiles/tmux/dot-tmux.conf
+clear
+print dotfiles/tmux/dot-tmux.conf
+open dotfiles/tmux/dot-tmux.conf
+open dotfiles/tmux/dot-tmux.conf | print
+clear
+nvim dotfiles/nushell/dot-config/nushell/config.nu 
+z
+zoxide init nushell | save -f ~/.zoxide.nu<\n>
+nvim dotfiles/nushell/dot-config/nushell/config.nu 
+exit
+z nushell
+ls
+zi dot
+zi nush
+cd dot-config/
+cd nushell/
+z
+ls | explore
+nvim $nu.config-path
+source $nu.config-path
+nvim $nu.config-path
+source $nu.config-path
+clear
+ls
+brew tap d12frosted/emacs-plus
+brew install emacs-plus@30
+brew services start d12frosted/emacs-plus/emacs-plus@30
+cd dotfiles/
+git status
+ls kitty/dot-config/gh/
