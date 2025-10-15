@@ -38,3 +38,18 @@ brew services start d12frosted/emacs-plus/emacs-plus@30
 cd dotfiles/
 git status
 ls kitty/dot-config/gh/
+bash
+stow --dotfiles nushell
+stow --dotfiles kitty
+ls
+ls -al
+nvim .stow-local-ignore
+stow --dotfiles kitty
+nvim .stow-local-ignore
+stow --dotfiles kitty
+sudo pacman -S wezterm
+stow --dotfiles wezterm
+exit
+cd dotfiles/
+pacman -S ghostty<\n>
+sudo pacman -S ghostty<\n>
