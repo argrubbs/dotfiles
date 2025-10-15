@@ -1,0 +1,2 @@
+-- This will be loaded after plugins are installed
+-- The actual colorscheme setup is in plugins/ui/rose-pine.lua

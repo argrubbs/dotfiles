@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nvim:*)",
+      "Read(//private/tmp/nvim-test/**)",
+      "WebFetch(domain:github.com)",
+      "Bash(tee:*)",
+      "Read(//private/tmp/**)",
+      "WebSearch",
+      "Bash(for file in test.py test.go test.md test.yml)",
+      "Bash(do echo \"=== Testing $file ===\")",
+      "Bash(done)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

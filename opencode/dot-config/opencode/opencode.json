@@ -1,0 +1,20 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (local)",
+      "options": {
+        "baseURL": "http://glados.local:11434/v1"
+      },
+      "models": {
+        "qwen3:8b-32k": {
+          "name": "qwen3:8b-32k"
+        },
+        "devstral:24b": {
+          "name": "devstral:24b"
+        }
+      }
+    }
+  }
+}

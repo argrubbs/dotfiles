@@ -6,3 +6,4 @@
 **/transient
 .emacs.d/config.el
 projects
+.aider*
