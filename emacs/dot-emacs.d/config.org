@@ -1,0 +1,442 @@
+#+TITLE: ARG Emacs
+#+AUTHOR: Adam Grubbs
+#+PROPERTY: header-args :tangle yes
+
+* Configuration
+:PROPERTIES:
+:VISIBILITY: children
+:END:
+
+** My Info
+#+begin_src emacs-lisp
+(setq user-full-name "Adam Grubbs"
+      user-main-address "argrubbs@users.noreply.github.com")
+#+end_src
+
+** Emacs Init
+
+*** Settings
+
+Sane Defaults
+#+begin_src emacs-lisp
+  ;; menu shit remove
+  (mapc
+   (lambda (mode)
+     (when (fboundp mode)
+       (funcall mode -1)))
+   ' (menu-bar-mode tool-bar-mode scroll-bar-mode))
+
+  ;; Init
+  (setq inhibit-default-init t
+        inhibit-startup-echo-area-message t
+        inhibit-startup-screen t
+        initial-scratch-message nil)
+
+  ;; warn when opening files bigger than 100MB
+  (setq large-file-warning-threshold 100000000)
+
+  (defconst gas-savefile-dir (expand-file-name "savefile" user-emacs-directory))
+
+  ;; Create the savefile dir if it doesn't exist
+  (unless (file-exists-p gas-savefile-dir)
+    (make-directory gas-savefile-dir))
+
+  ;;; UI
+  ;; No blink cursor
+  (blink-cursor-mode -1)
+
+  ;; disable bell ring
+  (setq ring-bell-function 'ignore)
+
+  ;; nice scrolling
+  (setq scroll-margin 0
+        scroll-conservatively 100000
+        scroll-preserve-screen-position 1)
+
+  ;; mode line settings
+  (line-number-mode t)
+  (column-number-mode t)
+  (size-indication-mode t)
+
+  ;; enable y/n answers
+  (fset 'yes-or-no-b 'y-or-n-p)
+
+  ;; useful frame title
+  (setq frame-title-format
+        '((:eval (if (buffer-file-name)
+  		   (abbreviate-file-name (buffer-file-name))
+  		 "%b"))))
+
+  ;; org default mode
+  (setq initial-major-mode 'org-mode)
+
+  ;; make cursor tab length on tab
+  (setq-default x-stretch-cursor t)
+
+  ;; Keep emacs custom-settings in separate file
+  (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+  (when (file-exists-p custom-file)
+    (load custom-file))
+
+  ;; Store all backup and autosave files in the tmp dir
+  (setq backup-directory-alist
+        `((".*" . ,temporary-file-directory)))
+  (setq auto-save-file-name-transforms
+        `((".*" ,temporary-file-directory t)))
+
+  ;; revert buffers automatically when file changed externally
+  (global-auto-revert-mode t)
+
+  ;; Make backups of files, even when they're in vcs
+  (setq vc-make-backup-files t)
+
+  ;; Fix empty pasteboard error
+  (setq save-interprogram-paste-before-kill nil)
+  
+#+end_src
+
+*** Package Management
+
+**** Package Settings
+
+Setting the =load-path= manually and avoid calling
+=(package-initialize)= (for performance reasons) so
+we need to set =package--init-file-ensured= to true
+to tell =package.el= to not automatically tell it on
+our behalf. Additionally we're setting =package-enable-at-startup=
+to nil so that packages will not automatically be loaded
+for us since =use-package= will be handling that.
+
+
+#+begin_src emacs-lisp
+  (eval-and-compile
+    (setq load-prefer-newer t
+  	package-user-dir "~/.emacs.d/elpa"
+  	package--init-file-ensured t
+  	package-enable-at-startup nil)
+
+    (unless (file-directory-p package-user-dir)
+      (make-directory package-user-dir t)))
+#+end_src
+
+**** Use-Package Settings
+Tell =use-package= to always defer loading packages unless
+explicitly told otherwise. This speeds up init
+significantly as many packages are only loaded
+later when they are explicitly used.
+
+#+begin_src emacs-lisp
+  (setq use-package-always-defer t
+        use-package-verbose t)
+#+end_src
+
+**** Manually Set Load Path
+Setting the load path manually so we don't have to call
+=package-initialize= at runtime to prevent performance hit.
+This load-path will be faster than the one created by
+=package-initialize= since it appends the elpa packages
+to the end of the load path.
+Otherwise any time a builtin package is required it
+would have to search all of the third-party paths first.
+
+#+begin_src emacs-lisp
+  (eval-and-compile
+    (setq load-path (append load-path (directory-files package-user-dir t "^[^.]" t))))
+#+end_src
+
+**** Native Compilation Silent
+Using native-compilation (default) translates things down to
+machine code for speed. It reports a lot of random warnings
+and errors which are annoying. These are generally only useful
+to the emacs or package devs. So, let's silence that mess.
+#+begin_src emacs-lisp
+  (when (native-comp-available-p)
+    (setq native-comp-async-report-warnings-errors 'silent))
+#+end_src
+
+#+RESULTS:
+: silent
+
+**** Initialize Package Management
+First, require =package.el= and add additional package archives,
+'melpa' and 'org'.
+After, we need to initialize our packages and then ensure that
+=use-package= is installed, which we install if it's missing.
+Finally, we load =use-package= and tell it to always install any
+missing packages.
+
+Note that this entire block is wrapped in =eval-when-compile=.
+The effect of this is to perform all of the package init during
+compilation so that when byte compiled, all of this time consuming
+code is skipped. This can be done because the result of byte compiling
+=use-package= statements results in the macro being fully expanded
+at which point =use-package= isn't actually required any longer.
+
+Since the code is automatically compiled during runtime, if the
+configuration hasn't already been previously compiled manually
+then all of the package initialization will still take place at startup.
+
+#+begin_src emacs-lisp
+  (eval-when-compile
+    (require 'package)
+
+    (unless (assoc-default "melpa" package-archives)
+      (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t))
+    (unless (assoc-default "org" package-archives)
+      (add-to-list 'package-archives '("org" . "https://orgmode.org/elpa/") t))
+    (unless (assoc-default "nongnu" package-archives)
+      (add-to-list 'package-archives '("nongnu" . "https://elpa.nongnu.org/nongnu/") t))
+
+    (setq package-install-upgrade-built-in t)
+
+    (unless (package-installed-p 'use-package)
+      (package-refresh-contents)
+      (package-install 'use-package))
+    (unless (package-installed-p 'bind-key)
+      (package-refresh-contents)
+      (package-install 'bind-key))
+    (require 'use-package)
+    (require 'bind-key)
+    (setq use-package-always-ensure t))
+#+end_src
+
+#+RESULTS:
+: t
+
+You can use =use-package= with version control instead of using
+a quelpa or straight
+
+#+begin_src emacs-lisp :tangle no
+  (use-package package-name
+    :vc (:url "git repo url"
+  	    :branch main))
+#+end_src
+
+*** Display
+
+**** Declare all themes as safe
+
+To avoid being asked about setting a theme as safe, I set this
+If you need to load a new theme, you won't have to set it with
+=(load-theme 'theme-name :no-confirm)=. Built-in themes are
+safe by default.
+
+#+begin_src emacs-lisp
+    (setq custom-safe-themes t)
+#+end_src
+
+#+RESULTS:
+: t
+
+**** Install Doom Themes
+This will install doom-themes from MELPA for use. To set the theme
+change it in the =(load-theme 'doom-theme-name t)= line.
+
+#+begin_src emacs-lisp
+  ;; Install doom-themes
+  (use-package doom-themes
+    :custom
+    (doom-themes-enable-bold t)
+    (doom-themes-enable-italic t)
+    :config
+    (doom-themes-visual-bell-config)
+    (doom-themes-org-config))
+#+end_src
+
+**** Load the Theme
+
+#+begin_src emacs-lisp
+(load-theme 'doom-gruvbox t)
+#+end_src
+
+*** Fonts
+
+Using show-fonts and fontaine from Prot
+[[https://protesilaos.com/emacs/show-font]]
+
+=show-font= is for previewing fonts
+=fontaine= is for configuring fonts
+
+#+begin_src emacs-lisp
+
+      (set-face-attribute 'default nil
+      		    :family "Iosevka Nerd Font Mono"
+      		    :height 160
+      		    :weight 'semi-light)
+      (set-face-attribute 'font-lock-comment-face nil
+    		    :font "Caveat-18")
+#+End_Src
+
+#+RESULTS:
+
+** Org-Mode
+
+*** Settings
+Change the following variables:
+
+ - =org-goto-auto-isearch= to allos for the use of n/p and f/b for org-goto =C-c C-j=
+ - =org-M-RET-may-split-lines= to prevent adding headings with =M-RET= in the middle of the line
+ - =org-yank-folded-subtrees= to allow for yanking (pasting) the contents of a killed (copy/cut) subtree
+ - =org-return-follows-link= allows you to use the RET key to follow links (default is =C-c C-o=)
+
+#+begin_src emacs-lisp
+  (setq org-goto-auto-isearch nil
+        org-M-RET-may-split-lines nil
+        org-return-follows-link t
+  	org-yank-olded-subtrees nil)
+#+end_src
+
+#+RESULTS:
+
+*** Custom Org-Mode Functions
+Here are my custom org-mode functions. They will include docstrings so there isn't
+a great need for documentation here.
+
+#+begin_src emacs-lisp
+  (defun arg-emacs-org-insert-drawer-correctly (arg)
+    "Insert a drawer or PROPERTIES drawer with prefix ARG. Places the cursor into
+  the new drawer."
+    (interactive "P")
+    (if arg
+        (let ((start (point))
+      (org-insert-property-drawer)
+      ;; Find the beginning of the drawer at point or after
+      (goto-char start)
+      (when (re-search-forward ":PROPERTIES:" nil t)
+        ;; Move to line after :PROPERTIES:
+        (forward-line 1)))
+    (call-interactively 'org-insert-drawer))))
+
+  (define-key org-mode-map (kbd "C-c i")
+  	    'arg-emacs-org-insert-drawer-correctly)
+
+  ;; Assign keybinds for moving between links
+  (with-eval-after-load 'org
+    (define-key org-mode-map (kbd "M-n") #'org-next-link)
+    (define-key org-mode-map (kbd "M-p") #'prg-previous-link))
+#+end_src
+
+#+RESULTS:
+: prg-previous-link
+
+
+*** Custom Org-Mode Keybinds :keybind:
+:PROPERTIES:
+:CUSTOM_ID: org_keys
+:END:
+
+#+begin_src emacs-lisp
+  (global-set-key (kbd "<f7>")
+  	    'org-tags-view)
+  (global-set-key (kbd "C-c a")
+  		#'org-agenda)
+#+end_src
+
+#+RESULTS:
+: org-agenda
+
+
+*** Org Agenda                                                   :org_agenda:
+
+Org Agenda file is set with ~C-c ]~ and removed with ~C-c [~
+
+My personal agenda file is in =~/org/agenda.org=
+
+*** Org Attach                                                   :org_attach:
+:PROPERTIES:
+
+:END:
+Org Attachments are useful for adding files to org files.
+
+Set org attach directory
+#+begin_src emacs-lisp
+    (defvar arg-org-data-dir (expand-file-name "~/org/data")
+      "Variable for setting the data directory for org attach")
+    (unless (file-directory-p arg-org-data-dir)
+      (make-directory arg-org-data-dir t))
+    (if (file-directory-p arg-org-data-dir)
+        (setq org-attach-id-dir arg-org-data-dir)) 
+#+end_src
+
+#+RESULTS:
+: ~/org/data
+
+Defining some custom functions for org attach
+#+begin_src emacs-lisp
+  ;; COPY and attach files to org headers using dired
+  (add-hook 'dired-mode-hook
+  	  (lambda ()
+  	    (define-key dired-mode-map (kbd "C-c C-x c")
+  			(lambda ()
+  			  (interactive)
+  			  (let ((org-attach-method 'cp))
+  			    (call-interactively #'org-attach-dired-to-subtree))))))
+  ;; MOVE and attach files to org headers using dired
+  (add-hook 'dired-mode-hook
+  	  (lambda ()
+  	    (define-key dired-mode-map (kbd "C-c C-x m")
+  			(lambda ()
+  			  (interactive)
+  			  (let ((org-attach-method 'mv))
+  			    (call-interactively #'org-attach-dired-to-subtree))))))
+#+end_src
+
+*** Org Roam
+
+Org-Roam is a note-taking system similar to zettelkasten.
+
+**** Install and Config
+
+This installs and configures org-roam.
+=(setq org-roam-v2-ack t)= is in the config to avoid the
+warnings about migrating from v1.
+=(org-roam-direcory "~/RoamNotes")= sets the directory that
+stores the notes. Org-Roam will bulid a =sqlite= database
+for storing the metadata for the nodes (notes) and the links
+between them.
+
+The variable =arg-emacs-org-roam-dir= assigns a directory
+to be used for org-roam notes. There is logic to determine if
+this directory exists, and if it does not then it should
+create it.
+
+
+#+begin_src emacs-lisp
+  (defvar arg-emacs-org-roam-dir "~/RoamNotes"
+  "Variable for Org Roam notes location")
+
+  (unless
+      (file-directory-p arg-emacs-org-roam-dir)
+    (make-directory arg-emacs-org-roam-dir))
+
+    (use-package org-roam
+      :ensure t
+      :init
+      (setq org-roam-v2-ack t)
+      :custom
+      (org-roam-directory arg-emacs-org-roam-dir)
+      (org-roam-completion-everywhere t)
+      (org-roam-capture-templates
+       '(("d" "default" plain
+  	"%?"
+  	:if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+  	:unnarrowed t)
+  	   ("c" "cat" plain
+  "* Cat Facts\n\n- Name: %?\n- Color: \n\n* Reference:\n\n"
+  	:if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+  	:unnarrowed t)
+  ))
+      :bind (("C-c n l" . org-roam-buffer-toggle)
+    	 ("C-c n f" . org-roam-node-find)
+    	 ("C-c n i" . org-roam-node-insert)
+  	 :map org-mode-map
+  	 ("C-M-i" . completion-at-point))
+      :config
+      (org-roam-setup))
+
+  ;; Set database autosync
+  (org-roam-db-autosync-enable)
+#+end_src
+
+#+RESULTS:
+: t
