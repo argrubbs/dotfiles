@@ -92,8 +92,28 @@ Sane Defaults
 
   ;; Fix empty pasteboard error
   (setq save-interprogram-paste-before-kill nil)
-  
+
+  ;; line highlihgt
+  (hl-line-mode t)
+
+  ;; enable recent files
+  (recentf-mode t)
 #+end_src
+
+#+RESULTS:
+: t
+
+Mac Settings
+
+#+begin_src emacs-lisp
+      (setq mac-option-key-is-meta nil
+            mac-command-key-is-meta t
+    	mac-option-modifier nil
+  	mac-command-modifier 'meta)
+#+end_src
+
+#+RESULTS:
+: meta
 
 *** Package Management
 
@@ -243,11 +263,42 @@ change it in the =(load-theme 'doom-theme-name t)= line.
     (doom-themes-org-config))
 #+end_src
 
-**** Load the Theme
+**** Load the Theme                                                   :theme:
 
 #+begin_src emacs-lisp
-(load-theme 'doom-gruvbox t)
+(load-theme 'doom-molokai t)
 #+end_src
+
+#+RESULTS:
+: t
+
+**** Load Doom Modeline
+
+Doom Modeline is a modeline for the bottom of the Emacs window
+#+begin_src emacs-lisp
+  (use-package doom-modeline
+  :ensure t
+  :init (doom-modeline-mode 1))
+#+end_src
+
+#+RESULTS:
+: t
+
+**** Zoom (golden-ratio)
+
+Package that handles automatic window sizing based on active window
+
+#+begin_src emacs-lisp
+  (use-package zoom
+    :init
+    (zoom-mode t)
+    :config
+    (custom-set-variables
+     '(zoom-size '(0.618 . 0.618))))
+#+end_src
+
+#+RESULTS:
+: t
 
 *** Fonts
 
@@ -259,13 +310,22 @@ Using show-fonts and fontaine from Prot
 
 #+begin_src emacs-lisp
 
-      (set-face-attribute 'default nil
-      		    :family "Iosevka Nerd Font Mono"
-      		    :height 160
-      		    :weight 'semi-light)
-      (set-face-attribute 'font-lock-comment-face nil
-    		    :font "Caveat-18")
+  (set-face-attribute 'default nil
+  		    :family "Iosevka Nerd Font Mono"
+  		    :height 160
+  		    :weight 'semi-light)
+  (set-face-attribute 'font-lock-comment-face nil
+  		    :font "Caveat-20")
 #+End_Src
+
+#+RESULTS:
+
+Adding Nerd Icons
+
+#+begin_src emacs-lisp
+  (use-package nerd-icons
+    :ensure t)
+#+end_src
 
 #+RESULTS:
 
@@ -335,6 +395,27 @@ a great need for documentation here.
 #+RESULTS:
 : org-agenda
 
+
+*** Org Superstar
+
+This package enables pretty bullets in org mode
+
+#+begin_src emacs-lisp
+  (use-package org-superstar
+    :ensure t)
+#+end_src
+
+#+RESULTS:
+
+*** Org Contrib
+
+Extra contrib packages to extend org mode
+
+#+begin_src emacs-lisp
+  (use-package org-contrib
+    :ensure t
+    :vc (:url "https://github.com/emacsmirror/org-contrib"))
+#+end_src
 
 *** Org Agenda                                                   :org_agenda:
 
@@ -440,3 +521,291 @@ create it.
 
 #+RESULTS:
 : t
+
+* Package Configs
+
+Below are the configs for various third-party packages. These packages provide functionality beyond the
+standard editor functions or augment existing functions.
+
+** Completion
+
+These packages ars focused on providing a better experience for completion
+in the minibuffer, editor, and anywhere else
+
+*** General settings
+
+These setting remove case sensitivity from completions
+#+begin_src emacs-lisp
+    (setq read-file-name-completion-ignore-case t
+        read-buffer-completion-ignore-case t
+        completion-ignore-case t)
+#+end_src
+
+#+RESULTS:
+: t
+
+*** Vertico
+
+Vertico provides a cleaner minibuffer completion framework. Check [[roam:emacs-package-vertico][Vertico Notes]] for more info.
+
+#+begin_src emacs-lisp
+  (use-package vertico
+    :custom
+    (vertico-cycle t)
+    :init
+    (vertico-mode)
+    :bind (:map vertico-map
+  	      ("TAB" . #'minibuffer-complete)
+      ("RET" . #'vertico-directory-enter)
+      ("DEL" . #'vertico-directory-delete-char)
+      ("M-DEL" . #'vertico-directory-delete-word))
+    :hook ((rfn-eshadow-update-overlay . #'vertico-directory-tidy)
+  	 (minibuffer-setup . #'vertico-repeat-save))
+    :config
+    (setq vertico-resize nil
+  	vertico-count 17
+  	vertico-cycle t)
+    (setq-default completion-in-region-function
+  		(lambda (&rest args)
+  		  (apply (if vertico-mode
+  			     #'consult-completion-in-region
+  			   #'completion--in-region)
+  			 args))))
+
+  (use-package savehist
+    :init
+    (savehist-mode))
+
+  (use-package emacs
+    :custom
+    (context-menu-mode t)
+    (enable-recursive-minibuffers t)
+    (read-extended-command-predicate #'command-completion-default-include-p)
+    (minibuffer-prompt-properties
+     '(read-only t cursor-intangible t face minibuffer-prompt)))
+#+end_src
+
+#+RESULTS:
+
+*** Orderless
+
+Orderless provides completion styles to make fuzzy finding and completion feel more natural
+
+#+begin_src emacs-lisp
+  (use-package orderless
+    :custom
+    (completion-styles '(orderless partial-completion basic))
+    (completion-category-override '((file (styles orderless partial-completion))))
+    (completion--category-defaults nil)
+    (completion-pcm-leading-wildcard t))
+
+#+end_src
+
+#+RESULTS:
+
+*** Marginalia
+
+Marginalia provides extra info into the minibuffer completions. It's really just that.
+
+#+begin_src emacs-lisp
+  (use-package marginalia
+    :bind (:map minibuffer-local-map
+  	      ("M-A" . marginalia-cycle))
+    :init
+    (marginalia-mode))
+
+  (use-package nerd-icons-completion
+    :hook (marginalia-mode . nerd-icons-completion-marginalia-setup)
+    :config
+    (nerd-icons-completion-mode))
+
+  (use-package all-the-icons-completion
+    :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
+    :init
+    (all-the-icons-completion-mode))
+#+end_src
+
+#+RESULTS:
+| all-the-icons-completion-marginalia-setup | nerd-icons-completion-marginalia-setup |
+
+*** Consult
+
+Consult provides search and navigation commands based on the Emacs completion
+function [[help:completing-read][completing-read]]. Check out [[id:2F9DB448-1184-4DB2-8C21-B54023F292CC][Consult]] for more.
+
+#+begin_src emacs-lisp
+  (use-package consult
+    :bind (;; C-c bindings in `mode-specific-map'
+  	 ("C-c M-x" . consult-mode-command)
+  	 ("C-c h" . consult-history)
+  	 ("C-c k" . consult-kmacro)
+  	 ("C-c m" . consult-man)
+  	 ("C-c i" . consult-info)
+  	 ([remap Info-search] . consult-info)
+  	 ;; C-x bindings in `ctl-x-map'
+  	 ("C-x M-:" . consult-complex-command)
+  	 ("C-x b" . consult-buffer)
+  	 ("C-x 4 b" . consult-buffer-other-window)
+  	 ("C-x 5 b" . consult-buffer-other-frame)
+  	 ("C-x t b" . consult-buffer-other-tab)
+  	 ("C-x r b" . consult-bookmark)
+  	 ("C-x p b" . consult-project-buffer)
+  	 ;; Custom M-# bindings for fast register access
+  	 ("M-#" . consult-register-load)
+  	 ("M-'" . consult-register-store)
+  	 ("C-M-#" . consult-register)
+  	 ;; other custom bindings
+  	 ("M-y" . sonsult-yank-pop)
+  	 ;; M-g bindings in `goto-map'
+  	 ("M-g e" . consult-compile-error)
+  	 ("M-g f" . consult-flymake)
+  	 ("M-g g" . consult-goto-line)
+  	 ("M-g M-g" . consult-goto-line)
+  	 ("M-g o" . consult-outline)
+  	 ("M-g m" . consult-mark)
+  	 ("M-g k" . consult-global-mark)
+  	 ("M-g i" . consult-imenu)
+  	 ("M-g I" . consult-imenu-multi)
+  	 ;; M-s bindings in `search-mode'
+  	 ("M-s d" . consult-find)
+  	 ("M-s c" . consult-locate)
+  	 ("M-s g" . consult-ripgrep)
+  	 ("M-s G" . consult-git-grep)
+  	 ("M-s l" . consult-line)
+  	 ("M-s L" . consult-line-multi)
+  	 ("M-s k" . consult-keep-lines)
+  	 ("M-s u" . consult-focus-lines)
+  	 ;;; Isearch intsgration
+  	 ("M-s e" . consult-isearch-history)
+  	 :map isearch-mode-map
+  	 ("M-e" . consult-isearch-history)
+  	 ("M-s e". consult-isearch-history)
+  	 ("M-s l" . consult-line)
+  	 ("M-s L" . consult-line-multi)
+  	 ;; Minibuffer history
+  	 :map minibuffer-local-map
+  	 ("M-s". consult-history)
+  	 ("M-r" . consult-history))
+    :hook (completion-list-mode . consult-preview-at-point-mode)
+    :init
+    (setq register-preview-delay 0.5
+  	register-preview-function #'consult-register-format)
+    (advice-add #'retister-preview :override #'consult-register-window)
+    (setq xref-show-xrefs-function #'consult-xref
+  	xref-show-definitions-function #'consult-xref)
+    :config
+    (consult-customize
+     consult-theme :preview-key '(:debounce 0.2 any)
+     consult-ripgrep consult-git-grep consult-grep
+     consult-bookmark consult-recent-file consult-xref
+     consult--source-bookmark consult--source-file-register
+     consult--source-recent-file consult--source-project-recent-file
+     ;; Preview key  "M-."
+     :preview-key '(:debounce 0.4 any))
+    (setq consult-narrow-key "<")) ;; "C-+"
+
+  (use-package consult-org-roam
+    :bind (("M-o M-o" . consult-org-roam-file-find)
+  	 ("M-o f" . consult-org-roam-forward-links)
+  	 ("M-o b" . consult-org-roam-backlinks)
+  	 ("M-o s" . consult-org-roam-search)
+  	 ("M-o l" . consult-org-roam-backlinks-recursive))
+    :init
+    (consult-org-roam-mode))
+
+  (use-package consult-dir
+    :ensure t
+    :bind (("C-x C-d" . consult-dir)
+  	 :map minibuffer-local-completion-map
+  	 ("C-x C-d" . consult-dir)
+  	 ("C-x C-f" . consult-dir-jump-file)))
+#+end_src
+
+#+RESULTS:
+: consult-dir-jump-file
+
+*** Corfu
+
+Corfu is an in-buffer completion framework that provides a completion popup.
+
+#+begin_src emacs-lisp
+  (use-package corfu
+    :init
+    (global-corfu-mode))
+
+  (use-package emacs
+    :init
+    (setq completion-cycle-threshold 3)
+    (setq tab-always-indent 'complete))
+
+  (use-package dabbrev
+    :bind (("C-<tab>" . dabbrev-completion)
+  	 ("C-M-<tab>" . dabbrev-expand))
+    :config
+    (add-to-list 'dabbrev-ignored-buffer-regexps "\\` ") 
+    (add-to-list 'dabbrev-ignored-buffer-modes 'doc-view-mode)
+    (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode))
+#+end_src
+
+#+RESULTS:
+: dabbrev-expand
+
+Nerd icons in Corfu
+
+#+begin_src emacs-lisp
+  (use-package nerd-icons-corfu
+  :ensure
+  :config
+  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
+  (setq nerd-icons-corfu-mapping
+      '((array :style "cod" :icon "symbol_array" :face font-lock-type-face)
+        (boolean :style "cod" :icon "symbol_boolean" :face font-lock-builtin-face)
+        ;; ...
+        (t :style "cod" :icon "code" :face font-lock-warning-face))))
+#+end_src
+
+#+RESULTS:
+
+*** Cape
+
+Cape (Completion-at-Point Extensions) are providers for Corfu completion
+
+#+begin_src emacs-lisp
+  (use-package cape
+    :bind (("C-c p p" . completion-at-point)
+  	 ("C-c p t" . complete-tag)
+  	 ("C-c p d". cape-dabbrev)
+  	 ("C-c p h" . cape-history)
+  	 ("C-c p f" . cape-file)
+  	 ("C-c p k" . cape-keyword)
+  	 ("C-c p s" . cape-elisp-symbol)
+  	 ("C-c p e" . cape-elisp-block)
+  	 ("C-c p a" . cape-abbrev)
+  	 ("C-c p l" . cape-line)
+  	 ("C-c p w" . cape-dict)
+  	 ("C-c p :" . cape-emoji)
+  	 ("C-c p \\" . cape-tex)
+  	 ("C-c p _" . cape-tex)
+  	 ("C-c p ^". cape-tex)
+  	 ("C-c p &" . cape-sgml)
+  	 ("C-c p r" . cape-rfc1345))
+    :init
+    ;; define cape functions here
+    (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+    (add-to-list 'completion-at-point-functions #'cape-file)
+    (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+    (add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
+    ;;(add-to-list 'completion-at-point-functions #'cape-history)
+    ;;(add-to-list 'completion-at-point-functions #'cape-keyword)
+    ;;(add-to-list 'completion-at-point-functions #'cape-tex)
+    ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
+    ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
+    ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
+    ;;(add-to-list 'completion-at-point-functions #'cape-dict)
+    ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
+    ;;(add-to-list 'completion-at-point-functions #'cape-line)
+    )
+#+end_src
+
+#+RESULTS:
+: cape-rfc1345
