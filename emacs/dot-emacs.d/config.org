@@ -119,7 +119,8 @@ Mac Settings
 
 **** Elisp Formatter
      #+begin_src emacs-lisp
-     (use-package elisp-format)
+     (use-package elisp-format
+       :ensure t)
      #+end_src
 
      #+RESULTS:
@@ -531,9 +532,11 @@ This package enables pretty bullets in org mode
 Extra contrib packages to extend org mode
 
 #+begin_src emacs-lisp
-    (use-package org-contrib
-      :ensure )
+   (use-package org-contrib
+      :ensure t)
 #+end_src
+
+#+RESULTS:
 
 *** Org Agenda                                                   :org_agenda:
 
@@ -619,7 +622,7 @@ create it.
      '(("d" "default" plain
 	"%?"
 	:if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-	:unnarrowed t))
+	:unnarrowed t)))
     :bind (("C-c n l" . org-roam-buffer-toggle)
   	 ("C-c n f" . org-roam-node-find)
   	 ("C-c n i" . org-roam-node-insert)
