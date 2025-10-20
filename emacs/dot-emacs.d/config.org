@@ -629,7 +629,7 @@ create it.
 	 :map org-mode-map
 	 ("C-M-i" . completion-at-point))
     :config
-    (org-roam-setup)))
+    (org-roam-setup))
 
 ;; Set database autosync
 (org-roam-db-autosync-enable)
@@ -728,6 +728,7 @@ Orderless provides completion styles to make fuzzy finding and completion feel m
 #+end_src
 
 #+RESULTS:
+: t
 
 *** Marginalia
 
