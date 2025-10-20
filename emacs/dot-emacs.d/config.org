@@ -19,85 +19,87 @@
 
 Sane Defaults
 #+begin_src emacs-lisp
-  ;; menu shit remove
-  (mapc
-   (lambda (mode)
-     (when (fboundp mode)
-       (funcall mode -1)))
-   ' (menu-bar-mode tool-bar-mode scroll-bar-mode))
+;; menu shit remove
+(mapc
+ (lambda (mode)
+   (when (fboundp mode)
+     (funcall mode -1)))
+ ' (menu-bar-mode tool-bar-mode scroll-bar-mode))
 
-  ;; Init
-  (setq inhibit-default-init t
-        inhibit-startup-echo-area-message t
-        inhibit-startup-screen t
-        initial-scratch-message nil)
+;; Init
+(setq inhibit-default-init t
+      inhibit-startup-echo-area-message t
+      inhibit-startup-screen t
+      initial-scratch-message nil)
 
-  ;; warn when opening files bigger than 100MB
-  (setq large-file-warning-threshold 100000000)
+;; warn when opening files bigger than 100MB
+(setq large-file-warning-threshold 100000000)
 
-  (defconst gas-savefile-dir (expand-file-name "savefile" user-emacs-directory))
+(defconst gas-savefile-dir (expand-file-name "savefile" user-emacs-directory))
 
-  ;; Create the savefile dir if it doesn't exist
-  (unless (file-exists-p gas-savefile-dir)
-    (make-directory gas-savefile-dir))
+;; Create the savefile dir if it doesn't exist
+(unless (file-exists-p gas-savefile-dir)
+  (make-directory gas-savefile-dir))
 
-  ;;; UI
-  ;; No blink cursor
-  (blink-cursor-mode -1)
+;;; UI
+;; No blink cursor
+(blink-cursor-mode -1)
 
-  ;; disable bell ring
-  (setq ring-bell-function 'ignore)
+(setq use-dialog-box nil)
 
-  ;; nice scrolling
-  (setq scroll-margin 0
-        scroll-conservatively 100000
-        scroll-preserve-screen-position 1)
+;; disable bell ring
+(setq ring-bell-function 'ignore)
 
-  ;; mode line settings
-  (line-number-mode t)
-  (column-number-mode t)
-  (size-indication-mode t)
+;; nice scrolling
+(setq scroll-margin 0
+      scroll-conservatively 100000
+      scroll-preserve-screen-position 1)
 
-  ;; enable y/n answers
-  (fset 'yes-or-no-b 'y-or-n-p)
+;; mode line settings
+(line-number-mode t)
+(column-number-mode t)
+(size-indication-mode t)
 
-  ;; useful frame title
-  (setq frame-title-format
-        '((:eval (if (buffer-file-name)
-  		   (abbreviate-file-name (buffer-file-name))
-  		 "%b"))))
+;; enable y/n answers
+(fset 'yes-or-no-b 'y-or-n-p)
 
-  ;; org default mode
-  (setq initial-major-mode 'org-mode)
+;; useful frame title
+(setq frame-title-format
+      '((:eval (if (buffer-file-name)
+		   (abbreviate-file-name (buffer-file-name))
+		 "%b"))))
 
-  ;; make cursor tab length on tab
-  (setq-default x-stretch-cursor t)
+;; org default mode
+(setq initial-major-mode 'org-mode)
 
-  ;; Keep emacs custom-settings in separate file
-  (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-  (when (file-exists-p custom-file)
-    (load custom-file))
+;; make cursor tab length on tab
+(setq-default x-stretch-cursor t)
 
-  ;; Store all backup and autosave files in the tmp dir
-  (setq backup-directory-alist
-        `((".*" . ,temporary-file-directory)))
-  (setq auto-save-file-name-transforms
-        `((".*" ,temporary-file-directory t)))
+;; Keep emacs custom-settings in separate file
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(when (file-exists-p custom-file)
+  (load custom-file))
 
-  ;; revert buffers automatically when file changed externally
-  (global-auto-revert-mode t)
+;; Store all backup and autosave files in the tmp dir
+(setq backup-directory-alist
+      `((".*" . ,temporary-file-directory)))
+(setq auto-save-file-name-transforms
+      `((".*" ,temporary-file-directory t)))
 
-  ;; Make backups of files, even when they're in vcs
-  (setq vc-make-backup-files t)
+;; revert buffers automatically when file changed externally
+(global-auto-revert-mode t)
 
-  ;; Fix empty pasteboard error
-  (setq save-interprogram-paste-before-kill nil)
+;; Make backups of files, even when they're in vcs
+(setq vc-make-backup-files t)
 
-  ;; line highlihgt
-  (hl-line-mode t)
+;; Fix empty pasteboard error
+(setq save-interprogram-paste-before-kill nil)
 
-  ;; enable recent files
-  (recentf-mode t)
+;; line highlihgt
+(hl-line-mode t)
+
+;; enable recent files
+(recentf-mode t)
 #+end_src
 
 #+RESULTS:
@@ -313,7 +315,8 @@ Using show-fonts and fontaine from Prot
 [[https://protesilaos.com/emacs/show-font]]
 
 =show-font= is for previewing fonts
-=fontaine= is for configuring fonts
+=fontaine= is for configuring fontsf
+
 
 #+begin_src emacs-lisp
         (when (member "Iosevka Nerd Font Mono" (font-family-list))
@@ -598,45 +601,48 @@ create it.
 
 
 #+begin_src emacs-lisp
-  (defvar arg-emacs-org-roam-dir "~/RoamNotes"
-  "Variable for Org Roam notes location")
+(defvar arg-emacs-org-roam-dir "~/RoamNotes"
+"Variable for Org Roam notes location")
 
-  (unless
-      (file-directory-p arg-emacs-org-roam-dir)
-    (make-directory arg-emacs-org-roam-dir))
+(unless
+    (file-directory-p arg-emacs-org-roam-dir)
+  (make-directory arg-emacs-org-roam-dir))
 
-    (use-package org-roam
-      :ensure t
-      :init
-      (setq org-roam-v2-ack t)
-      :custom
-      (org-roam-directory arg-emacs-org-roam-dir)
-      (org-roam-completion-everywhere t)
-      (org-roam-capture-templates
-       '(("d" "default" plain
-  	"%?"
-  	:if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-  	:unnarrowed t)
-  	   ("c" "cat" plain
-  "* Cat Facts\n\n- Name: %?\n- Color: \n\n* Reference:\n\n"
-  	:if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-  	:unnarrowed t)
-  ))
-      :bind (("C-c n l" . org-roam-buffer-toggle)
-    	 ("C-c n f" . org-roam-node-find)
-    	 ("C-c n i" . org-roam-node-insert)
-  	 :map org-mode-map
-  	 ("C-M-i" . completion-at-point))
-      :config
-      (org-roam-setup))
+  (use-package org-roam
+    :ensure t
+    :init
+    (setq org-roam-v2-ack t)
+    :custom
+    (org-roam-directory arg-emacs-org-roam-dir)
+    (org-roam-completion-everywhere t)
+    (org-roam-capture-templates
+     '(("d" "default" plain
+	"%?"
+	:if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+	:unnarrowed t))
+    :bind (("C-c n l" . org-roam-buffer-toggle)
+  	 ("C-c n f" . org-roam-node-find)
+  	 ("C-c n i" . org-roam-node-insert)
+	 :map org-mode-map
+	 ("C-M-i" . completion-at-point))
+    :config
+    (org-roam-setup)))
 
-  ;; Set database autosync
-  (org-roam-db-autosync-enable)
+;; Set database autosync
+(org-roam-db-autosync-enable)
 #+end_src
 
 #+RESULTS:
 : t
 
+**** Capture Templates
+
+     Here are my capture templates for Org Roam. Keeping them here for easy access and editing.
+     [2025-10-19 Sun] Need to look into having these things in other org files and tangled into the config at some point.
+
+     #+begin_src emacs-lisp
+     
+     #+end_src
 * Package Configs
 
 Below are the configs for various third-party packages. These packages provide functionality beyond the
@@ -707,13 +713,21 @@ Vertico provides a cleaner minibuffer completion framework. Check [[roam:emacs-p
 Orderless provides completion styles to make fuzzy finding and completion feel more natural
 
 #+begin_src emacs-lisp
-  (use-package orderless
-    :custom
-    (completion-styles '(orderless partial-completion basic))
-    (completion-category-override '((file (styles orderless partial-completion))))
-    (completion--category-defaults nil)
-    (completion-pcm-leading-wildcard t))
-
+(use-package orderless
+  :custom
+  (orderless-define-completion-style orderless+initialism
+    (orderless-matching-styles '(orderless-initialism
+				 orderless-literal
+				 orderless-regexp
+				 orderless-flex)))
+  (setq completion-category-overrides
+	'((command (styles orderless+initialism))
+	  (symbol (styles orderless+initialism))
+	  (variable (styles orderless+initalism))))
+  ;; (completion-styles '(orderless orderless-initialism partial-completion basic)) 
+  ;; (completion-category-override '((file (styles orderless partial-completion))))
+  (completion--category-defaults nil)
+  (completion-pcm-leading-wildcard t))
 #+end_src
 
 #+RESULTS:
@@ -844,22 +858,25 @@ function [[help:completing-read][completing-read]]. Check out [[id:2F9DB448-1184
 Corfu is an in-buffer completion framework that provides a completion popup.
 
 #+begin_src emacs-lisp
-  (use-package corfu
-    :init
-    (global-corfu-mode))
+(use-package corfu
+  :init
+  (global-corfu-mode)
+  (setq corfu-auto t)
+  (corfu-history-mode t)
+  (corfu-popupinfo-mode t))
 
-  (use-package emacs
-    :init
-    (setq completion-cycle-threshold 3)
-    (setq tab-always-indent 'complete))
+(use-package emacs
+  :init
+  (setq completion-cycle-threshold 3)
+  (setq tab-always-indent 'complete))
 
-  (use-package dabbrev
-    :bind (("C-<tab>" . dabbrev-completion)
-  	 ("C-M-<tab>" . dabbrev-expand))
-    :config
-    (add-to-list 'dabbrev-ignored-buffer-regexps "\\` ") 
-    (add-to-list 'dabbrev-ignored-buffer-modes 'doc-view-mode)
-    (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode))
+(use-package dabbrev
+  :bind (("C-<tab>" . dabbrev-completion)
+	 ("C-M-<tab>" . dabbrev-expand))
+  :config
+  (add-to-list 'dabbrev-ignored-buffer-regexps "\\` ") 
+  (add-to-list 'dabbrev-ignored-buffer-modes 'doc-view-mode)
+  (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode))
 #+end_src
 
 #+RESULTS:
@@ -886,40 +903,41 @@ Nerd icons in Corfu
 Cape (Completion-at-Point Extensions) are providers for Corfu completion
 
 #+begin_src emacs-lisp
-  (use-package cape
-    :bind (("C-c p p" . completion-at-point)
-  	 ("C-c p t" . complete-tag)
-  	 ("C-c p d". cape-dabbrev)
-  	 ("C-c p h" . cape-history)
-  	 ("C-c p f" . cape-file)
-  	 ("C-c p k" . cape-keyword)
-  	 ("C-c p s" . cape-elisp-symbol)
-  	 ("C-c p e" . cape-elisp-block)
-  	 ("C-c p a" . cape-abbrev)
-  	 ("C-c p l" . cape-line)
-  	 ("C-c p w" . cape-dict)
-  	 ("C-c p :" . cape-emoji)
-  	 ("C-c p \\" . cape-tex)
-  	 ("C-c p _" . cape-tex)
-  	 ("C-c p ^". cape-tex)
-  	 ("C-c p &" . cape-sgml)
-  	 ("C-c p r" . cape-rfc1345))
-    :init
-    ;; define cape functions here
-    (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-    (add-to-list 'completion-at-point-functions #'cape-file)
-    (add-to-list 'completion-at-point-functions #'cape-elisp-block)
-    (add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
-    ;;(add-to-list 'completion-at-point-functions #'cape-history)
-    ;;(add-to-list 'completion-at-point-functions #'cape-keyword)
-    ;;(add-to-list 'completion-at-point-functions #'cape-tex)
-    ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
-    ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
-    ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
-    ;;(add-to-list 'completion-at-point-functions #'cape-dict)
-    ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
-    ;;(add-to-list 'completion-at-point-functions #'cape-line)
-    )
+(use-package cape
+  :bind (("C-c p p" . completion-at-point)
+	 ("C-c p t" . complete-tag)
+	 ("C-c p d". cape-dabbrev)
+	 ("C-c p h" . cape-history)
+	 ("C-c p f" . cape-file)
+	 ("C-c p k" . cape-keyword)
+	 ("C-c p s" . cape-elisp-symbol)
+	 ("C-c p e" . cape-elisp-block)
+	 ("C-c p a" . cape-abbrev)
+	 ("C-c p l" . cape-line)
+	 ("C-c p w" . cape-dict)
+	 ("C-c p :" . cape-emoji)
+	 ("C-c p \\" . cape-tex)
+	 ("C-c p _" . cape-tex)
+	 ("C-c p ^". cape-tex)
+	 ("C-c p &" . cape-sgml)
+	 ("C-c p r" . cape-rfc1345))
+  :init
+  ;; define cape functions here
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-file)
+  (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+  (add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
+  (add-to-list 'completion-at-point-functions #'org-roam-complete-link-at-point)
+  ;;(add-to-list 'completion-at-point-functions #'cape-history)
+  (add-to-list 'completion-at-point-functions #'cape-keyword)
+  ;;(add-to-list 'completion-at-point-functions #'cape-tex)
+  ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
+  ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
+  ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
+  ;;(add-to-list 'completion-at-point-functions #'cape-dict)
+  ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
+  ;;(add-to-list 'completion-at-point-functions #'cape-line)
+  )
 #+end_src
 
 #+RESULTS:
