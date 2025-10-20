@@ -1,4 +1,3 @@
-tap "d12frosted/emacs-plus"
 tap "jimeh/emacs-builds"
 tap "rsteube/tap"
 
@@ -15,6 +14,9 @@ brew "syncthing", restart_service: :changed
 brew "tldr"
 brew "zoxide"
 brew "rsteube/tap/carapace"
+brew "yazi"
+brew "git"
+brew "ollama"
 
 cask "1password-cli"
 cask "emacs-app"
