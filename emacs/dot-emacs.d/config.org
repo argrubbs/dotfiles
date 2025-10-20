@@ -119,8 +119,8 @@ Mac Settings
 
 **** Elisp Formatter
      #+begin_src emacs-lisp
-     (use-package elisp-format
-       :ensure t)
+;;     (use-package elisp-format
+ ;;      :ensure t)
      #+end_src
 
      #+RESULTS:
