@@ -103,18 +103,6 @@
     #+end_src
 
     #+RESULTS:
-    : t
-
-    Mac Settings
-
-    #+begin_src emacs-lisp
-    (setq mac-option-key-is-meta nil
-          mac-command-key-is-meta t
-          mac-option-modifier nil
-          mac-command-modifier 'meta)
-    #+end_src
-
-    #+RESULTS:
     : meta
 
 **** Elisp Formatter
