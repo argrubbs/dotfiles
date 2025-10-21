@@ -274,7 +274,7 @@ change it in the =(load-theme 'doom-theme-name t)= line.
 **** Load the Theme                                                   :theme:
 
 #+begin_src emacs-lisp
-(load-theme 'doom-molokai t)
+(load-theme 'modus-vivendi-tinted t)
 #+end_src
 
 #+RESULTS:
@@ -283,6 +283,7 @@ change it in the =(load-theme 'doom-theme-name t)= line.
 **** Load Doom Modeline
 
 Doom Modeline is a modeline for the bottom of the Emacs window
+
 #+begin_src emacs-lisp
   (use-package doom-modeline
   :ensure t
@@ -398,8 +399,10 @@ Change the following variables:
 
 (add-hook 'org-mode-hook 'visual-line-mode)
 
-(use-package olivetti
-  :hook (org-mode . olivetti-mode))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; (use-package olivetti	       ;;
+;;   :hook (org-mode . olivetti-mode)) ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
   
 
 #+end_src
@@ -408,6 +411,7 @@ Change the following variables:
 | olivetti-mode | visual-line-mode | variable-pitch-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
 
 *** Custom Org-Mode Functions
+
 Here are my custom org-mode functions. They will include docstrings so there isn't
 a great need for documentation here.
 
@@ -646,6 +650,7 @@ create it.
      #+begin_src emacs-lisp
      
      #+end_src
+
 * Package Configs
 
 Below are the configs for various third-party packages. These packages provide functionality beyond the
@@ -659,6 +664,7 @@ in the minibuffer, editor, and anywhere else
 *** General settings
 
 These setting remove case sensitivity from completions
+
 #+begin_src emacs-lisp
     (setq read-file-name-completion-ignore-case t
         read-buffer-completion-ignore-case t
@@ -757,8 +763,7 @@ Marginalia provides extra info into the minibuffer completions. It's really just
 
 *** Consult
 
-Consult provides search and navigation commands based on the Emacs completion
-function [[help:completing-read][completing-read]]. Check out [[id:2F9DB448-1184-4DB2-8C21-B54023F292CC][Consult]] for more.
+Consult provides search and navigation commands based on the Emacs completion function [[help:completing-read][completing-read]]. Check out [[id:2F9DB448-1184-4DB2-8C21-B54023F292CC][Consult]] for more.
 
 #+begin_src emacs-lisp
 (use-package consult
