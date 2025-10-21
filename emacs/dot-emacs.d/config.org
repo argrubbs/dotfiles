@@ -3,124 +3,124 @@
 #+PROPERTY: header-args :tangle yes
 
 * Configuration
-:PROPERTIES:
-:VISIBILITY: children
-:END:
+  :PROPERTIES:
+  :VISIBILITY: children
+  :END:
 
 ** My Info
-#+begin_src emacs-lisp
-(setq user-full-name "Adam Grubbs"
-      user-main-address "argrubbs@users.noreply.github.com")
-#+end_src
-MCGEE IS A CAT
+   #+begin_src emacs-lisp
+   (setq user-full-name "Adam Grubbs"
+         user-main-address "argrubbs@users.noreply.github.com")
+   #+end_src
+   MCGEE IS A CAT
 ** Emacs Init
 
 *** Settings
 
-Sane Defaults
-#+begin_src emacs-lisp
-;; menu shit remove
-(mapc
- (lambda (mode)
-   (when (fboundp mode)
-     (funcall mode -1)))
- ' (menu-bar-mode tool-bar-mode scroll-bar-mode))
+    Sane Defaults
+    #+begin_src emacs-lisp
+    ;; menu shit remove
+    (mapc
+     (lambda (mode)
+       (when (fboundp mode)
+         (funcall mode -1)))
+     ' (menu-bar-mode tool-bar-mode scroll-bar-mode))
 
-;; Init
-(setq inhibit-default-init t
-      inhibit-startup-echo-area-message t
-      inhibit-startup-screen t
-      initial-scratch-message nil)
+    ;; Init
+    (setq inhibit-default-init t
+          inhibit-startup-echo-area-message t
+          inhibit-startup-screen t
+          initial-scratch-message nil)
 
-;; warn when opening files bigger than 100MB
-(setq large-file-warning-threshold 100000000)
+    ;; warn when opening files bigger than 100MB
+    (setq large-file-warning-threshold 100000000)
 
-(defconst gas-savefile-dir (expand-file-name "savefile" user-emacs-directory))
+    (defconst gas-savefile-dir (expand-file-name "savefile" user-emacs-directory))
 
-;; Create the savefile dir if it doesn't exist
-(unless (file-exists-p gas-savefile-dir)
-  (make-directory gas-savefile-dir))
+    ;; Create the savefile dir if it doesn't exist
+    (unless (file-exists-p gas-savefile-dir)
+      (make-directory gas-savefile-dir))
 
-;;; UI
-;; No blink cursor
-(blink-cursor-mode -1)
+    ;;; UI
+    ;; No blink cursor
+    (blink-cursor-mode -1)
 
-(setq use-dialog-box nil)
+    (setq use-dialog-box nil)
 
-;; disable bell ring
-(setq ring-bell-function 'ignore)
+    ;; disable bell ring
+    (setq ring-bell-function 'ignore)
 
-;; nice scrolling
-(setq scroll-margin 0
-      scroll-conservatively 100000
-      scroll-preserve-screen-position 1)
+    ;; nice scrolling
+    (setq scroll-margin 0
+          scroll-conservatively 100000
+          scroll-preserve-screen-position 1)
 
-;; mode line settings
-(line-number-mode t)
-(column-number-mode t)
-(size-indication-mode t)
+    ;; mode line settings
+    (line-number-mode t)
+    (column-number-mode t)
+    (size-indication-mode t)
 
-;; enable y/n answers
-(fset 'yes-or-no-b 'y-or-n-p)
+    ;; enable y/n answers
+    (fset 'yes-or-no-b 'y-or-n-p)
 
-;; useful frame title
-(setq frame-title-format
-      '((:eval (if (buffer-file-name)
-		   (abbreviate-file-name (buffer-file-name))
-		 "%b"))))
+    ;; useful frame title
+    (setq frame-title-format
+          '((:eval (if (buffer-file-name)
+    		   (abbreviate-file-name (buffer-file-name))
+    		 "%b"))))
 
-;; org default mode
-(setq initial-major-mode 'org-mode)
+    ;; org default mode
+    (setq initial-major-mode 'org-mode)
 
-;; make cursor tab length on tab
-(setq-default x-stretch-cursor t)
+    ;; make cursor tab length on tab
+    (setq-default x-stretch-cursor t)
 
-;; Keep emacs custom-settings in separate file
-(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-(when (file-exists-p custom-file)
-  (load custom-file))
+    ;; Keep emacs custom-settings in separate file
+    (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+    (when (file-exists-p custom-file)
+      (load custom-file))
 
-;; Store all backup and autosave files in the tmp dir
-(setq backup-directory-alist
-      `((".*" . ,temporary-file-directory)))
-(setq auto-save-file-name-transforms
-      `((".*" ,temporary-file-directory t)))
+    ;; Store all backup and autosave files in the tmp dir
+    (setq backup-directory-alist
+          `((".*" . ,temporary-file-directory)))
+    (setq auto-save-file-name-transforms
+          `((".*" ,temporary-file-directory t)))
 
-;; revert buffers automatically when file changed externally
-(global-auto-revert-mode t)
+    ;; revert buffers automatically when file changed externally
+    (global-auto-revert-mode t)
 
-;; Make backups of files, even when they're in vcs
-(setq vc-make-backup-files t)
+    ;; Make backups of files, even when they're in vcs
+    (setq vc-make-backup-files t)
 
-;; Fix empty pasteboard error
-(setq save-interprogram-paste-before-kill nil)
+    ;; Fix empty pasteboard error
+    (setq save-interprogram-paste-before-kill nil)
 
-;; line highlihgt
-(hl-line-mode t)
+    ;; line highlihgt
+    (hl-line-mode t)
 
-;; enable recent files
-(recentf-mode t)
-#+end_src
+    ;; enable recent files
+    (recentf-mode t)
+    #+end_src
 
-#+RESULTS:
-: t
+    #+RESULTS:
+    : t
 
-Mac Settings
+    Mac Settings
 
-#+begin_src emacs-lisp
-      (setq mac-option-key-is-meta nil
-            mac-command-key-is-meta t
-    	mac-option-modifier nil
-  	mac-command-modifier 'meta)
-#+end_src
+    #+begin_src emacs-lisp
+    (setq mac-option-key-is-meta nil
+          mac-command-key-is-meta t
+          mac-option-modifier nil
+          mac-command-modifier 'meta)
+    #+end_src
 
-#+RESULTS:
-: meta
+    #+RESULTS:
+    : meta
 
 **** Elisp Formatter
      #+begin_src emacs-lisp
-;;     (use-package elisp-format
- ;;      :ensure t)
+     ;;     (use-package elisp-format
+     ;;      :ensure t)
      #+end_src
 
      #+RESULTS:
@@ -129,334 +129,334 @@ Mac Settings
 
 **** Package Settings
 
-Setting the =load-path= manually and avoid calling
-=(package-initialize)= (for performance reasons) so
-we need to set =package--init-file-ensured= to true
-to tell =package.el= to not automatically tell it on
-our behalf. Additionally we're setting =package-enable-at-startup=
-to nil so that packages will not automatically be loaded
-for us since =use-package= will be handling that.
+     Setting the =load-path= manually and avoid calling
+     =(package-initialize)= (for performance reasons) so
+     we need to set =package--init-file-ensured= to true
+     to tell =package.el= to not automatically tell it on
+     our behalf. Additionally we're setting =package-enable-at-startup=
+     to nil so that packages will not automatically be loaded
+     for us since =use-package= will be handling that.
 
 
-#+begin_src emacs-lisp
-  (eval-and-compile
-    (setq load-prefer-newer t
-  	package-user-dir "~/.emacs.d/elpa"
-  	package--init-file-ensured t
-  	package-enable-at-startup nil)
+     #+begin_src emacs-lisp
+     (eval-and-compile
+       (setq load-prefer-newer t
+     	package-user-dir "~/.emacs.d/elpa"
+     	package--init-file-ensured t
+     	package-enable-at-startup nil)
 
-    (unless (file-directory-p package-user-dir)
-      (make-directory package-user-dir t)))
-#+end_src
+       (unless (file-directory-p package-user-dir)
+         (make-directory package-user-dir t)))
+     #+end_src
 
 **** Use-Package Settings
-Tell =use-package= to always defer loading packages unless
-explicitly told otherwise. This speeds up init
-significantly as many packages are only loaded
-later when they are explicitly used.
+     Tell =use-package= to always defer loading packages unless
+     explicitly told otherwise. This speeds up init
+     significantly as many packages are only loaded
+     later when they are explicitly used.
 
-#+begin_src emacs-lisp
-  (setq use-package-always-defer t
-        use-package-verbose t)
-#+end_src
+     #+begin_src emacs-lisp
+     (setq use-package-always-defer t
+           use-package-verbose t)
+     #+end_src
 
 **** Manually Set Load Path
-Setting the load path manually so we don't have to call
-=package-initialize= at runtime to prevent performance hit.
-This load-path will be faster than the one created by
-=package-initialize= since it appends the elpa packages
-to the end of the load path.
-Otherwise any time a builtin package is required it
-would have to search all of the third-party paths first.
+     Setting the load path manually so we don't have to call
+     =package-initialize= at runtime to prevent performance hit.
+     This load-path will be faster than the one created by
+     =package-initialize= since it appends the elpa packages
+     to the end of the load path.
+     Otherwise any time a builtin package is required it
+     would have to search all of the third-party paths first.
 
-#+begin_src emacs-lisp
-  (eval-and-compile
-    (setq load-path (append load-path (directory-files package-user-dir t "^[^.]" t))))
-#+end_src
+     #+begin_src emacs-lisp
+     (eval-and-compile
+       (setq load-path (append load-path (directory-files package-user-dir t "^[^.]" t))))
+     #+end_src
 
 **** Native Compilation Silent
-Using native-compilation (default) translates things down to
-machine code for speed. It reports a lot of random warnings
-and errors which are annoying. These are generally only useful
-to the emacs or package devs. So, let's silence that mess.
-#+begin_src emacs-lisp
-  (when (native-comp-available-p)
-    (setq native-comp-async-report-warnings-errors 'silent))
-#+end_src
+     Using native-compilation (default) translates things down to
+     machine code for speed. It reports a lot of random warnings
+     and errors which are annoying. These are generally only useful
+     to the emacs or package devs. So, let's silence that mess.
+     #+begin_src emacs-lisp
+     (when (native-comp-available-p)
+       (setq native-comp-async-report-warnings-errors 'silent))
+     #+end_src
 
-#+RESULTS:
-: silent
+     #+RESULTS:
+     : silent
 
 **** Initialize Package Management
-First, require =package.el= and add additional package archives,
-'melpa' and 'org'.
-After, we need to initialize our packages and then ensure that
-=use-package= is installed, which we install if it's missing.
-Finally, we load =use-package= and tell it to always install any
-missing packages.
+     First, require =package.el= and add additional package archives,
+     'melpa' and 'org'.
+     After, we need to initialize our packages and then ensure that
+     =use-package= is installed, which we install if it's missing.
+     Finally, we load =use-package= and tell it to always install any
+     missing packages.
 
-Note that this entire block is wrapped in =eval-when-compile=.
-The effect of this is to perform all of the package init during
-compilation so that when byte compiled, all of this time consuming
-code is skipped. This can be done because the result of byte compiling
-=use-package= statements results in the macro being fully expanded
-at which point =use-package= isn't actually required any longer.
+     Note that this entire block is wrapped in =eval-when-compile=.
+     The effect of this is to perform all of the package init during
+     compilation so that when byte compiled, all of this time consuming
+     code is skipped. This can be done because the result of byte compiling
+     =use-package= statements results in the macro being fully expanded
+     at which point =use-package= isn't actually required any longer.
 
-Since the code is automatically compiled during runtime, if the
-configuration hasn't already been previously compiled manually
-then all of the package initialization will still take place at startup.
+     Since the code is automatically compiled during runtime, if the
+     configuration hasn't already been previously compiled manually
+     then all of the package initialization will still take place at startup.
 
-#+begin_src emacs-lisp
-  (eval-when-compile
-    (require 'package)
+     #+begin_src emacs-lisp
+     (eval-when-compile
+       (require 'package)
 
-    (unless (assoc-default "melpa" package-archives)
-      (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t))
-    (unless (assoc-default "nongnu" package-archives)
-      (add-to-list 'package-archives '("nongnu" . "https://elpa.nongnu.org/nongnu/") t))
+       (unless (assoc-default "melpa" package-archives)
+         (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t))
+       (unless (assoc-default "nongnu" package-archives)
+         (add-to-list 'package-archives '("nongnu" . "https://elpa.nongnu.org/nongnu/") t))
 
-    (setq package-install-upgrade-built-in t)
+       (setq package-install-upgrade-built-in t)
 
-    (unless (package-installed-p 'use-package)
-      (package-refresh-contents)
-      (package-install 'use-package))
-    (unless (package-installed-p 'bind-key)
-      (package-refresh-contents)
-      (package-install 'bind-key))
-    (require 'use-package)
-    (require 'bind-key)
-    (setq use-package-always-ensure t))
-#+end_src
+       (unless (package-installed-p 'use-package)
+         (package-refresh-contents)
+         (package-install 'use-package))
+       (unless (package-installed-p 'bind-key)
+         (package-refresh-contents)
+         (package-install 'bind-key))
+       (require 'use-package)
+       (require 'bind-key)
+       (setq use-package-always-ensure t))
+     #+end_src
 
-#+RESULTS:
-: t
+     #+RESULTS:
+     : t
 
-You can use =use-package= with version control instead of using
-a quelpa or straight
+     You can use =use-package= with version control instead of using
+     a quelpa or straight
 
-#+begin_src emacs-lisp :tangle no
-  (use-package package-name
-    :vc (:url "git repo url"
-  	    :branch main))
-#+end_src
+     #+begin_src emacs-lisp :tangle no
+     (use-package package-name
+       :vc (:url "git repo url"
+     	    :branch main))
+     #+end_src
 
 *** Display
 
 **** Declare all themes as safe
 
-To avoid being asked about setting a theme as safe, I set this
-If you need to load a new theme, you won't have to set it with
-=(load-theme 'theme-name :no-confirm)=. Built-in themes are
-safe by default.
+     To avoid being asked about setting a theme as safe, I set this
+     If you need to load a new theme, you won't have to set it with
+     =(load-theme 'theme-name :no-confirm)=. Built-in themes are
+     safe by default.
 
-#+begin_src emacs-lisp
-    (setq custom-safe-themes t)
-#+end_src
+     #+begin_src emacs-lisp
+     (setq custom-safe-themes t)
+     #+end_src
 
-#+RESULTS:
-: t
+     #+RESULTS:
+     : t
 
 **** Install Doom Themes
-This will install doom-themes from MELPA for use. To set the theme
-change it in the =(load-theme 'doom-theme-name t)= line.
+     This will install doom-themes from MELPA for use. To set the theme
+     change it in the =(load-theme 'doom-theme-name t)= line.
 
-#+begin_src emacs-lisp
-  ;; Install doom-themes
-  (use-package doom-themes
-    :custom
-    (doom-themes-enable-bold t)
-    (doom-themes-enable-italic t)
-    :config
-    (doom-themes-visual-bell-config)
-    (doom-themes-org-config))
-#+end_src
+     #+begin_src emacs-lisp
+     ;; Install doom-themes
+     (use-package doom-themes
+       :custom
+       (doom-themes-enable-bold t)
+       (doom-themes-enable-italic t)
+       :config
+       (doom-themes-visual-bell-config)
+       (doom-themes-org-config))
+     #+end_src
 
 **** Load the Theme                                                   :theme:
 
-#+begin_src emacs-lisp
-(load-theme 'modus-vivendi-tinted t)
-#+end_src
+     #+begin_src emacs-lisp
+     (load-theme 'modus-vivendi-tinted t)
+     #+end_src
 
-#+RESULTS:
-: t
+     #+RESULTS:
+     : t
 
 **** Load Doom Modeline
 
-Doom Modeline is a modeline for the bottom of the Emacs window
+     Doom Modeline is a modeline for the bottom of the Emacs window
 
-#+begin_src emacs-lisp
-  (use-package doom-modeline
-  :ensure t
-  :init (doom-modeline-mode 1))
-#+end_src
+     #+begin_src emacs-lisp
+     (use-package doom-modeline
+       :ensure t
+       :init (doom-modeline-mode 1))
+     #+end_src
 
-#+RESULTS:
-: t
+     #+RESULTS:
+     : t
 
 **** Zoom (golden-ratio)
 
-Package that handles automatic window sizing based on active window
+     Package that handles automatic window sizing based on active window
 
-#+begin_src emacs-lisp
-  (use-package zoom
-    :init
-    (zoom-mode t)
-    :config
-    (custom-set-variables
-     '(zoom-size '(0.618 . 0.618))))
-#+end_src
+     #+begin_src emacs-lisp
+     (use-package zoom
+       :init
+       (zoom-mode t)
+       :config
+       (custom-set-variables
+        '(zoom-size '(0.618 . 0.618))))
+     #+end_src
 
-#+RESULTS:
-: t
+     #+RESULTS:
+     : t
 
 *** Fonts
 
-Using show-fonts and fontaine from Prot
-[[https://protesilaos.com/emacs/show-font]]
+    Using show-fonts and fontaine from Prot
+    [[https://protesilaos.com/emacs/show-font]]
 
-=show-font= is for previewing fonts
-=fontaine= is for configuring fontsf
+    =show-font= is for previewing fonts
+    =fontaine= is for configuring fontsf
 
 
-#+begin_src emacs-lisp
-        (when (member "Iosevka Nerd Font Mono" (font-family-list))
-          (set-face-attribute 'default nil :family "Iosevka Nerd Font" :height 160 :weight 'semi-light)
-          (set-face-attribute 'fixed-pitch nil :family "Iosevka Nerd Font Mono"))
+    #+begin_src emacs-lisp
+    (when (member "Iosevka Nerd Font Mono" (font-family-list))
+      (set-face-attribute 'default nil :family "Iosevka Nerd Font" :height 160 :weight 'semi-light)
+      (set-face-attribute 'fixed-pitch nil :family "Iosevka Nerd Font Mono"))
 
-        (when (member "Caveat" (font-family-list))
-          (set-face-attribute 'font-lock-comment-face nil :font "Caveat-20"))
+    (when (member "Caveat" (font-family-list))
+      (set-face-attribute 'font-lock-comment-face nil :font "Caveat-20"))
 
-        (when (member "Iosevka Nerd Font" (font-family-list))
-          (set-face-attribute 'variable-pitch nil :family "Iosevka Nerd Font" :height 170))
+    (when (member "Iosevka Nerd Font" (font-family-list))
+      (set-face-attribute 'variable-pitch nil :family "Iosevka Nerd Font" :height 170))
 
-        ;; Resize Org headings
-      (dolist (face '((org-level-1 . 1.35)
-                      (org-level-2 . 1.3)
-                      (org-level-3 . 1.2)
-                      (org-level-4 . 1.1)
-                      (org-level-5 . 1.1)
-                      (org-level-6 . 1.1)
-                      (org-level-7 . 1.1)
-                      (org-level-8 . 1.1)))
-        (set-face-attribute (car face) nil :font "Iosevka Nerd Font" :weight 'bold :height (cdr face)))
+    ;; Resize Org headings
+    (dolist (face '((org-level-1 . 1.35)
+                    (org-level-2 . 1.3)
+                    (org-level-3 . 1.2)
+                    (org-level-4 . 1.1)
+                    (org-level-5 . 1.1)
+                    (org-level-6 . 1.1)
+                    (org-level-7 . 1.1)
+                    (org-level-8 . 1.1)))
+      (set-face-attribute (car face) nil :font "Iosevka Nerd Font" :weight 'bold :height (cdr face)))
 
-      ;; Make the document title a bit bigger
-      (set-face-attribute 'org-document-title nil :font "Iosevka Nerd Font" :weight
-      'bold :height 1.8)
+    ;; Make the document title a bit bigger
+    (set-face-attribute 'org-document-title nil :font "Iosevka Nerd Font" :weight
+    		    'bold :height 1.8)
 
-      (require 'org-indent)
+    (require 'org-indent)
     (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
 
     (set-face-attribute 'org-block nil            :foreground nil :inherit
-  'fixed-pitch :height 0.85)
-  (set-face-attribute 'org-code nil             :inherit '(shadow fixed-pitch) :height 0.85)
-  (set-face-attribute 'org-indent nil           :inherit '(org-hide fixed-pitch) :height 0.85)
-  (set-face-attribute 'org-verbatim nil         :inherit '(shadow fixed-pitch) :height 0.85)
-  (set-face-attribute 'org-special-keyword nil  :inherit '(font-lock-comment-face
-  fixed-pitch))
-  (set-face-attribute 'org-meta-line nil        :inherit '(font-lock-comment-face fixed-pitch))
-  (set-face-attribute 'org-checkbox nil         :inherit 'fixed-pitch)
+    		    'fixed-pitch :height 0.85)
+    (set-face-attribute 'org-code nil             :inherit '(shadow fixed-pitch) :height 0.85)
+    (set-face-attribute 'org-indent nil           :inherit '(org-hide fixed-pitch) :height 0.85)
+    (set-face-attribute 'org-verbatim nil         :inherit '(shadow fixed-pitch) :height 0.85)
+    (set-face-attribute 'org-special-keyword nil  :inherit '(font-lock-comment-face
+    							 fixed-pitch))
+    (set-face-attribute 'org-meta-line nil        :inherit '(font-lock-comment-face fixed-pitch))
+    (set-face-attribute 'org-checkbox nil         :inherit 'fixed-pitch)
 
-  (add-hook 'org-mode-hook 'variable-pitch-mode)
+    (add-hook 'org-mode-hook 'variable-pitch-mode)
 
-#+End_Src
+    #+End_Src
 
-#+RESULTS:
-| olivetti-mode | visual-line-mode | variable-pitch-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
+    #+RESULTS:
+    | olivetti-mode | visual-line-mode | variable-pitch-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
 
-Adding Nerd Icons
+    Adding Nerd Icons
 
-#+begin_src emacs-lisp
-  (use-package nerd-icons
-    :ensure t)
-#+end_src
+    #+begin_src emacs-lisp
+    (use-package nerd-icons
+      :ensure t)
+    #+end_src
 
-#+RESULTS:
+    #+RESULTS:
 
 ** Org-Mode
 
 *** Settings
-Change the following variables:
+    Change the following variables:
 
- - =org-goto-auto-isearch= to allos for the use of n/p and f/b for org-goto =C-c C-j=
- - =org-M-RET-may-split-lines= to prevent adding headings with =M-RET= in the middle of the line
- - =org-yank-folded-subtrees= to allow for yanking (pasting) the contents of a killed (copy/cut) subtree
- - =org-return-follows-link= allows you to use the RET key to follow links (default is =C-c C-o=)
+    - =org-goto-auto-isearch= to allos for the use of n/p and f/b for org-goto =C-c C-j=
+    - =org-M-RET-may-split-lines= to prevent adding headings with =M-RET= in the middle of the line
+    - =org-yank-folded-subtrees= to allow for yanking (pasting) the contents of a killed (copy/cut) subtree
+    - =org-return-follows-link= allows you to use the RET key to follow links (default is =C-c C-o=)
 
-#+begin_src emacs-lisp
-(setq org-goto-auto-isearch nil
-   org-M-RET-may-split-lines nil
-   org-return-follows-link t
-   org-yank-olded-subtrees nil
-   org-adapt-indentation t
-   org-hide-leading-stars t
-   org-hide-emphasis-markers t
-   org-pretty-entities t
-   org-ellipsis "  ·"
-   org-src-fontify-natively t
-   org-src-tab-acts-natively t
-   org-edit-src-content-indentation 0)
+    #+begin_src emacs-lisp
+    (setq org-goto-auto-isearch nil
+          org-M-RET-may-split-lines nil
+          org-return-follows-link t
+          org-yank-olded-subtrees nil
+          org-adapt-indentation t
+          org-hide-leading-stars t
+          org-hide-emphasis-markers t
+          org-pretty-entities t
+          org-ellipsis "  ·"
+          org-src-fontify-natively t
+          org-src-tab-acts-natively t
+          org-edit-src-content-indentation 0)
 
-(add-hook 'org-mode-hook 'visual-line-mode)
+    (add-hook 'org-mode-hook 'visual-line-mode)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; (use-package olivetti	       ;;
-;;   :hook (org-mode . olivetti-mode)) ;;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-  
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; (use-package olivetti	       ;;
+    ;;   :hook (org-mode . olivetti-mode)) ;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-#+end_src
 
-#+RESULTS:
-| olivetti-mode | visual-line-mode | variable-pitch-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
+    #+end_src
+
+    #+RESULTS:
+    | olivetti-mode | visual-line-mode | variable-pitch-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
 
 *** Custom Org-Mode Functions
 
-Here are my custom org-mode functions. They will include docstrings so there isn't
-a great need for documentation here.
+    Here are my custom org-mode functions. They will include docstrings so there isn't
+    a great need for documentation here.
 
-#+begin_src emacs-lisp
-  (defun arg-emacs-org-insert-drawer-correctly (arg)
-    "Insert a drawer or PROPERTIES drawer with prefix ARG. Places the cursor into
-  the new drawer."
-    (interactive "P")
-    (if arg
-        (let ((start (point))
-      (org-insert-property-drawer)
-      ;; Find the beginning of the drawer at point or after
-      (goto-char start)
-      (when (re-search-forward ":PROPERTIES:" nil t)
-        ;; Move to line after :PROPERTIES:
-        (forward-line 1)))
-    (call-interactively 'org-insert-drawer))))
+    #+begin_src emacs-lisp
+    (defun arg-emacs-org-insert-drawer-correctly (arg)
+      "Insert a drawer or PROPERTIES drawer with prefix ARG. Places the cursor into
+    the new drawer."
+      (interactive "P")
+      (if arg
+          (let ((start (point))
+    	    (org-insert-property-drawer)
+    	    ;; Find the beginning of the drawer at point or after
+    	    (goto-char start)
+    	    (when (re-search-forward ":PROPERTIES:" nil t)
+    	      ;; Move to line after :PROPERTIES:
+    	      (forward-line 1)))
+    	(call-interactively 'org-insert-drawer))))
 
-  (define-key org-mode-map (kbd "C-c i")
-  	    'arg-emacs-org-insert-drawer-correctly)
+    (define-key org-mode-map (kbd "C-c i")
+    	    'arg-emacs-org-insert-drawer-correctly)
 
-  ;; Assign keybinds for moving between links
-  (with-eval-after-load 'org
-    (define-key org-mode-map (kbd "M-n") #'org-next-link)
-    (define-key org-mode-map (kbd "M-p") #'prg-previous-link))
-#+end_src
+    ;; Assign keybinds for moving between links
+    (with-eval-after-load 'org
+      (define-key org-mode-map (kbd "M-n") #'org-next-link)
+      (define-key org-mode-map (kbd "M-p") #'prg-previous-link))
+    #+end_src
 
-#+RESULTS:
-: prg-previous-link
+    #+RESULTS:
+    : prg-previous-link
 
 
 *** Custom Org-Mode Keybinds :keybind:
-:PROPERTIES:
-:CUSTOM_ID: org_keys
-:END:
+    :PROPERTIES:
+    :CUSTOM_ID: org_keys
+    :END:
 
-#+begin_src emacs-lisp
-  (global-set-key (kbd "<f7>")
-  	    'org-tags-view)
-  (global-set-key (kbd "C-c a")
-  		#'org-agenda)
-#+end_src
+    #+begin_src emacs-lisp
+    (global-set-key (kbd "<f7>")
+    		'org-tags-view)
+    (global-set-key (kbd "C-c a")
+    		#'org-agenda)
+    #+end_src
 
-#+RESULTS:
-: org-agenda
+    #+RESULTS:
+    : org-agenda
 
 
 *** Org Modern
@@ -464,32 +464,32 @@ a great need for documentation here.
     Modern Org mode package
 
     #+begin_src emacs-lisp
-      (use-package org-modern
-    :config
-    (setq
-     org-auto-align-tags t
-     org-tags-column 0
-     org-fold-catch-invisible-edits 'show-and-error
-     org-special-ctrl-a/e t
-     org-insert-heading-respect-content t
+    (use-package org-modern
+      :config
+      (setq
+       org-auto-align-tags t
+       org-tags-column 0
+       org-fold-catch-invisible-edits 'show-and-error
+       org-special-ctrl-a/e t
+       org-insert-heading-respect-content t
 
-     ;; Don't style the following
-     org-modern-tag nil
-     org-modern-priority nil
-     org-modern-todo nil
-     org-modern-table nil
+       ;; Don't style the following
+       org-modern-tag nil
+       org-modern-priority nil
+       org-modern-todo nil
+       org-modern-table nil
 
-     ;; Agenda styling
-     org-agenda-tags-column 0
-     org-agenda-block-separator ?─
-     org-agenda-time-grid
-     '((daily today require-timed)
-    	 (800 1000 1200 1400 1600 1800 2000)
-    	 " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
-     org-agenda-current-time-string
-     "⭠ now ─────────────────────────────────────────────────")
+       ;; Agenda styling
+       org-agenda-tags-column 0
+       org-agenda-block-separator ?─
+       org-agenda-time-grid
+       '((daily today require-timed)
+         (800 1000 1200 1400 1600 1800 2000)
+         " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+       org-agenda-current-time-string
+       "⭠ now ─────────────────────────────────────────────────")
 
-    (global-org-modern-mode))
+      (global-org-modern-mode))
 
     #+end_src
 
@@ -497,26 +497,26 @@ a great need for documentation here.
 
 *** Org Superstar
 
-This package enables pretty bullets in org mode
+    This package enables pretty bullets in org mode
 
-#+begin_src emacs-lisp
-(use-package org-superstar
-  :config
-  (setq org-superstar-leading-bullet " ")
-  (setq org-superstar-special-todo-items t) ;; Makes TODO header bullets into boxes
-  (setq org-superstar-todo-bullet-alist '(("TODO" . 9744)
-                                          ("DONE" . 9744)
-                                          ("READ" . 9744)
-                                          ("IDEA" . 9744)
-                                          ("WAITING" . 9744)
-                                          ("CANCELLED" . 9744)
-                                          ("PROJECT" . 9744)
-                                          ("POSTPONED" . 9744)))
-  )
+    #+begin_src emacs-lisp
+    (use-package org-superstar
+      :config
+      (setq org-superstar-leading-bullet " ")
+      (setq org-superstar-special-todo-items t) ;; Makes TODO header bullets into boxes
+      (setq org-superstar-todo-bullet-alist '(("TODO" . 9744)
+                                              ("DONE" . 9744)
+                                              ("READ" . 9744)
+                                              ("IDEA" . 9744)
+                                              ("WAITING" . 9744)
+                                              ("CANCELLED" . 9744)
+                                              ("PROJECT" . 9744)
+                                              ("POSTPONED" . 9744)))
+      )
 
-#+end_src
+    #+end_src
 
-#+RESULTS:
+    #+RESULTS:
 
 *** Org Bullets
 
@@ -531,116 +531,116 @@ This package enables pretty bullets in org mode
 
 *** [#B] Org Contrib
 
-Extra contrib packages to extend org mode
+    Extra contrib packages to extend org mode
 
-#+begin_src emacs-lisp
-(use-package org-contrib
-   :ensure t)
-(require 'ox)
-#+end_src
+    #+begin_src emacs-lisp
+    (use-package org-contrib
+      :ensure t)
+    (require 'ox)
+    #+end_src
 
-#+RESULTS:
-: ox
+    #+RESULTS:
+    : ox
 
 *** Org Agenda                                                   :org_agenda:
 
-Org Agenda file is set with ~C-c ]~ and removed with ~C-c [~
+    Org Agenda file is set with ~C-c ]~ and removed with ~C-c [~
 
-My personal agenda file is in =~/org/agenda.org=
+    My personal agenda file is in =~/org/agenda.org=
 
 *** Org Attach                                                   :org_attach:
-:PROPERTIES:
+    :PROPERTIES:
 
-:END:
-Org Attachments are useful for adding files to org files.
+    :END:
+    Org Attachments are useful for adding files to org files.
 
-Set org attach directory
-#+begin_src emacs-lisp
+    Set org attach directory
+    #+begin_src emacs-lisp
     (defvar arg-org-data-dir (expand-file-name "~/org/data")
       "Variable for setting the data directory for org attach")
     (unless (file-directory-p arg-org-data-dir)
       (make-directory arg-org-data-dir t))
     (if (file-directory-p arg-org-data-dir)
         (setq org-attach-id-dir arg-org-data-dir)) 
-#+end_src
+    #+end_src
 
-#+RESULTS:
-: ~/org/data
+    #+RESULTS:
+    : ~/org/data
 
-Defining some custom functions for org attach
-#+begin_src emacs-lisp
-  ;; COPY and attach files to org headers using dired
-  (add-hook 'dired-mode-hook
-  	  (lambda ()
-  	    (define-key dired-mode-map (kbd "C-c C-x c")
-  			(lambda ()
-  			  (interactive)
-  			  (let ((org-attach-method 'cp))
-  			    (call-interactively #'org-attach-dired-to-subtree))))))
-  ;; MOVE and attach files to org headers using dired
-  (add-hook 'dired-mode-hook
-  	  (lambda ()
-  	    (define-key dired-mode-map (kbd "C-c C-x m")
-  			(lambda ()
-  			  (interactive)
-  			  (let ((org-attach-method 'mv))
-  			    (call-interactively #'org-attach-dired-to-subtree))))))
-#+end_src
+    Defining some custom functions for org attach
+    #+begin_src emacs-lisp
+    ;; COPY and attach files to org headers using dired
+    (add-hook 'dired-mode-hook
+    	  (lambda ()
+    	    (define-key dired-mode-map (kbd "C-c C-x c")
+    			(lambda ()
+    			  (interactive)
+    			  (let ((org-attach-method 'cp))
+    			    (call-interactively #'org-attach-dired-to-subtree))))))
+    ;; MOVE and attach files to org headers using dired
+    (add-hook 'dired-mode-hook
+    	  (lambda ()
+    	    (define-key dired-mode-map (kbd "C-c C-x m")
+    			(lambda ()
+    			  (interactive)
+    			  (let ((org-attach-method 'mv))
+    			    (call-interactively #'org-attach-dired-to-subtree))))))
+    #+end_src
 
 *** Org Roam
 
-Org-Roam is a note-taking system similar to zettelkasten.
+    Org-Roam is a note-taking system similar to zettelkasten.
 
 **** Install and Config
 
-This installs and configures org-roam.
-=(setq org-roam-v2-ack t)= is in the config to avoid the
-warnings about migrating from v1.
-=(org-roam-direcory "~/RoamNotes")= sets the directory that
-stores the notes. Org-Roam will bulid a =sqlite= database
-for storing the metadata for the nodes (notes) and the links
-between them.
+     This installs and configures org-roam.
+     =(setq org-roam-v2-ack t)= is in the config to avoid the
+     warnings about migrating from v1.
+     =(org-roam-direcory "~/RoamNotes")= sets the directory that
+     stores the notes. Org-Roam will bulid a =sqlite= database
+     for storing the metadata for the nodes (notes) and the links
+     between them.
 
-The variable =arg-emacs-org-roam-dir= assigns a directory
-to be used for org-roam notes. There is logic to determine if
-this directory exists, and if it does not then it should
-create it.
+     The variable =arg-emacs-org-roam-dir= assigns a directory
+     to be used for org-roam notes. There is logic to determine if
+     this directory exists, and if it does not then it should
+     create it.
 
 
-#+begin_src emacs-lisp
-(defvar arg-emacs-org-roam-dir "~/RoamNotes"
-"Variable for Org Roam notes location")
+     #+begin_src emacs-lisp
+     (defvar arg-emacs-org-roam-dir "~/RoamNotes"
+       "Variable for Org Roam notes location")
 
-(unless
-    (file-directory-p arg-emacs-org-roam-dir)
-  (make-directory arg-emacs-org-roam-dir))
+     (unless
+         (file-directory-p arg-emacs-org-roam-dir)
+       (make-directory arg-emacs-org-roam-dir))
 
-  (use-package org-roam
-    :ensure t
-    :init
-    (setq org-roam-v2-ack t)
-    :custom
-    (org-roam-directory arg-emacs-org-roam-dir)
-    (org-roam-completion-everywhere t)
-    (org-roam-capture-templates
-     '(("d" "default" plain
-	"%?"
-	:if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-	:unnarrowed t)))
-    :bind (("C-c n l" . org-roam-buffer-toggle)
-  	 ("C-c n f" . org-roam-node-find)
-  	 ("C-c n i" . org-roam-node-insert)
-	 :map org-mode-map
-	 ("C-M-i" . completion-at-point))
-    :config
-    (org-roam-setup))
+     (use-package org-roam
+       :ensure t
+       :init
+       (setq org-roam-v2-ack t)
+       :custom
+       (org-roam-directory arg-emacs-org-roam-dir)
+       (org-roam-completion-everywhere t)
+       (org-roam-capture-templates
+        '(("d" "default" plain
+           "%?"
+           :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+           :unnarrowed t)))
+       :bind (("C-c n l" . org-roam-buffer-toggle)
+       	 ("C-c n f" . org-roam-node-find)
+       	 ("C-c n i" . org-roam-node-insert)
+     	 :map org-mode-map
+     	 ("C-M-i" . completion-at-point))
+       :config
+       (org-roam-setup))
 
-;; Set database autosync
-(org-roam-db-autosync-enable)
-#+end_src
+     ;; Set database autosync
+     (org-roam-db-autosync-enable)
+     #+end_src
 
-#+RESULTS:
-: t
+     #+RESULTS:
+     : t
 
 **** Capture Templates
 
@@ -648,282 +648,284 @@ create it.
      [2025-10-19 Sun] Need to look into having these things in other org files and tangled into the config at some point.
 
      #+begin_src emacs-lisp
-     
+
      #+end_src
 
 * Package Configs
 
-Below are the configs for various third-party packages. These packages provide functionality beyond the
-standard editor functions or augment existing functions.
+  Below are the configs for various third-party packages. These packages provide functionality beyond the
+  standard editor functions or augment existing functions.
 
 ** Completion
 
-These packages ars focused on providing a better experience for completion
-in the minibuffer, editor, and anywhere else
+   These packages ars focused on providing a better experience for completion
+   in the minibuffer, editor, and anywhere else
 
 *** General settings
 
-These setting remove case sensitivity from completions
+    These setting remove case sensitivity from completions
 
-#+begin_src emacs-lisp
+    #+begin_src emacs-lisp
     (setq read-file-name-completion-ignore-case t
-        read-buffer-completion-ignore-case t
-        completion-ignore-case t)
-#+end_src
+          read-buffer-completion-ignore-case t
+          completion-ignore-case t)
+    #+end_src
 
-#+RESULTS:
-: t
+    #+RESULTS:
+    : t
 
 *** Vertico
 
-Vertico provides a cleaner minibuffer completion framework. Check [[roam:emacs-package-vertico][Vertico Notes]] for more info.
+    Vertico provides a cleaner minibuffer completion framework. Check [[roam:emacs-package-vertico][Vertico Notes]] for more info.
 
-#+begin_src emacs-lisp
-  (use-package vertico
-    :custom
-    (vertico-cycle t)
-    :init
-    (vertico-mode)
-    :bind (:map vertico-map
-  	      ("TAB" . #'minibuffer-complete)
-      ("RET" . #'vertico-directory-enter)
-      ("DEL" . #'vertico-directory-delete-char)
-      ("M-DEL" . #'vertico-directory-delete-word))
-    :hook ((rfn-eshadow-update-overlay . #'vertico-directory-tidy)
-  	 (minibuffer-setup . #'vertico-repeat-save))
-    :config
-    (setq vertico-resize nil
-  	vertico-count 17
-  	vertico-cycle t)
-    (setq-default completion-in-region-function
-  		(lambda (&rest args)
-  		  (apply (if vertico-mode
-  			     #'consult-completion-in-region
-  			   #'completion--in-region)
-  			 args))))
+    #+begin_src emacs-lisp
+    (use-package vertico
+      :custom
+      (vertico-cycle t)
+      :init
+      (vertico-mode)
+      :bind (:map vertico-map
+    	      ("TAB" . #'minibuffer-complete)
+    	      ("RET" . #'vertico-directory-enter)
+    	      ("DEL" . #'vertico-directory-delete-char)
+    	      ("M-DEL" . #'vertico-directory-delete-word))
+      :hook ((rfn-eshadow-update-overlay . #'vertico-directory-tidy)
+    	 (minibuffer-setup . #'vertico-repeat-save))
+      :config
+      (setq vertico-resize nil
+    	vertico-count 17
+    	vertico-cycle t)
+      (setq-default completion-in-region-function
+    		(lambda (&rest args)
+    		  (apply (if vertico-mode
+    			     #'consult-completion-in-region
+    			   #'completion--in-region)
+    			 args))))
 
-  (use-package savehist
-    :init
-    (savehist-mode))
+    (use-package savehist
+      :init
+      (savehist-mode))
 
-  (use-package emacs
-    :custom
-    (context-menu-mode t)
-    (enable-recursive-minibuffers t)
-    (read-extended-command-predicate #'command-completion-default-include-p)
-    (minibuffer-prompt-properties
-     '(read-only t cursor-intangible t face minibuffer-prompt)))
-#+end_src
+    (use-package emacs
+      :custom
+      (context-menu-mode t)
+      (enable-recursive-minibuffers t)
+      (read-extended-command-predicate #'command-completion-default-include-p)
+      (minibuffer-prompt-properties
+       '(read-only t cursor-intangible t face minibuffer-prompt)))
+    #+end_src
 
-#+RESULTS:
+    #+RESULTS:
 
 *** Orderless
 
-Orderless provides completion styles to make fuzzy finding and completion feel more natural
+    Orderless provides completion styles to make fuzzy finding and completion feel more natural
 
-#+begin_src emacs-lisp
-(use-package orderless
-  :init
-  (setq completion-styles '(orderless basic)
-	completion-category-defaults nil
-	completion-category-overrides '((command (styles orderless))
-					(file (styles partial-completion)))
-	completion-pcm-leading-wildcard t)
-  :config
-  (setq orderless-matching-styles '(orderless-literal orderless-regexp orderless-flex)))
-#+end_src
+    #+begin_src emacs-lisp
+    (use-package orderless
+      :init
+      (setq completion-styles '(orderless basic)
+    	completion-category-defaults nil
+    	completion-category-overrides '((command (styles orderless))
+    					(file (styles partial-completion)))
+    	completion-pcm-leading-wildcard t)
+      :config
+      (setq orderless-matching-styles '(orderless-literal orderless-regexp orderless-flex)))
+    #+end_src
 
-#+RESULTS:
-: t
+    #+RESULTS:
+    : t
 
 *** Marginalia
 
-Marginalia provides extra info into the minibuffer completions. It's really just that.
+    Marginalia provides extra info into the minibuffer completions. It's really just that.
 
-#+begin_src emacs-lisp
-  (use-package marginalia
-    :bind (:map minibuffer-local-map
-  	      ("M-A" . marginalia-cycle))
-    :init
-    (marginalia-mode))
+    #+begin_src emacs-lisp
+    (use-package marginalia
+      :bind (:map minibuffer-local-map
+    	      ("M-A" . marginalia-cycle))
+      :init
+      (marginalia-mode))
 
-  (use-package nerd-icons-completion
-    :hook (marginalia-mode . nerd-icons-completion-marginalia-setup)
-    :config
-    (nerd-icons-completion-mode))
+    (use-package nerd-icons-completion
+      :hook (marginalia-mode . nerd-icons-completion-marginalia-setup)
+      :config
+      (nerd-icons-completion-mode))
 
-  (use-package all-the-icons-completion
-    :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
-    :init
-    (all-the-icons-completion-mode))
-#+end_src
+    (use-package all-the-icons-completion
+      :hook (marginalia-mode . all-the-icons-completion-marginalia-setup)
+      :init
+      (all-the-icons-completion-mode))
+    #+end_src
 
-#+RESULTS:
-| all-the-icons-completion-marginalia-setup | nerd-icons-completion-marginalia-setup |
+    #+RESULTS:
+    | all-the-icons-completion-marginalia-setup | nerd-icons-completion-marginalia-setup |
 
 *** Consult
 
-Consult provides search and navigation commands based on the Emacs completion function [[help:completing-read][completing-read]]. Check out [[id:2F9DB448-1184-4DB2-8C21-B54023F292CC][Consult]] for more.
+    Consult provides search and navigation commands based on the Emacs completion function [[help:completing-read][completing-read]]. Check out [[id:2F9DB448-1184-4DB2-8C21-B54023F292CC][Consult]] for more.
 
-#+begin_src emacs-lisp
-(use-package consult
-  :bind (:map global-map
-	      ("M-g M-g" . consult-goto-line)
-	      ("M-s M-b" . consult-buffer)
-	      ("M-s M-f" . consult-find)
-	      ("M-s M-g" . consult-ripgrep)
-	      ("M-s M-h" . consult-history)
-	      ("M-s M-i" . consult-imenu)
-	      ("M-s M-l" . consult-line)
-	      ("M-s M-m" . consult-mark)
-	      ("M-s M-y" . consult-yank-pop)
-	      ("M-s M-s" . consult-outline)
-	      :map consult-narrow-map
-	      ("?" . consult-narrow-help))
-  :hook (completion-list-mode . consult-preview-at-point-mode)
-  :init
-  (setq register-preview-delay 0.5
-	register-preview-function #'consult-register-format)
-  (advice-add #'retister-preview :override #'consult-register-window)
-  (setq xref-show-xrefs-function #'consult-xref
-	xref-show-definitions-function #'consult-xref)
-  :config
-  (setq consult-line-numbers-widen t)
-  (setq consult-async-min-input 3)
-  (setq consult-async-input-debounce 0.5)
-  (setq consult-async-input-throttle 0.8)
-  (setq consult-narrow-key nil)
-  (setq consult-find-args
-	(concat "find . -not ( "
-		"-path */.git* -prune "
-		"-or -path */.cache* -prune )"))
-  (setq consult-preview-key 'any)
-  (add-to-list 'consult-mode-histories '(vc-git-log-edit-mode . log-edit-comment-ring))
-  (require 'consult-imenu)
+    #+begin_src emacs-lisp
+    (use-package consult
+      :bind (:map global-map
+    	      ("M-g M-g" . consult-goto-line)
+    	      ("M-s M-b" . consult-buffer)
+    	      ("M-s M-f" . consult-find)
+    	      ("M-s M-g" . consult-ripgrep)
+    	      ("M-s M-h" . consult-history)
+    	      ("M-s M-i" . consult-imenu)
+    	      ("M-s M-l" . consult-line)
+    	      ("M-s M-m" . consult-mark)
+    	      ("M-s M-y" . consult-yank-pop)
+    	      ("M-s M-s" . consult-outline)
+    	      :map consult-narrow-map
+    	      ("?" . consult-narrow-help))
+      :hook (completion-list-mode . consult-preview-at-point-mode)
+      :init
+      (setq register-preview-delay 0.5
+    	register-preview-function #'consult-register-format)
+      (advice-add #'retister-preview :override #'consult-register-window)
+      (setq xref-show-xrefs-function #'consult-xref
+    	xref-show-definitions-function #'consult-xref)
+      :config
+      (setq consult-line-numbers-widen t)
+      (setq consult-async-min-input 3)
+      (setq consult-async-input-debounce 0.5)
+      (setq consult-async-input-throttle 0.8)
+      (setq consult-narrow-key nil)
+      (setq consult-find-args
+    	(concat "find . -not ( "
+    		"-path */.git* -prune "
+    		"-or -path */.cache* -prune )"))
+      (setq consult-preview-key 'any)
+      (add-to-list 'consult-mode-histories '(vc-git-log-edit-mode . log-edit-comment-ring))
+      (require 'consult-imenu)
 
 
-(use-package consult-org-roam
-  :bind (("M-o M-o" . consult-org-roam-file-find)
-	 ("M-o f" . consult-org-roam-forward-links)
-	 ("M-o b" . consult-org-roam-backlinks)
-	 ("M-o s" . consult-org-roam-search)
-	 ("M-o l" . consult-org-roam-backlinks-recursive))
-  :init
-  (consult-org-roam-mode))
+      (use-package consult-org-roam
+        :bind (("M-o M-o" . consult-org-roam-file-find)
+    	   ("M-o f" . consult-org-roam-forward-links)
+    	   ("M-o b" . consult-org-roam-backlinks)
+    	   ("M-o s" . consult-org-roam-search)
+    	   ("M-o l" . consult-org-roam-backlinks-recursive))
+        :init
+        (consult-org-roam-mode))
 
-(use-package consult-dir
-  :ensure t
-  :bind (("C-x C-d" . consult-dir)
-	 :map minibuffer-local-completion-map
-	 ("C-x C-d" . consult-dir)
-	 ("C-x C-f" . consult-dir-jump-file))))
-#+end_src
+      (use-package consult-dir
+        :ensure t
+        :bind (("C-x C-d" . consult-dir)
+    	   :map minibuffer-local-completion-map
+    	   ("C-x C-d" . consult-dir)
+    	   ("C-x C-f" . consult-dir-jump-file))))
+    #+end_src
 
-#+RESULTS:
-: consult-dir-jump-file
+    #+RESULTS:
+    : consult-dir-jump-file
 
 *** Corfu
 
-Corfu is an in-buffer completion framework that provides a completion popup.
+    Corfu is an in-buffer completion framework that provides a completion popup.
 
-#+begin_src emacs-lisp
-(use-package corfu
-  :init
-  (global-corfu-mode)
-  (setq corfu-auto t)
-  :bind (:map corfu-map ("<tab>" . corfu-complete))
-  :config
-  (setq corfu-min-width 20)
-  (setq corfu-popupinfo-delay '(1.25 . 0.5))
-  (corfu-popupinfo-mode 1)
-  (with-eval-after-load 'savehist
-    (corfu-history-mode 1)
-    (add-to-list 'savehist-additional-variables 'corfu-hostory)))
+    #+begin_src emacs-lisp
+    (use-package corfu
+      :init
+      (global-corfu-mode)
+      (setq corfu-auto t)
+      :bind (:map corfu-map ("<tab>" . corfu-complete))
+      :config
+      (setq corfu-min-width 20)
+      (setq corfu-popupinfo-delay '(1.25 . 0.5))
+      (corfu-popupinfo-mode 1)
+      (with-eval-after-load 'savehist
+        (corfu-history-mode 1)
+        (add-to-list 'savehist-additional-variables 'corfu-hostory)))
 
-(use-package emacs
-  :init
-  (setq completion-cycle-threshold 3)
-  (setq tab-always-indent 'complete))
+    (use-package emacs
+      :init
+      (setq completion-cycle-threshold 3)
+      (setq tab-always-indent 'complete))
 
-(use-package dabbrev
-  :bind (("C-<tab>" . dabbrev-completion)
-	 ("C-M-<tab>" . dabbrev-expand))
-  :config
-  (add-to-list 'dabbrev-ignored-buffer-regexps "\\` ") 
-  (add-to-list 'dabbrev-ignored-buffer-modes 'doc-view-mode)
-  (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode))
-#+end_src
+    (use-package dabbrev
+      :bind (("C-<tab>" . dabbrev-completion)
+    	 ("C-M-<tab>" . dabbrev-expand))
+      :config
+      (add-to-list 'dabbrev-ignored-buffer-regexps "\\` ") 
+      (add-to-list 'dabbrev-ignored-buffer-modes 'doc-view-mode)
+      (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode))
+    #+end_src
 
-#+RESULTS:
-: dabbrev-expand
+    #+RESULTS:
+    : dabbrev-expand
 
-Nerd icons in Corfu
+    Nerd icons in Corfu
 
-#+begin_src emacs-lisp
-  (use-package nerd-icons-corfu
-  :ensure
-  :config
-  (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
-  (setq nerd-icons-corfu-mapping
-      '((array :style "cod" :icon "symbol_array" :face font-lock-type-face)
-        (boolean :style "cod" :icon "symbol_boolean" :face font-lock-builtin-face)
-        ;; ...
-        (t :style "cod" :icon "code" :face font-lock-warning-face))))
-#+end_src
+    #+begin_src emacs-lisp
+    (use-package nerd-icons-corfu
+      :ensure
+      :config
+      (add-to-list 'corfu-margin-formatters #'nerd-icons-corfu-formatter)
+      (setq nerd-icons-corfu-mapping
+    	'((array :style "cod" :icon "symbol_array" :face font-lock-type-face)
+    	  (boolean :style "cod" :icon "symbol_boolean" :face font-lock-builtin-face)
+    	  ;; ...
+    	  (t :style "cod" :icon "code" :face font-lock-warning-face))))
+    #+end_src
 
-#+RESULTS:
+    #+RESULTS:
 
 *** Cape
 
-Cape (Completion-at-Point Extensions) are providers for Corfu completion
+    Cape (Completion-at-Point Extensions) are providers for Corfu completion
 
-#+begin_src emacs-lisp
-(use-package cape
-  :bind (("C-c p p" . completion-at-point)
-	 ("C-c p t" . complete-tag)
-	 ("C-c p d". cape-dabbrev)
-	 ("C-c p h" . cape-history)
-	 ("C-c p f" . cape-file)
-	 ("C-c p k" . cape-keyword)
-	 ("C-c p s" . cape-elisp-symbol)
-	 ("C-c p e" . cape-elisp-block)
-	 ("C-c p a" . cape-abbrev)
-	 ("C-c p l" . cape-line)
-	 ("C-c p w" . cape-dict)
-	 ("C-c p :" . cape-emoji)
-	 ("C-c p \\" . cape-tex)
-	 ("C-c p _" . cape-tex)
-	 ("C-c p ^". cape-tex)
-	 ("C-c p &" . cape-sgml)
-	 ("C-c p r" . cape-rfc1345))
-  :init
-  ;; define cape functions here
-  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
-  (add-to-list 'completion-at-point-functions #'cape-file)
-  (add-to-list 'completion-at-point-functions #'cape-elisp-block)
-  (add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
-  (add-to-list 'completion-at-point-functions #'org-roam-complete-link-at-point)
-  ;;(add-to-list 'completion-at-point-functions #'cape-history)
-  (add-to-list 'completion-at-point-functions #'cape-keyword)
-  ;;(add-to-list 'completion-at-point-functions #'cape-tex)
-  ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
-  ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
-  ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
-  ;;(add-to-list 'completion-at-point-functions #'cape-dict)
-  ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
-  ;;(add-to-list 'completion-at-point-functions #'cape-line)
-  )
-#+end_src
+    #+begin_src emacs-lisp
+    (use-package cape
+      :bind (("C-c p p" . completion-at-point)
+    	 ("C-c p t" . complete-tag)
+    	 ("C-c p d". cape-dabbrev)
+    	 ("C-c p h" . cape-history)
+    	 ("C-c p f" . cape-file)
+    	 ("C-c p k" . cape-keyword)
+    	 ("C-c p s" . cape-elisp-symbol)
+    	 ("C-c p e" . cape-elisp-block)
+    	 ("C-c p a" . cape-abbrev)
+    	 ("C-c p l" . cape-line)
+    	 ("C-c p w" . cape-dict)
+    	 ("C-c p :" . cape-emoji)
+    	 ("C-c p \\" . cape-tex)
+    	 ("C-c p _" . cape-tex)
+    	 ("C-c p ^". cape-tex)
+    	 ("C-c p &" . cape-sgml)
+    	 ("C-c p r" . cape-rfc1345))
+      :init
+      ;; define cape functions here
+      (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+      (add-to-list 'completion-at-point-functions #'cape-file)
+      (add-to-list 'completion-at-point-functions #'cape-elisp-block)
+      (add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
+      (add-to-list 'completion-at-point-functions #'org-roam-complete-link-at-point)
+      ;;(add-to-list 'completion-at-point-functions #'cape-history)
+      (add-to-list 'completion-at-point-functions #'cape-keyword)
+      ;;(add-to-list 'completion-at-point-functions #'cape-tex)
+      ;;(add-to-list 'completion-at-point-functions #'cape-sgml)
+      ;;(add-to-list 'completion-at-point-functions #'cape-rfc1345)
+      ;;(add-to-list 'completion-at-point-functions #'cape-abbrev)
+      ;;(add-to-list 'completion-at-point-functions #'cape-dict)
+      ;;(add-to-list 'completion-at-point-functions #'cape-elisp-symbol)
+      ;;(add-to-list 'completion-at-point-functions #'cape-line)
+      )
+    #+end_src
 
-#+RESULTS:
-: cape-rfc1345
+    #+RESULTS:
+    : cape-rfc1345
 
 *** Set exec-path from shell
 
-   #+begin_src emacs-lisp
-   (when (memq window-system '(mac ns x))
-     (exec-path-from-shell-initialize))
+    #+begin_src emacs-lisp
+    (use-package exec-path-from-shell
+      :ensure t
+      :config
+      (when (memq window-system '(mac ns x))
+        (exec-path-from-shell-initialize)))
    #+end_src
 
    #+RESULTS:
-   : ((MANPATH . :/usr/share/man:/usr/local/share/man:/Library/TeX/Distributions/.DefaultTeX/Contents/Man:) (PATH . /opt/homebrew/bin:/opt/homebrew/sbin:/Users/adamgrubbs/.npm-global/bin:/Users/adamgrubbs/.local/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/TeX/texbin))
