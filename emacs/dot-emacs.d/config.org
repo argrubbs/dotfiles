@@ -12,7 +12,7 @@
 (setq user-full-name "Adam Grubbs"
       user-main-address "argrubbs@users.noreply.github.com")
 #+end_src
-
+MCGEE IS A CAT
 ** Emacs Init
 
 *** Settings
@@ -361,7 +361,7 @@ Using show-fonts and fontaine from Prot
 #+End_Src
 
 #+RESULTS:
-| variable-pitch-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
+| olivetti-mode | visual-line-mode | variable-pitch-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
 
 Adding Nerd Icons
 
@@ -530,11 +530,13 @@ This package enables pretty bullets in org mode
 Extra contrib packages to extend org mode
 
 #+begin_src emacs-lisp
-   (use-package org-contrib
-      :ensure t)
+(use-package org-contrib
+   :ensure t)
+(require 'ox)
 #+end_src
 
 #+RESULTS:
+: ox
 
 *** Org Agenda                                                   :org_agenda:
 
@@ -759,91 +761,57 @@ Consult provides search and navigation commands based on the Emacs completion
 function [[help:completing-read][completing-read]]. Check out [[id:2F9DB448-1184-4DB2-8C21-B54023F292CC][Consult]] for more.
 
 #+begin_src emacs-lisp
-  (use-package consult
-    :bind (;; C-c bindings in `mode-specific-map'
-  	 ("C-c M-x" . consult-mode-command)
-  	 ("C-c h" . consult-history)
-  	 ("C-c k" . consult-kmacro)
-  	 ("C-c m" . consult-man)
-  	 ("C-c i" . consult-info)
-  	 ([remap Info-search] . consult-info)
-  	 ;; C-x bindings in `ctl-x-map'
-  	 ("C-x M-:" . consult-complex-command)
-  	 ("C-x b" . consult-buffer)
-  	 ("C-x 4 b" . consult-buffer-other-window)
-  	 ("C-x 5 b" . consult-buffer-other-frame)
-  	 ("C-x t b" . consult-buffer-other-tab)
-  	 ("C-x r b" . consult-bookmark)
-  	 ("C-x p b" . consult-project-buffer)
-  	 ;; Custom M-# bindings for fast register access
-  	 ("M-#" . consult-register-load)
-  	 ("M-'" . consult-register-store)
-  	 ("C-M-#" . consult-register)
-  	 ;; other custom bindings
-  	 ("M-y" . sonsult-yank-pop)
-  	 ;; M-g bindings in `goto-map'
-  	 ("M-g e" . consult-compile-error)
-  	 ("M-g f" . consult-flymake)
-  	 ("M-g g" . consult-goto-line)
-  	 ("M-g M-g" . consult-goto-line)
-  	 ("M-g o" . consult-outline)
-  	 ("M-g m" . consult-mark)
-  	 ("M-g k" . consult-global-mark)
-  	 ("M-g i" . consult-imenu)
-  	 ("M-g I" . consult-imenu-multi)
-  	 ;; M-s bindings in `search-mode'
-  	 ("M-s d" . consult-find)
-  	 ("M-s c" . consult-locate)
-  	 ("M-s g" . consult-ripgrep)
-  	 ("M-s G" . consult-git-grep)
-  	 ("M-s l" . consult-line)
-  	 ("M-s L" . consult-line-multi)
-  	 ("M-s k" . consult-keep-lines)
-  	 ("M-s u" . consult-focus-lines)
-  	 ;;; Isearch intsgration
-  	 ("M-s e" . consult-isearch-history)
-  	 :map isearch-mode-map
-  	 ("M-e" . consult-isearch-history)
-  	 ("M-s e". consult-isearch-history)
-  	 ("M-s l" . consult-line)
-  	 ("M-s L" . consult-line-multi)
-  	 ;; Minibuffer history
-  	 :map minibuffer-local-map
-  	 ("M-s". consult-history)
-  	 ("M-r" . consult-history))
-    :hook (completion-list-mode . consult-preview-at-point-mode)
-    :init
-    (setq register-preview-delay 0.5
-  	register-preview-function #'consult-register-format)
-    (advice-add #'retister-preview :override #'consult-register-window)
-    (setq xref-show-xrefs-function #'consult-xref
-  	xref-show-definitions-function #'consult-xref)
-    :config
-    (consult-customize
-     consult-theme :preview-key '(:debounce 0.2 any)
-     consult-ripgrep consult-git-grep consult-grep
-     consult-bookmark consult-recent-file consult-xref
-     consult--source-bookmark consult--source-file-register
-     consult--source-recent-file consult--source-project-recent-file
-     ;; Preview key  "M-."
-     :preview-key '(:debounce 0.4 any))
-    (setq consult-narrow-key "<")) ;; "C-+"
+(use-package consult
+  :bind (:map global-map
+	      ("M-g M-g" . consult-goto-line)
+	      ("M-s M-b" . consult-buffer)
+	      ("M-s M-f" . consult-find)
+	      ("M-s M-g" . consult-ripgrep)
+	      ("M-s M-h" . consult-history)
+	      ("M-s M-i" . consult-imenu)
+	      ("M-s M-l" . consult-line)
+	      ("M-s M-m" . consult-mark)
+	      ("M-s M-y" . consult-yank-pop)
+	      ("M-s M-s" . consult-outline)
+	      :map consult-narrow-map
+	      ("?" . consult-narrow-help))
+  :hook (completion-list-mode . consult-preview-at-point-mode)
+  :init
+  (setq register-preview-delay 0.5
+	register-preview-function #'consult-register-format)
+  (advice-add #'retister-preview :override #'consult-register-window)
+  (setq xref-show-xrefs-function #'consult-xref
+	xref-show-definitions-function #'consult-xref)
+  :config
+  (setq consult-line-numbers-widen t)
+  (setq consult-async-min-input 3)
+  (setq consult-async-input-debounce 0.5)
+  (setq consult-async-input-throttle 0.8)
+  (setq consult-narrow-key nil)
+  (setq consult-find-args
+	(concat "find . -not ( "
+		"-path */.git* -prune "
+		"-or -path */.cache* -prune )"))
+  (setq consult-preview-key 'any)
+  (add-to-list 'consult-mode-histories '(vc-git-log-edit-mode . log-edit-comment-ring))
+  (require 'consult-imenu)
 
-  (use-package consult-org-roam
-    :bind (("M-o M-o" . consult-org-roam-file-find)
-  	 ("M-o f" . consult-org-roam-forward-links)
-  	 ("M-o b" . consult-org-roam-backlinks)
-  	 ("M-o s" . consult-org-roam-search)
-  	 ("M-o l" . consult-org-roam-backlinks-recursive))
-    :init
-    (consult-org-roam-mode))
 
-  (use-package consult-dir
-    :ensure t
-    :bind (("C-x C-d" . consult-dir)
-  	 :map minibuffer-local-completion-map
-  	 ("C-x C-d" . consult-dir)
-  	 ("C-x C-f" . consult-dir-jump-file)))
+(use-package consult-org-roam
+  :bind (("M-o M-o" . consult-org-roam-file-find)
+	 ("M-o f" . consult-org-roam-forward-links)
+	 ("M-o b" . consult-org-roam-backlinks)
+	 ("M-o s" . consult-org-roam-search)
+	 ("M-o l" . consult-org-roam-backlinks-recursive))
+  :init
+  (consult-org-roam-mode))
+
+(use-package consult-dir
+  :ensure t
+  :bind (("C-x C-d" . consult-dir)
+	 :map minibuffer-local-completion-map
+	 ("C-x C-d" . consult-dir)
+	 ("C-x C-f" . consult-dir-jump-file))))
 #+end_src
 
 #+RESULTS:
@@ -858,8 +826,14 @@ Corfu is an in-buffer completion framework that provides a completion popup.
   :init
   (global-corfu-mode)
   (setq corfu-auto t)
-  (corfu-history-mode t)
-  (corfu-popupinfo-mode t))
+  :bind (:map corfu-map ("<tab>" . corfu-complete))
+  :config
+  (setq corfu-min-width 20)
+  (setq corfu-popupinfo-delay '(1.25 . 0.5))
+  (corfu-popupinfo-mode 1)
+  (with-eval-after-load 'savehist
+    (corfu-history-mode 1)
+    (add-to-list 'savehist-additional-variables 'corfu-hostory)))
 
 (use-package emacs
   :init
@@ -938,3 +912,13 @@ Cape (Completion-at-Point Extensions) are providers for Corfu completion
 
 #+RESULTS:
 : cape-rfc1345
+
+*** Set exec-path from shell
+
+   #+begin_src emacs-lisp
+   (when (memq window-system '(mac ns x))
+     (exec-path-from-shell-initialize))
+   #+end_src
+
+   #+RESULTS:
+   : ((MANPATH . :/usr/share/man:/usr/local/share/man:/Library/TeX/Distributions/.DefaultTeX/Contents/Man:) (PATH . /opt/homebrew/bin:/opt/homebrew/sbin:/Users/adamgrubbs/.npm-global/bin:/Users/adamgrubbs/.local/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/TeX/texbin))

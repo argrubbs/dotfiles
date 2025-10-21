@@ -18,6 +18,7 @@ brew "yazi"
 brew "git"
 brew "ollama"
 
+
 cask "1password-cli"
 cask "emacs-app"
 cask "font-caveat"
@@ -25,3 +26,4 @@ cask "font-caveat-brush"
 cask "font-iosevka"
 cask "font-iosevka-nerd-font"
 cask "kitty"
+cask "basictex"
