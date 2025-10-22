@@ -312,10 +312,10 @@
       (set-face-attribute 'fixed-pitch nil :family "Iosevka Nerd Font Mono"))
 
     (when (member "Caveat" (font-family-list))
-      (set-face-attribute 'font-lock-comment-face nil :font "Caveat-20"))
+      (set-face-attribute 'font-lock-comment-face nil :font "Futura-20"))
 
     (when (member "Iosevka Nerd Font" (font-family-list))
-      (set-face-attribute 'variable-pitch nil :family "Iosevka Nerd Font" :height 170))
+      (set-face-attribute 'variable-pitch nil :family "American Typewriter" :height 170))
 
     ;; Resize Org headings
     (dolist (face '((org-level-1 . 1.35)
@@ -350,7 +350,7 @@
     #+End_Src
 
     #+RESULTS:
-    | olivetti-mode | visual-line-mode | variable-pitch-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
+    | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | visual-line-mode | variable-pitch-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
 
     Adding Nerd Icons
 

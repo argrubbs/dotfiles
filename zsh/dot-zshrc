@@ -71,8 +71,8 @@ ZSH_THEME="robbyrussell"
 # Custom plugins may be added to $ZSH_CUSTOM/plugins/
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
-plugins=(git zoxide colored-man-pages command-not-found sudo fzf vi-mode)
-VI_MODE_SET_CURSOR=true
+plugins=(git zoxide colored-man-pages command-not-found sudo fzf)
+# VI_MODE_SET_CURSOR=true
 
 source $ZSH/oh-my-zsh.sh
 
@@ -128,11 +128,11 @@ alias ls='eza --color=always --all --long --git --icons --classify --group-direc
 
 
 # Add global npm to path
-export PATH=~/.npm-global/bin:~/.local/bin:$PATH
+export PATH=~/.npm-global/bin:~/.local/bin:~/.config/emacs/bin:/opt/homebrew/lib/node_modules:$PATH
 export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig"
 export LDFLAGS="-L/opt/homebrew/lib"
 export CPPFLAGS="-I/opt/homebrew/include"
-
+export XDG_CONFIG_DIR="~/.config"
 # Set Emacs config directory
 export EMACS_USER_DIRECTORY="$HOME/.config/emacs"
 eval "$(/opt/homebrew/bin/brew shellenv)"
