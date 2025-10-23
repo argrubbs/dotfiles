@@ -831,7 +831,7 @@
 
     #+RESULTS:
     : consult-dir-jump-file
-
+    
 *** Corfu
 
     Corfu is an in-buffer completion framework that provides a completion popup.
@@ -927,7 +927,7 @@
 
     #+RESULTS:
     : cape-rfc1345
-
+    
 *** Set exec-path from shell
 
     #+begin_src emacs-lisp
@@ -1003,7 +1003,10 @@
     #+begin_src emacs-lisp
     (use-package git-messenger
       :ensure t
-      :bind ("C-x v p" . git-messenger:popup-message))
+      :bind ("C-x v p" . git-messenger:popup-message)
+      :config
+      (setq git-messenger:show-detail t
+    	git-messenger:use-magit-popup t))
     #+end_src
 **** diff-hl
     #+begin_src emacs-lisp
@@ -1015,3 +1018,26 @@
 
 
     #+end_src
+**** blamer
+     #+begin_src emacs-lisp
+(use-package blamer
+  :ensure t
+  :bind (("s-i" . blamer-show-commit-info)
+         ("C-c i" . blamer-show-posframe-commit-info))
+  :defer 20
+  :custom
+  (blamer-idle-time 0.3)
+  (blamer-min-offset 70)
+  :custom-face
+  (blamer-face ((t :foreground "#7a88cf"
+                    :background nil
+                    :height 140
+                    :italic t)))
+  :config
+  (global-blamer-mode 1))
+       
+     #+end_src
+
+     #+RESULTS:
+     : blamer-show-posframe-commit-info
+
