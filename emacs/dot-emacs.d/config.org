@@ -1250,11 +1250,23 @@
    Using =project.el= instead of =projectile= at first. I will see if this doesn't cut it at some point.
 
    #+begin_src emacs-lisp
-   (use-package project
-  :ensure nil
-  :bind-keymap
-  ("C-x p" . project-prefix-map))
+(use-package projectile
+  :ensure t
+  :init
+  (projectile-mode +1)
+  :bind (:map projectile-mode-map
+              ("C-c p" . projectile-command-map))
+  :config
+  (setq projectile-project-search-path '("~/projects/"))
+  (setq projectile-completion-system 'default)
+  (setq projectile-enable-caching t))
+
+(use-package consult-projectile
+  :ensure t
+  :after (consult projectile)
+  :bind (("C-c p f" . consult-projectile-find-file)
+         ("C-c p p" . consult-projectile-switch-project)))
    #+end_src
 
 #+RESULTS:
-: #[nil ((use-package-autoload-keymap 'project-prefix-map 'project nil)) nil nil nil nil]
+: consult-projectile-switch-project
