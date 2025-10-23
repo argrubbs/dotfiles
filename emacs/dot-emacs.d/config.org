@@ -629,11 +629,11 @@
 
     Org Agenda file is set with ~C-c ]~ and removed with ~C-c [~
 #+begin_src emacs-lisp
-(setq org-agenda-files (expand-file-name "~/org/agenda.org"))
+(setq org-agenda-files "~/org/agenda.org")
 #+end_src
 
 #+RESULTS:
-| expand-file-name | ~/org/agenda.org |
+: ~/org/agenda.org
 
     My personal agenda file is in =~/org/agenda.org=
 
