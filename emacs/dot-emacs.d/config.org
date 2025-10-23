@@ -1,18 +1,20 @@
 #+TITLE: ARG Emacs
 #+AUTHOR: Adam Grubbs
+:PROPERTIES:
 #+PROPERTY: header-args :tangle yes
-
+#+STARTUP: overview
+:END:
 * Configuration
   :PROPERTIES:
   :VISIBILITY: children
   :END:
 
-** My Info
+** My Info 
    #+begin_src emacs-lisp
    (setq user-full-name "Adam Grubbs"
          user-main-address "argrubbs@users.noreply.github.com")
    #+end_src
-   MCGEE IS A CAT
+
 ** Emacs Init
 
 *** Settings
@@ -360,6 +362,26 @@
     #+end_src
 
     #+RESULTS:
+
+*** Custom Emacs Functions
+    Here are my custom functions for general emacs use.
+
+    This function opens my config.org file easily
+    #+begin_src emacs-lisp
+    (defun arg/visit-config-org-file ()
+      "Function that opens my config.org file to edit easily."
+      (interactive)
+        (let ((config-file (concat user-emacs-directory "config.org")))
+          (if (file-exists-p config-file)
+    	  (find-file config-file))))
+    #+end_src
+
+
+*** Custom Emacs Keybinds
+    #+begin_src emacs-lisp
+    (global-set-key (kbd "C-c f P") 'arg/visit-config-org-file)
+    #+end_src
+
 
 ** Org-Mode
 
@@ -917,3 +939,79 @@
    #+end_src
 
    #+RESULTS:
+
+** Git and Version Control
+   
+*** Magit
+    #+begin_src emacs-lisp
+    (use-package magit
+      :ensure t
+      :bind (("C-x g" . magit-status)
+    	 ("C-x M-g" . magit-dispatch)
+    	 ("C-c M-g" . magit-file-dispatch))
+      :config
+      (setq magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+
+    #+end_src
+
+*** Git Support Packages
+**** git-gutter
+    #+begin_src emacs-lisp
+        (use-package git-gutter
+          :ensure t
+          :config
+          (global-git-gutter-mode 1))
+ #+end_src
+**** git-timemachine
+    #+begin_src emacs-lisp
+        (use-package git-timemachine
+          :ensure t
+          :bind (("C-x v t" . git-timemachine)))
+ #+end_src
+**** forge
+     Forge  Setup for GitLab:
+     1. Create token at https://gitlab.com/-/profile/personal_access_tokens
+     2. Scopes: =api=, =read_user=, =read_repository=
+     3. Add to =~/.authinfo.gpg= or =~/.authinfo=
+	~machine gitlab.com/api/v4 login YOUR_USERNAME^forge password YOUR_TOKEN~
+	 #+begin_src emacs-lisp
+	 (use-package forge
+	   :ensure t
+	   :after magit
+	   :config
+	   ;; Gitlab settings
+	   (setq forge-alist
+		 '(("gitlab.com" "gitlab.com/api/v4" "gitlab.com" forge-gitlab-repository)))
+
+	   ;; Set number of topics to fetch
+	   (setq forge-topic-list-limit '(60 . 10))  ; (issues . merge-requests)
+
+	   ;; Columns to show in topic list
+	   (setq forge-topic-list-columns
+		 '(("#" 5 forge-topic-list-sort-by-number (:right-align t) number nil)
+		   ("Title" 60 t nil title nil)
+		   ("State" 6 t nil state nil)
+		   ("Updated" 10 t nil updated nil)))
+
+	   ;; Auto-fetch notifications
+	   (setq forge-pull-notifications t)
+
+	   ;; Database location
+	   (setq forge-database-file (expand-file-name "forge-database.sqlite" user-emacs-directory)))
+      #+end_src
+**** git-messenger
+    #+begin_src emacs-lisp
+    (use-package git-messenger
+      :ensure t
+      :bind ("C-x v p" . git-messenger:popup-message))
+    #+end_src
+**** diff-hl
+    #+begin_src emacs-lisp
+        (use-package diff-hl
+          :ensure t
+          :config
+          (global-diff-hl-mode)
+          (diff-hl-flydiff-mode))
+
+
+    #+end_src
