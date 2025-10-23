@@ -540,18 +540,14 @@
 
     #+begin_src emacs-lisp
     (use-package org-superstar
-      :config
-      (setq org-superstar-leading-bullet " ")
-      (setq org-superstar-special-todo-items t) ;; Makes TODO header bullets into boxes
-      (setq org-superstar-todo-bullet-alist '(("TODO" . 9744)
-                                              ("DONE" . 9744)
-                                              ("READ" . 9744)
-                                              ("IDEA" . 9744)
-                                              ("WAITING" . 9744)
-                                              ("CANCELLED" . 9744)
-                                              ("PROJECT" . 9744)
-                                              ("POSTPONED" . 9744)))
-      )
+        :ensure t
+          :custom
+    ;; Use simple bullets that definitely exist in your font
+    (org-superstar-headline-bullets-list '("●" "○" "◆" "◇" "▶" "▷"))
+    ;; Or use these if you want more variety
+    ;; (org-superstar-headline-bullets-list '("◉" "○" "✸" "✿" "✤" "✜"))
+    (org-superstar-remove-leading-stars t)
+    (org-superstar-leading-bullet ?\s))
 
     #+end_src
 
@@ -560,10 +556,10 @@
 *** Org Bullets
 
     #+begin_src emacs-lisp
-    (use-package org-bullets
-      :config
-      (add-hook 'org-mode-hook (lambda ()
-    			     (org-bullets-mode 1))))
+    ;; (use-package org-bullets
+    ;;   :config
+    ;;   (add-hook 'org-mode-hook (lambda ()
+    ;; 			     (org-bullets-mode 1))))
     #+end_src
 
     #+RESULTS:
@@ -1175,3 +1171,5 @@
 | #[nil ((define-key yaml-mode-map (kbd RET) 'newline-and-indent) (setq indent-tabs-mode nil) (setq tab-width 2) (add-hook 'completion-at-point-functions (lambda (&rest _) (untabify (line-beginning-position) (line-end-position)) nil) 100 t)) nil] | #[nil ((define-key yaml-mode-map (kbd RET) 'newline-and-indent) (setq indent-tabs-mode nil) (setq tab-width 2) (add-hook 'post-self-insert-hook (lambda nil (when (eq (char-before) 9) (atomic-change-group (delete-char -1) (insert (make-string tab-width 32))))) nil t)) nil] | #[nil ((define-key yaml-mode-map (kbd RET) 'newline-and-indent) (setq indent-tabs-mode nil) (add-hook 'before-save-hook (lambda nil (untabify (point-min) (point-max))) nil t)) nil] | yaml-set-imenu-generic-expression | #[nil ((define-key yaml-mode-map (kbd RET) 'newline-and-indent)) nil] | ansible-doc-mode | ansible | eglot-ensure |
 
 *** 
+
+** Projects
