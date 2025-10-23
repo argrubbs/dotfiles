@@ -420,6 +420,16 @@
 
     #+RESULTS:
 
+*** Editor
+    #+begin_src emacs-lisp
+    (use-package expand-region
+      :ensure t
+      :bind (("C-=" . er/expand-region)))
+    #+end_src
+
+#+RESULTS:
+: er/expand-region
+
 *** Custom Emacs Functions
     Here are my custom functions for general emacs use.
 
