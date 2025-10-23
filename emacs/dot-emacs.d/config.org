@@ -328,6 +328,34 @@
      #+RESULTS:
      : t
 
+**** Posframe
+     #+begin_src emacs-lisp
+(use-package posframe
+  :ensure t
+  :config
+  ;; Global posframe settings
+  
+  ;; Default position handler for all posframes
+  (setq posframe-mouse-banish t)  ; Move mouse away from posframe
+  
+  ;; Default parameters for all posframes
+  (setq-default posframe-arghandler
+                (lambda (buffer-or-name key value)
+                  (or (and (eq key :internal-border-width) 10)
+                      (and (eq key :internal-border-color) "#51afef")
+                      (and (eq key :background-color) "#282c34")
+                      value)))
+  
+  ;; Posframe border style
+  (setq posframe-border-width 2)
+  
+  ;; Hide posframe on specific events
+  (add-hook 'posframe-hide-hook
+            (lambda () (set-cursor-color "white"))))
+     #+end_src
+
+#+RESULTS:
+
 *** Fonts
 
     Using show-fonts and fontaine from Prot
@@ -411,6 +439,26 @@
     (global-set-key (kbd "C-c f P") 'arg/visit-config-org-file)
     #+end_src
 
+
+*** Which-Key
+    #+begin_src emacs-lisp
+    (use-package which-key
+      :ensure t
+      :init (which-key-mode)
+      :config
+      (setq which-key-idle-delay 0.5)
+      (setq which-key-show-prefix nil)
+      (setq which-key-echo-keystrokes 0))
+
+    (use-package which-key-posframe
+      :ensure t
+      :after which-key
+      :config
+      (which-key-posframe-mode))
+    #+end_src
+
+#+RESULTS:
+: t
 
 ** Org-Mode
 
@@ -1173,3 +1221,15 @@
 *** 
 
 ** Projects
+
+   Using =project.el= instead of =projectile= at first. I will see if this doesn't cut it at some point.
+
+   #+begin_src emacs-lisp
+   (use-package project
+  :ensure nil
+  :bind-keymap
+  ("C-x p" . project-prefix-map))
+   #+end_src
+
+#+RESULTS:
+: #[nil ((use-package-autoload-keymap 'project-prefix-map 'project nil)) nil nil nil nil]
