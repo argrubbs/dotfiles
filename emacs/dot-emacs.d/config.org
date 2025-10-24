@@ -389,14 +389,14 @@
 
     #+begin_src emacs-lisp
     (when (member "Iosevka Nerd Font Mono" (font-family-list))
-      (set-face-attribute 'default nil :family "Iosevka Nerd Font" :height 160 :weight 'semi-light)
-      (set-face-attribute 'fixed-pitch nil :family "Iosevka Nerd Font Mono"))
+      (set-face-attribute 'default nil :family "Iosevka Nerd Font" :height 200 :weight 'semi-light)
+      (set-face-attribute 'fixed-pitch nil :family "Iosevka Nerd Font Mono" :height 200))
 
     (when (member "Caveat" (font-family-list))
       (set-face-attribute 'font-lock-comment-face nil :font "Futura-20"))
 
     (when (member "Iosevka Nerd Font" (font-family-list))
-      (set-face-attribute 'variable-pitch nil :family "American Typewriter" :height 170))
+      (set-face-attribute 'variable-pitch nil :family "American Typewriter" :height 220))
 
     ;; Resize Org headings
     (dolist (face '((org-level-1 . 1.35)
@@ -431,7 +431,7 @@
     #+End_Src
 
     #+RESULTS:
-    | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | visual-line-mode | variable-pitch-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
+    | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | #[nil ((add-hook 'completion-at-point-functions #'cape-emoji nil t) (add-hook 'completion-at-point-functions #'org-roam-complete-link-at-point nil t)) nil] | visual-line-mode | variable-pitch-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
 
     Adding Nerd Icons
 
@@ -971,11 +971,11 @@
 
 
       (use-package consult-org-roam
-        :bind (("M-o M-o" . consult-org-roam-file-find)
-    	   ("M-o f" . consult-org-roam-forward-links)
-    	   ("M-o b" . consult-org-roam-backlinks)
-    	   ("M-o s" . consult-org-roam-search)
-    	   ("M-o l" . consult-org-roam-backlinks-recursive))
+        :bind (("M-s M-o f" . consult-org-roam-file-find)
+    	   ("M-s M-o l" . consult-org-roam-forward-links)
+    	   ("M-s M-o b" . consult-org-roam-backlinks)
+    	   ("M-s M-o s" . consult-org-roam-search)
+    	   ("M-s M-o l" . consult-org-roam-backlinks-recursive))
         :init
         (consult-org-roam-mode))
 
@@ -988,14 +988,14 @@
     #+end_src
 
     #+RESULTS:
-    : consult-dir-jump-file
+    : consult-narrow-help
     
 *** Corfu
 
     Corfu is an in-buffer completion framework that provides a completion popup.
 
     #+begin_src emacs-lisp
-    (use-package corfu
+	    (use-package corfu
       :ensure t
       :custom
       (corfu-auto t)
@@ -1261,45 +1261,74 @@
    
 *** eglot
     #+begin_src emacs-lisp
-    (use-package eglot
-      :ensure t
-      :hook ((python-mode . eglot-ensure)
-    	 (yaml-mode . eglot-ensure))
-      :config
-      (add-to-list 'eglot-server-programs
-                   '(python-mode . ("pyright-langserver" "--stdio")))
-      (add-to-list 'eglot-server-programs
-                   '(yaml-mode . ("ansible-language-server" "--stdio")))
-      (add-hook 'python-mode-hook
-    	    (lambda ()
-                  (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
-        (setq eglot-ignored-server-capabilities 
-        '(:workspaceDidChangeConfiguration)))
+          (use-package eglot
+            :ensure t
+            :hook ((python-mode . eglot-ensure)
+          	 (yaml-mode . eglot-ensure))
+            :config
+            (add-to-list 'eglot-server-programs
+                         '(python-mode . ("pyright-langserver" "--stdio")))
+            (add-to-list 'eglot-server-programs
+                         '(yaml-mode . ("ansible-language-server" "--stdio")))
+            (add-hook 'python-mode-hook
+          	    (lambda ()
+                        (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
+              (setq eglot-ignored-server-capabilities 
+              '(:workspaceDidChangeConfiguration)))
 
-    (use-package eldoc-box
+    (use-package sideline
       :ensure t
+      :hook (flymake-mode . sideline-mode)
       :config
-      (defun arg/eldoc-box-scroll-up ()
-        "Scroll up in `eldoc-box--frame'"
-        (interactive)
-        (with-current-buffer eldoc-box--buffer
-          (with-selected-frame eldoc-box--frame
-            (scroll-down 3))))
-      (defun arg/eldoc-box-scroll-down ()
-        "Scroll down in `eldoc-box--frame'"
-        (interactive)
-        (with-current-buffer eldoc-box--buffer
-          (with-selected-frame eldoc-box--frame
-            (scroll-up 3))))
-      :bind
-      (:map eglot-mode-map
-            ("C-k" . arg/eldoc-box-scroll-up)
-            ("C-j" . arg/eldoc-box-scroll-down)
-            ("M-h" . eldoc-box-eglot-help-at-point)))
+      (setq sideline-flymake-display-mode 'line)
+      (setq sideline-backends-right '(sideline-flymake)))
+
+    (use-package sideline-flymake
+      :ensure t
+      :after (sideline flymake)
+      :hook (flymake-mode . sideline-mode))
+
+          (use-package eldoc-box
+            :ensure t
+            :config
+            (defun arg/eldoc-box-scroll-up ()
+              "Scroll up in `eldoc-box--frame'"
+              (interactive)
+              (with-current-buffer eldoc-box--buffer
+                (with-selected-frame eldoc-box--frame
+                  (scroll-down 3))))
+            (defun arg/eldoc-box-scroll-down ()
+              "Scroll down in `eldoc-box--frame'"
+              (interactive)
+              (with-current-buffer eldoc-box--buffer
+                (with-selected-frame eldoc-box--frame
+                  (scroll-up 3))))
+            :bind
+            (:map eglot-mode-map
+                  ("C-k" . arg/eldoc-box-scroll-up)
+                  ("C-j" . arg/eldoc-box-scroll-down)
+                  ("M-h" . eldoc-box-eglot-help-at-point)))
     #+end_src
 
     #+RESULTS:
     : eldoc-box-eglot-help-at-point
+
+*** flycheck
+    #+begin_src emacs-lisp
+    ;; (use-package flycheck
+    ;; :ensure t
+    ;; :config
+    ;; (add-hook 'after-init-hook #'global-flycheck-mode))
+
+    ;; (use-package flycheck-eglot
+    ;;   :ensure t
+    ;;   :after (flycheck eglot)
+    ;;   :config
+    ;;   (global-flycheck-eglot-mode 1))
+    #+end_src
+
+#+RESULTS:
+: t
 
 *** ansible
     #+begin_src emacs-lisp
@@ -1328,7 +1357,27 @@
 #+RESULTS:
 | #[nil ((define-key yaml-mode-map (kbd RET) 'newline-and-indent) (setq indent-tabs-mode nil) (setq tab-width 2) (add-hook 'completion-at-point-functions (lambda (&rest _) (untabify (line-beginning-position) (line-end-position)) nil) 100 t)) nil] | #[nil ((define-key yaml-mode-map (kbd RET) 'newline-and-indent) (setq indent-tabs-mode nil) (setq tab-width 2) (add-hook 'post-self-insert-hook (lambda nil (when (eq (char-before) 9) (atomic-change-group (delete-char -1) (insert (make-string tab-width 32))))) nil t)) nil] | #[nil ((define-key yaml-mode-map (kbd RET) 'newline-and-indent) (setq indent-tabs-mode nil) (add-hook 'before-save-hook (lambda nil (untabify (point-min) (point-max))) nil t)) nil] | yaml-set-imenu-generic-expression | #[nil ((define-key yaml-mode-map (kbd RET) 'newline-and-indent)) nil] | ansible-doc-mode | ansible | eglot-ensure |
 
-*** 
+
+*** python
+    #+begin_src emacs-lisp
+    (use-package pyvenv
+      :ensure t
+      :config
+      (setq pyvenv-mode-line-indicator '(pyvenv-virtual-env-name ("[venv:" pyvenv-virtual-env-name "] ")))
+      
+      ;; Auto-activate venv in project root
+      (defun my-auto-activate-venv ()
+        (when-let* ((root (projectile-project-root))
+                    (venv-dir (expand-file-name ".venv" root)))
+          (when (file-directory-p venv-dir)
+            (pyvenv-activate venv-dir)
+            (eglot-reconnect (current-buffer)))))
+      
+      (add-hook 'python-mode-hook #'my-auto-activate-venv))
+    #+end_src
+
+    #+RESULTS:
+    : t
 
 ** Projects
 
@@ -1354,4 +1403,4 @@
    #+end_src
 
 #+RESULTS:
-: consult-projectile-switch-project
+: consult-projectile-switch-projects
