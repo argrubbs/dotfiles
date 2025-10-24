@@ -356,6 +356,28 @@
 
 #+RESULTS:
 
+**** Beacon
+     #+begin_src emacs-lisp
+     (use-package beacon
+       :ensure t
+       :init
+       (beacon-mode 1))
+     #+end_src
+
+#+RESULTS:
+
+**** Wgrep
+     #+begin_src emacs-lisp
+     ;; wgrep - Edit grep results inline
+     (use-package wgrep
+       :ensure t
+       :config
+       (setq wgrep-auto-save-buffer t))
+     #+end_src
+
+#+RESULTS:
+: t
+
 *** Fonts
 
     Using show-fonts and fontaine from Prot
@@ -438,6 +460,44 @@
 
 #+RESULTS:
 : t
+
+**** avy
+     #+begin_src emacs-lisp
+     (use-package avy
+     :ensure t
+     :bind (("C-;" . avy-goto-char-timer)
+            ("C-:" . avy-goto-line)
+            ("M-g w" . avy-goto-word-1)
+            ("M-g c" . avy-goto-char-2))
+     :config
+     (setq avy-background t)
+     (setq avy-style 'at-full)
+     (setq avy-timeout-seconds 0.5)
+     (setq avy-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
+
+     ;; avy-zap - Zap to char using avy
+(use-package avy-zap
+  :ensure t
+  :bind (("M-z" . avy-zap-to-char-dwim)
+         ("M-Z" . avy-zap-up-to-char-dwim)))
+
+;; ace-window - Window switching with avy
+(use-package ace-window
+  :ensure t
+  :bind (("M-o" . ace-window))
+  :config
+  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+  (setq aw-scope 'frame))
+
+;; link-hint - Open links with avy
+(use-package link-hint
+  :ensure t
+  :bind (("C-c l o" . link-hint-open-link)
+         ("C-c l c" . link-hint-copy-link)))
+     #+end_src
+
+#+RESULTS:
+: link-hint-copy-link
 
 *** Custom Emacs Functions
     Here are my custom functions for general emacs use.
@@ -1059,6 +1119,31 @@
     #+RESULTS:
     : cape-rfc1345
     
+*** Embark
+    #+begin_src emacs-lisp
+        (use-package embark
+            :ensure t
+            :bind (("C-." . embark-act)
+                   ("M-." . embark-dwim)
+                   ("C-h B" . embark-bindings))
+            :config
+            (setq embark-indicators
+                  '(embark-minimal-indicator
+                    embark-highlight-indicator
+                    embark-isearch-highlight-indicator))
+            (setq embark-prompter 'embark-completing-read-prompter))
+
+            ;; Embark + Consult integration (must-have)
+        (use-package embark-consult
+          :ensure t
+          :after (embark consult)
+          :hook (embark-collect-mode . consult-preview-at-point-mode))
+
+        
+    #+end_src
+
+#+RESULTS:
+
 *** Set exec-path from shell
 
     #+begin_src emacs-lisp
