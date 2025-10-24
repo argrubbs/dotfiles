@@ -1417,17 +1417,7 @@
     (use-package pyvenv
       :ensure t
       :config
-      (setq pyvenv-mode-line-indicator '(pyvenv-virtual-env-name ("[venv:" pyvenv-virtual-env-name "] ")))
-      
-      ;; Auto-activate venv in project root
-      (defun my-auto-activate-venv ()
-        (when-let* ((root (projectile-project-root))
-                    (venv-dir (expand-file-name ".venv" root)))
-          (when (file-directory-p venv-dir)
-            (pyvenv-activate venv-dir)
-            (eglot-reconnect))))
-      
-      (add-hook 'python-mode-hook #'my-auto-activate-venv))
+      (setq pyvenv-mode-line-indicator '(pyvenv-virtual-env-name ("[venv:" pyvenv-virtual-env-name "] "))))
     #+end_src
 
     #+RESULTS:
