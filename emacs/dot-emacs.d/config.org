@@ -499,6 +499,39 @@
 #+RESULTS:
 : link-hint-copy-link
 
+*** Window Management
+    #+begin_src emacs-lisp
+      (use-package ace-window
+      :ensure t
+      :bind (("M-o" . ace-window)
+             ("C-x o" . ace-window))
+      :config
+      (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+      (setq aw-scope 'frame)
+      (setq aw-dispatch-always t)
+
+      ;; Actions available after M-o:
+      ;; x - delete window
+      ;; m - swap windows
+      ;; M - move window
+      ;; c - copy window
+      ;; j - select buffer
+      ;; n - select next window
+      ;; u - undo window config
+      ;; r - resize window
+      ;; ? - show help
+      )
+
+    (use-package winner
+    :ensure nil
+    :init (winner-mode)
+    :bind (("C-c <left>" . winner-undo)
+           ("C-c <right>" . winner-redo)))
+    #+end_src
+
+#+RESULTS:
+: winner-redo
+
 *** Custom Emacs Functions
     Here are my custom functions for general emacs use.
 
@@ -1378,6 +1411,25 @@
 
     #+RESULTS:
     : t
+
+*** devdocs
+    #+begin_src emacs-lisp
+    (use-package devdocs
+    :ensure t
+    :bind (("C-h D" . devdocs-lookup)
+           ("C-c d d" . devdocs-lookup))
+    :config
+    ;; Install docs for your languages
+    (add-hook 'python-mode-hook
+              (lambda () (setq-local devdocs-current-docs '("python~3.13"))))
+    (add-hook 'yaml-mode-hook
+              (lambda () (setq-local devdocs-current-docs '("ansible~2.11"))))
+    (add-hook 'emacs-lisp-mode-hook
+              (lambda () (setq-local devdocs-current-docs '("elisp")))))
+    #+end_src
+
+#+RESULTS:
+: devdocs-lookup
 
 ** Projects
 
