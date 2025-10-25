@@ -66,6 +66,13 @@ else
 fi
 ##############################################################################
 
+# Create and assign global npm dir
+if command -v npm &> /dev/null; then
+   mkdir -p ~/.npm-global
+   npm config set prefix ~/.npm-global
+   [[ -d ~/.npm-global/bin ]] && path+=(~/.npm-global/bin)
+fi
+
 # Custom Aliases
 ##############################################################################
 alias ls='eza --color=always --all --long --git --icons --classify --group-directories-first'
@@ -73,6 +80,7 @@ alias ls='eza --color=always --all --long --git --icons --classify --group-direc
 
 # PATH Directories
 ##############################################################################
+typeset -U path
 path_dirs=(
     ~/.npm-global/bin
     ~/.local/bin
@@ -84,9 +92,8 @@ path_dirs=(
 # Check if the directory exists
 # If it does, add it to the PATH variable
 # Export PATH
-typeset -U PATH
 for dir in $path_dirs; do
-    [[ -d $dir ]] && PATH+=($dir)
+    [[ -d $dir ]] && path+=($dir)
 done
 export PATH
 ##############################################################################
@@ -99,6 +106,8 @@ if (( ${PATH[(Ie)"/opt/homebrew/bin"]} ));then
     export CPPFLAGS="-I/opt/homebrew/include"
 fi
 ##############################################################################
+
+
 
 # Set XDG_CONFIG_DIR for compatibility. In MacOS this can help certain packages not get confused
 ##############################################################################
