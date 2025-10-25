@@ -1,0 +1,39 @@
+configuration {
+    modi: "drun,run,window,ssh";
+    show-icons: true;
+    icon-theme: "Papirus-Dark";
+    display-drun: "Apps";
+    display-run: "Run";
+    display-window: "Windows";
+    display-ssh: "SSH";
+    drun-display-format: "{name}";
+    window-format: "{w} {c} {t}";
+
+    font: "JetBrainsMono Nerd Font 11";
+
+    /* Behavior */
+    matching: "fuzzy";
+    sort: true;
+    sorting-method: "fzf";
+    scroll-method: 0;
+    disable-history: false;
+
+    /* Keybindings */
+    kb-mode-next: "Alt+Tab";
+    kb-mode-previous: "Alt+Shift+Tab";
+    kb-remove-to-eol: "Control+Shift+e";
+    kb-accept-entry: "Control+m,Return,KP_Enter";
+    kb-remove-char-back: "BackSpace,Control+h";
+
+    /* Display */
+    terminal: "kitty";
+    sidebar-mode: true;
+    hover-select: true;
+    me-select-entry: "";
+    me-accept-entry: "MousePrimary";
+
+    /* Wayland specific */
+    dpi: 0;
+}
+
+@theme "modern-dark"

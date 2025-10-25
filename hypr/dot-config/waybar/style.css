@@ -1,0 +1,171 @@
+/* Rose Pine Theme for Waybar */
+
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font", "Font Awesome 6 Free";
+    font-size: 13px;
+    min-height: 0;
+}
+
+/* Rose Pine Colors */
+@define-color base      #191724;
+@define-color surface   #1f1d2e;
+@define-color overlay   #26233a;
+@define-color muted     #6e6a86;
+@define-color subtle    #908caa;
+@define-color text      #e0def4;
+@define-color love      #eb6f92;
+@define-color gold      #f6c177;
+@define-color rose      #ebbcba;
+@define-color pine      #31748f;
+@define-color foam      #9ccfd8;
+@define-color iris      #c4a7e7;
+@define-color highlightLow  #21202e;
+@define-color highlightMed  #403d52;
+@define-color highlightHigh #524f67;
+
+window#waybar {
+    background-color: @base;
+    color: @text;
+    transition-property: background-color;
+    transition-duration: 0.5s;
+}
+
+window#waybar.hidden {
+    opacity: 0.2;
+}
+
+#workspaces {
+    background-color: @surface;
+    margin: 4px 4px 4px 8px;
+    padding: 0 4px;
+    border-radius: 10px;
+}
+
+#workspaces button {
+    padding: 0 8px;
+    color: @subtle;
+    background-color: transparent;
+    border-radius: 8px;
+    margin: 4px 2px;
+}
+
+#workspaces button.active {
+    color: @base;
+    background-color: @iris;
+}
+
+#workspaces button.urgent {
+    color: @base;
+    background-color: @love;
+}
+
+#workspaces button:hover {
+    background-color: @overlay;
+    color: @text;
+}
+
+#window {
+    color: @text;
+    background-color: @surface;
+    margin: 4px 8px;
+    padding: 0 12px;
+    border-radius: 10px;
+}
+
+#clock,
+#battery,
+#cpu,
+#memory,
+#network,
+#pulseaudio,
+#tray {
+    padding: 0 12px;
+    margin: 4px 2px;
+    background-color: @surface;
+    color: @text;
+    border-radius: 10px;
+}
+
+#clock {
+    color: @iris;
+    font-weight: bold;
+}
+
+#battery {
+    color: @foam;
+}
+
+#battery.charging {
+    color: @pine;
+}
+
+#battery.warning:not(.charging) {
+    color: @gold;
+}
+
+#battery.critical:not(.charging) {
+    color: @love;
+    animation-name: blink;
+    animation-duration: 0.5s;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+@keyframes blink {
+    to {
+        background-color: @love;
+        color: @base;
+    }
+}
+
+#cpu {
+    color: @rose;
+}
+
+#memory {
+    color: @gold;
+}
+
+#network {
+    color: @foam;
+}
+
+#network.disconnected {
+    color: @love;
+}
+
+#pulseaudio {
+    color: @iris;
+}
+
+#pulseaudio.muted {
+    color: @muted;
+}
+
+#tray {
+    background-color: @surface;
+    margin-right: 8px;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+    background-color: @love;
+}
+
+tooltip {
+    background-color: @overlay;
+    border: 2px solid @iris;
+    border-radius: 10px;
+    color: @text;
+}
+
+tooltip label {
+    color: @text;
+}
