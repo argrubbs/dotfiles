@@ -2,7 +2,7 @@
 Type=Application
 Name=Emacs (Vanilla)
 Comment=Extensible text editor with custom config
-Exec=emacs --init-directory ~/.emacs.d %F
+Exec=emacs --with-profile default %F
 Icon=emacs
 Categories=Utility;TextEditor;
 Terminal=false

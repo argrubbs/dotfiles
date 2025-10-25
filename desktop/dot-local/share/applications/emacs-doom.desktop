@@ -2,8 +2,8 @@
 Type=Application
 Name=Emacs (Doom)
 Comment=Extensible text editor with Doom config
-Exec=emacs --init-directory ~/.config/emacs %F
+Exec=emacs --with-profile=doom %F
 Icon=emacs
 Categories=Utility;TextEditor;
-Terminal=false
+Terminal=true
 MimeType=text/plain;text/x-shellscript;application/x-shellscript;text/x-python;text/x-lisp;
