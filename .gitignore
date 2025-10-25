@@ -1,11 +1,2 @@
 **/history.txt
-**/elpa
-**/auto-save-list
-**/eln-cache
-**/emacs/.local
-**/eshell
-**/transient
-.emacs.d/config.el
-projects
 .aider*
-.#*
