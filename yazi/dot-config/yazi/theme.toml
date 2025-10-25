@@ -1,0 +1,53 @@
+# Yazi Theme - Rosé Pine color scheme
+
+[colors]
+# Background
+bg = "#191724"
+fg = "#e0def4"
+
+# Primary colors
+accent = "#c4a7e7"
+accent_2 = "#ea9a97"
+accent_3 = "#f6c177"
+
+[mgr]
+# File browser background and text
+bg = "#191724"
+fg = "#e0def4"
+
+# Selected file
+selection_bg = "#26233a"
+selection_fg = "#c4a7e7"
+
+# Focused directory
+directory_fg = "#c4a7e7"
+
+# Symlink
+symlink_fg = "#f6c177"
+
+# Broken symlink
+broken_fg = "#eb6f92"
+
+# Executable
+executable_fg = "#9ccfd8"
+
+[status]
+# Status bar (bottom)
+bg = "#26233a"
+fg = "#e0def4"
+separator_fg = "#6e6a86"
+
+[preview]
+# Preview pane
+bg = "#191724"
+fg = "#e0def4"
+
+[border]
+# Border color
+normal = "#26233a"
+active = "#c4a7e7"
+
+[icons]
+# Use a monospace font with icon support
+# Customize based on your preference
+use_nerd_font = true

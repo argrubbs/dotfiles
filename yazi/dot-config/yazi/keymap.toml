@@ -1,0 +1,80 @@
+# Yazi Keybindings - Productivity-focused
+
+[mgr]
+# Navigation (vim-style)
+k = "arrow -1"
+j = "arrow 1"
+K = "arrow -5"
+J = "arrow 5"
+h = "leave"
+l = "enter"
+H = "back"
+L = "forward"
+
+# Search
+"/" = "search fd"
+"?" = "search rg"
+n = "search-next"
+N = "search-prev"
+
+# Sorting
+s = "sort modified --reverse=no"
+S = "sort size --reverse=no"
+e = "sort extension --reverse=no"
+c = "sort created --reverse=no"
+
+# Selection
+v = "select --state=true"
+V = "select-all --state=true"
+u = "select-all --state=false"
+"<C-a>" = "select-all --state=true"
+"<C-u>" = "select-all --state=false"
+"<Space>" = "select --state=switch"
+
+# File operations
+y = "yank"
+Y = "yank path"
+p = "paste"
+P = "paste --force"
+x = "cut"
+d = "remove"
+D = "remove --permanently"
+
+# Create/Rename
+a = "create"
+r = "rename --cursor=before_ext"
+R = "rename --cursor=end"
+
+# Open files
+"<C-o>" = "open"
+"<Enter>" = "open --interactive"
+
+# Copy/Move
+m = "move"
+C = "copy"
+
+# Undo/Redo
+z = "undo"
+Z = "redo"
+
+# Bookmarks
+b = "bookmark --interactive"
+B = "bookmark --create"
+
+# Terminal & Other
+"`" = "shell"
+"!" = "shell --block"
+"~" = "cd ~"
+"." = "toggle-hidden"
+"<C-h>" = "toggle-hidden"
+q = "quit"
+Q = "quit --no-confirm"
+
+[tasks]
+w = "inspect"
+
+[completion]
+"<C-l>" = "close"
+"<Tab>" = "complete"
+"<S-Tab>" = "complete --reverse"
+"<C-c>" = "cancel"
