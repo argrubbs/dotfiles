@@ -75,7 +75,7 @@ fi
 
 # Custom Aliases
 #ll#############################################################################
-alias ls='eza --all --group-directories-first --long --oneline --hyperlink --icons=always --git --git-repos'
+alias ls='eza --all --group-directories-first --long --hyperlink --icons=always --git --git-repos'
 ##############################################################################
 
 # PATH Directories
