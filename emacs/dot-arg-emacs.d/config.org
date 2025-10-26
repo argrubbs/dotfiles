@@ -11,8 +11,8 @@
   (setq user-full-name "Adam Grubbs"
         user-main-address "argrubbs@users.noreply.github.com")
   #+end_src
-
 * Emacs Initialization
+
    #+begin_src emacs-lisp
    ;; menu shit remove
    (mapc
@@ -232,9 +232,8 @@
 
       #+begin_src emacs-lisp
       (use-package zoom
-	:init
-	(zoom-mode t)
 	:config
+	(zoom-mode t)
 	(custom-set-variables
          '(zoom-size '(0.618 . 0.618))))
       #+end_src
@@ -265,7 +264,7 @@
        #+begin_src emacs-lisp
        (use-package beacon
 	 :ensure t
-	 :init
+	 :config
 	 (beacon-mode 1))
        #+end_src
 
@@ -394,7 +393,7 @@
    #+end_src
 Setting a keybind for visiting my config.org
 #+begin_src emacs-lisp
-(global-set-key (kbd "C-c f p") 'arg/visit-config-org-file)"
+(global-set-key (kbd "C-c f p") 'arg/visit-config-org-file)
 #+end_src
 * Appearance
 ** Fonts
@@ -404,10 +403,10 @@ Setting a keybind for visiting my config.org
      (set-face-attribute 'default nil :family "Iosevka Nerd Font" :height 200 :weight 'semi-light)
      (set-face-attribute 'fixed-pitch nil :family "Iosevka Nerd Font Mono" :height 200))
 
-   (when (member "Caveat" (font-family-list))
-     (set-face-attribute 'font-lock-comment-face nil :font "Futura-20"))
+   (when (member "Futura" (font-family-list))
+     (set-face-attribute 'font-lock-comment-face nil :family "Futura" :height 200))
 
-   (when (member "Iosevka Nerd Font" (font-family-list))
+   (when (member "American Typewriter" (font-family-list))
      (set-face-attribute 'variable-pitch nil :family "American Typewriter" :height 220))
 #+end_src
 *** Org-Mode Font Settings
@@ -421,10 +420,10 @@ Setting a keybind for visiting my config.org
                    (org-level-6 . 1.1)
                    (org-level-7 . 1.1)
                    (org-level-8 . 1.1)))
-     (set-face-attribute (car face) nil :font "Iosevka Nerd Font" :weight 'bold :height (cdr face)))
+     (set-face-attribute (car face) nil :family "Iosevka Nerd Font" :weight 'bold :height (cdr face)))
 
    ;; Make the document title a bit bigger
-   (set-face-attribute 'org-document-title nil :font "Iosevka Nerd Font" :weight
+   (set-face-attribute 'org-document-title nil :family "Iosevka Nerd Font" :weight
                    'bold :height 1.8)
 
    (require 'org-indent)
