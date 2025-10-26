@@ -74,8 +74,8 @@ if command -v npm &> /dev/null; then
 fi
 
 # Custom Aliases
-##############################################################################
-alias ls='eza --color=always --all --long --git --icons --classify --group-directories-first'
+#ll#############################################################################
+alias ls='eza --all --group-directories-first --long --oneline --hyperlink --icons=always --git --git-repos'
 ##############################################################################
 
 # PATH Directories
@@ -107,8 +107,11 @@ if (( ${PATH[(Ie)"/opt/homebrew/bin"]} ));then
 fi
 ##############################################################################
 
-
-
+# FZF config settings
+##############################################################################
+export FZF_DEFAULT_OPTS="--preview '[[ -d {} ]] && eza -la {} || bat --style=numbers --color=always {}' --preview-window=right:50%"
+export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always {}'"
+##############################################################################
 # Set XDG_CONFIG_DIR for compatibility. In MacOS this can help certain packages not get confused
 ##############################################################################
 export XDG_CONFIG_DIR="~/.config"
