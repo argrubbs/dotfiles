@@ -503,7 +503,7 @@
          ("M-Z" . avy-zap-up-to-char-dwim)))
 
 ;; ace-window - Window switching with avy
-(use-package ace-window
+(oxuse-package ace-window
   :ensure t
   :bind (("M-o" . ace-window))
   :config
@@ -1173,31 +1173,6 @@
     #+RESULTS:
     : cape-rfc1345
     
-*** Embark
-    #+begin_src emacs-lisp
-        (use-package embark
-            :ensure t
-            :bind (("C-." . embark-act)
-                   ("M-." . embark-dwim)
-                   ("C-h B" . embark-bindings))
-            :config
-            (setq embark-indicators
-                  '(embark-minimal-indicator
-                    embark-highlight-indicator
-                    embark-isearch-highlight-indicator))
-            (setq embark-prompter 'embark-completing-read-prompter))
-
-            ;; Embark + Consult integration (must-have)
-        (use-package embark-consult
-          :ensure t
-          :after (embark consult)
-          :hook (embark-collect-mode . consult-preview-at-point-mode))
-
-        
-    #+end_src
-
-#+RESULTS:
-
 *** Set exec-path from shell
 
     #+begin_src emacs-lisp
@@ -1476,3 +1451,54 @@
      :defer t
      :bind (("C-c o t" . vterm-other-window)))
    #+end_src
+
+#+RESULTS:
+: vterm-other-window
+
+** Snippets
+   #+begin_src emacs-lisp
+   (use-package tempel
+     :ensure t
+     :defer t
+     :bind (("M-+" . tempel-complete)
+   	 ("M-*" . tempel-insert))
+     :init
+     (defun tempel-setup-capf ()
+       (setq-local completion-at-point-functions
+   		(cons #'tempel-expand
+   		      completion-at-point-functions)))
+
+     (add-hook 'conf-mode-hook 'tempel-setup-capf)
+     (add-hook 'prog-mode-hook 'tempel-setup-capf)
+     (add-hook 'text-mode-hook 'tempel-setup-capf))
+
+   (use-package tempel-collection
+     :ensure t)
+   #+end_src
+
+** Embark
+    #+begin_src emacs-lisp
+    (use-package embark
+        :ensure t
+        :bind (("C-." . embark-act)
+               ("M-." . embark-dwim)
+               ("C-h B" . embark-bindings))
+        :config
+        (setq embark-indicators
+              '(embark-minimal-indicator
+                embark-highlight-indicator
+                embark-isearch-highlight-indicator))
+        (setq embark-prompter 'embark-completing-read-prompter))
+
+        ;; Embark + Consult integration (must-have)
+    (use-package embark-consult
+      :ensure t
+      :after (embark consult)
+      :hook (embark-collect-mode . consult-preview-at-point-mode))
+
+
+    #+end_src
+
+#+RESULTS:
+| consult-preview-at-point-mode |
+
