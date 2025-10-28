@@ -1467,3 +1467,12 @@
 
 #+RESULTS:
 : consult-projectile-switch-projects
+
+** Shell and Terminal
+   Install vterm for terminal support
+   #+begin_src emacs-lisp
+   (use-package vterm
+     :ensure t
+     :defer t
+     :bind (("C-c o t" . vterm-other-window)))
+   #+end_src
