@@ -503,7 +503,7 @@
          ("M-Z" . avy-zap-up-to-char-dwim)))
 
 ;; ace-window - Window switching with avy
-(oxuse-package ace-window
+(use-package ace-window
   :ensure t
   :bind (("M-o" . ace-window))
   :config
