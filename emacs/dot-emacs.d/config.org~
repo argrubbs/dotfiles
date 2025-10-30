@@ -1,15 +1,34 @@
 #+TITLE: ARG Emacs
 #+AUTHOR: Adam Grubbs
 :PROPERTIES:
-#+PROPERTY: header-args :tangle yes
+#+PROPERTY: header-args :tangle yes :results silent
 #+STARTUP: overview
-#+RESULTS: silent
 :END:
 * Configuration
   :PROPERTIES:
   :VISIBILITY: children
   :END:
+** straight.el
+   #+begin_src emacs-lisp
+   (defvar bootstrap-version)
+   (let ((bootstrap-file
+          (expand-file-name
+           "straight/repos/straight.el/bootstrap.el"
+           (or (bound-and-true-p straight-base-dir)
+               user-emacs-directory)))
+         (bootstrap-version 7))
+     (unless (file-exists-p bootstrap-file)
+       (with-current-buffer
+           (url-retrieve-synchronously
+            "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
+            'silent 'inhibit-cookies)
+         (goto-char (point-max))
+         (eval-print-last-sexp)))
+     (load bootstrap-file nil 'nomessage))
 
+   (setq straight-use-package-by-default t)
+   (straight-use-package 'use-package)
+   #+end_src
 ** My Info 
    #+begin_src emacs-lisp
    (setq user-full-name "Adam Grubbs"
@@ -446,16 +465,49 @@
            ("C-c <right>" . winner-redo)))
     #+end_src
 
-** Navigation
+#+RESULTS:
+: winner-redo
 
-** Editing
+*** Custom Emacs Functions
+    Here are my custom functions for general emacs use.
 
-** Appearance
-*** Themes
-*** Modeline
-*** Fonts
-*** Beacon
-*** Zoom (golden-ratio)
+    This function opens my config.org file easily
+    #+begin_src emacs-lisp
+    (defun arg/visit-config-org-file ()
+      "Function that opens my config.org file to edit easily."
+      (interactive)
+        (let ((config-file (concat user-emacs-directory "config.org")))
+          (if (file-exists-p config-file)
+          (find-file config-file))))
+    #+end_src
+
+
+*** Custom Emacs Keybinds
+    #+begin_src emacs-lisp
+    (global-set-key (kbd "C-c f P") 'arg/visit-config-org-file)
+    #+end_src
+
+
+**** Which-Key
+     #+begin_src emacs-lisp
+     (use-package which-key
+       :straight t
+       :init (which-key-mode)
+       :config
+       (setq which-key-idle-delay 0.5)
+       (setq which-key-show-prefix nil)
+       (setq which-key-echo-keystrokes 0))
+
+     (use-package which-key-posframe
+       :straight t
+       :after which-key
+       :config
+       (which-key-posframe-mode))
+     #+end_src
+
+ #+RESULTS:
+ : t
+
 ** Org-Mode
 
 *** Settings

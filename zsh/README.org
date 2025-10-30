@@ -1,23 +1,32 @@
-# Path to your Oh My Zsh installation.
-##############################################################################
+#+TITLE: ZSH Config
+#+PROPERTY: header-args :tangle .zshrc
+
+* Oh-My-ZSH Installation
+
+#+begin_src shell
 export ZSH="$HOME/.oh-my-zsh"
 export FZF_BASE="/run/current-system/sw/bin"
-##############################################################################
-
+#+end_src
 
 # See https://github.com/ohmyzsh/ohmyzsh/wiki/Themes
 ##############################################################################
+#+begin_src shell
 ZSH_THEME="robbyrussell"
+#+end_src
 ##############################################################################
 
 # Auto Update OMZ
 ##############################################################################
+#+begin_src shell
 zstyle ':omz:update' mode auto      # update automatically without asking
+#+end_src
 ##############################################################################
 
 # Uncomment the following line to enable command auto-correction.
 ##############################################################################
+#+begin_src shell
 ENABLE_CORRECTION="true"
+#+end_src
 ##############################################################################
 
 # Uncomment the following line to display red dots whilst waiting for completion.
@@ -25,12 +34,16 @@ ENABLE_CORRECTION="true"
 # e.g. COMPLETION_WAITING_DOTS="%F{yellow}waiting...%f"
 # Caution: this setting can cause issues with multiline prompts in zsh < 5.7.1 (see #5765)
 ##############################################################################
+ #+begin_src shell
  COMPLETION_WAITING_DOTS="true"
+ #+end_src
 ##############################################################################
 
 # Set History timestamps
 ##############################################################################
+#+begin_src shell
 HIST_STAMPS="mm/dd/yyyy"
+#+end_src
 ##############################################################################
 
 # Which plugins would you like to load?
@@ -39,18 +52,24 @@ HIST_STAMPS="mm/dd/yyyy"
 # Example format: plugins=(rails git textmate ruby lighthouse)
 # Add wisely, as too many plugins slow down shell startup.
 ##############################################################################
+#+begin_src shell
 plugins=(git zoxide colored-man-pages command-not-found sudo fzf)
+#+end_src
 ##############################################################################
 
 
 # Enable vim bindings
 ##############################################################################
-VI_MODE_SET_CURSOR=true
+#+begin_src 
+export VI_MODE_SET_CURSOR=true
+#+end_src
 ##############################################################################
 
 # Enable OMZ
 ##############################################################################
+#+begin_src shell
 source $ZSH/oh-my-zsh.sh
+#+end_src
 ##############################################################################
 
 ##############################################################################
@@ -59,27 +78,34 @@ source $ZSH/oh-my-zsh.sh
 
 # Preferred editor for local and remote sessions
 ##############################################################################
+#+begin_src shell
 if [[ -n $SSH_CONNECTION ]]; then
   export EDITOR='vim'
 else
   export EDITOR='emacs'
 fi
+#+end_src
 ##############################################################################
 
 # Create and assign global npm dir
+#+begin_src shell
 if command -v npm &> /dev/null; then
    mkdir -p ~/.npm-global
    npm config set prefix ~/.npm-global
    [[ -d ~/.npm-global/bin ]] && path+=(~/.npm-global/bin)
 fi
+#+end_src
 
 # Custom Aliases
 #ll#############################################################################
+#+begin_src shell
 alias ls='eza --all --group-directories-first --long --hyperlink --icons=always --git --git-repos'
+#+end_src
 ##############################################################################
 
 # PATH Directories
 ##############################################################################
+#+begin_src shell
 typeset -U path
 path_dirs=(
     ~/.npm-global/bin
@@ -88,39 +114,61 @@ path_dirs=(
     /opt/homebrew/bin
 )
 
-# Iterate over path_dirs above
-# Check if the directory exists
-# If it does, add it to the PATH variable
-# Export PATH
 for dir in $path_dirs; do
     [[ -d $dir ]] && path+=($dir)
 done
 export PATH
+#+end_src
 ##############################################################################
 
 # Add homebrew to path if folder exists
 ##############################################################################
+#+begin_src shell
 if (( ${PATH[(Ie)"/opt/homebrew/bin"]} ));then
     export PKG_CONFIG_PATH="/opt/homebrew/lib/pkgconfig"
     export LDFLAGS="-L/opt/homebrew/lib"
     export CPPFLAGS="-I/opt/homebrew/include"
 fi
+#+end_src
 ##############################################################################
 
 # FZF config settings
 ##############################################################################
+#+begin_src shell
 export FZF_DEFAULT_OPTS="--preview '[[ -d {} ]] && eza -la {} || bat --style=numbers --color=always {}' --preview-window=right:50%"
 export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always {}'"
+#+end_src
 ##############################################################################
 # Set XDG_CONFIG_DIR for compatibility. In MacOS this can help certain packages not get confused
 ##############################################################################
+#+begin_src shell
 export XDG_CONFIG_DIR="~/.config"
+#+end_src
 ##############################################################################
 
 # Load Homebrew into path
 ##############################################################################
+#+begin_src shell
 if [[ -f "/opt/homebrew/bin/brew" ]]
 then
     eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
+#+end_src
 ##############################################################################
+
+* Emacs vterm integration
+  #+begin_src shell
+  vterm_printf() {
+    if [ -n "$TMUX" ] \
+        && { [ "${TERM%%-*}" = "tmux" ] \
+            || [ "${TERM%%-*}" = "screen" ]; }; then
+        # Tell tmux to pass the escape sequences through
+        printf "\ePtmux;\e\e]%s\007\e\\" "$1"
+    elif [ "${TERM%%-*}" = "screen" ]; then
+        # GNU screen (screen, screen-256color, screen-256color-bce)
+        printf "\eP\e]%s\007\e\\" "$1"
+    else
+        printf "\e]%s\e\\" "$1"
+    fi
+}
+  #+end_src

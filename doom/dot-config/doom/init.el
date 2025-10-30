@@ -22,7 +22,7 @@
 
        :completion
        ;;company           ; the ultimate code completion backend
-       (corfu +orderless +icons)  ; complete with cap(f), cape and a flying feather!
+       (corfu +orderless +icons +cape)  ; complete with cap(f), cape and a flying feather!
        ;;helm              ; the *other* search engine for love and life
        ;;ido               ; the other *other* search engine...
        ;;ivy               ; a search engine for love and life
@@ -89,7 +89,7 @@
        ;;grammar           ; tasing grammar mistake every you make
 
        :tools
-       ansible
+       (ansible +lsp)
        ;;biblio            ; Writes a PhD for you (citation needed)
        ;;collab            ; buffers with friends
        debugger          ; FIXME stepping through code, to help you add bugs
@@ -100,7 +100,7 @@
        (eval +overlay)     ; run code, run (also, repls)
        lookup              ; navigate your code and its documentation
        llm               ; when I said you needed friends, I didn't mean...
-       (lsp +eglot +peek)      ; M-x vscode
+       (lsp +eglot)      ; M-x vscode
        (magit +forge)             ; a git porcelain for Emacs
        ;;make              ; run make tasks from Emacs
        (pass +auth)              ; password manager for nerds
