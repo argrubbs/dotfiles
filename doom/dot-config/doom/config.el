@@ -75,3 +75,41 @@
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
+
+(use-package! gptel
+  :config
+  (gptel-make-ollama "ollama"
+    :host "localhost:11434"
+    :stream t
+    :models '(qwen3:8b)))
+
+(setq
+ gptel-model 'qwen3:8b
+ gptel-backend (gptel-make-ollama "LLAMARAMA"
+                 :host "localhost:11434"
+                 :stream t
+                 :models '(qwen3:8b llama3.2:3b)))
+
+(use-package! ellama
+  :bind (("C-c e" . ellama))
+  :hook (org-ctrl-c-ctrl-c-final . ellama-chat-send-last-message)
+  :init (setopt ellama-auto-scroll t)
+  (require 'llm-ollama)
+  (setopt ellama-provider
+          (make-llm-ollama
+           :chat-model "qwen3:8b"
+           :embedding-model "nomic-embed-text"
+           :default-chat-non-standard-params '(("num_ctx" . 8192))))
+  (setopt ollama-summarization-provider
+          (make-llm-ollama
+           :chat-model "qwen2.5:3b"
+           :embedding-model "nomic-embed-text"
+           :default-chat-non-standard-params '(("num_ctx" . 32768))))
+  (setopt ollama-coding-provider
+          (make-llm-ollama
+           :chat-model "qwen2.5-coder:3b"
+           :embedding-model "nomic-embed-text"
+           :default-chat-non-standard-params '(("num_ctx" . 32768))))
+  :config
+  (ellama-context-header-line-global-mode +1)
+  (ellama-session-header-line-global-mode +1))
