@@ -1,142 +1,23 @@
 #+TITLE: ARG Emacs
 #+AUTHOR: Adam Grubbs
 :PROPERTIES:
-#+PROPERTY: header-args :tangle yes
-#+STARTUP: overview
+#+PROPERTY: header-args :tangle config.el
+#+STARTUP: contents
 #+RESULTS: silent
 :END:
-* Configuration
-  :PROPERTIES:
-  :VISIBILITY: children
-  :END:
 
-** My Info 
-   #+begin_src emacs-lisp
-   (setq user-full-name "Adam Grubbs"
-         user-main-address "argrubbs@users.noreply.github.com")
-   #+end_src
+* Emacs Configuration
 
+** Base Settings
 
-** Custom Variables
-   #+begin_src emacs-lisp
-   (defcustom arg-dotfiles-folder "~/dotfiles"
-     "The folder where dotfiles exist. It is configured to be managed by GNU Stow."
-     :type 'string
-     :group 'dotfiles)
+*** Set initial mode to Org
+#+begin_src emacs-lisp
+  (setq initial-major-mode 'org-mode)
+#+end_src
 
-   (defcustom arg-dotfiles-config-files-directory "emacs/dot-emacs.d/"
-     "The directory path inside `arg/dotfiles-folder' where emacs config files are stored."
-     :type 'stringq
-     :group 'dotfiles)
-   #+end_src
-** Custom Functions
-   #+begin_src emacs-lisp
-   #+end_src
-** Emacs Init
+** UI
 
-*** Settings
-
-    Sane Defaults
-    #+begin_src emacs-lisp
-    ;; menu shit remove
-    (mapc
-     (lambda (mode)
-       (when (fboundp mode)
-         (funcall mode -1)))
-     ' (menu-bar-mode tool-bar-mode scroll-bar-mode))
-
-    (unless (file-directory-p "~/dev")
-      (make-directory "~/dev" t)
-      (setq default-directory "~/dev"))
-
-    ;; Init
-    (setq inhibit-default-init t
-          inhibit-startup-echo-area-message t
-          inhibit-startup-screen t
-          initial-scratch-message nil)
-
-    ;; warn when opening files bigger than 100MB
-    (setq large-file-warning-threshold 100000000)
-
-    (defconst gas-savefile-dir (expand-file-name "savefile" user-emacs-directory))
-
-    ;; Create the savefile dir if it doesn't exist
-    (unless (file-exists-p gas-savefile-dir)
-      (make-directory gas-savefile-dir))
-
-    ;;; UI
-    ;; No blink cursor
-    (blink-cursor-mode -1)
-
-    (setq use-dialog-box nil)
-
-    ;; disable bell ring
-    (setq ring-bell-function 'ignore)
-
-    ;; nice scrolling
-    (setq scroll-margin 0
-          scroll-conservatively 100000
-          scroll-preserve-screen-position 1)
-
-    ;; mode line settings
-    (line-number-mode t)
-    (column-number-mode t)
-    (size-indication-mode t)
-
-    ;; enable y/n answers
-    (fset 'yes-or-no-b 'y-or-n-p)
-
-    ;; useful frame title
-    (setq frame-title-format
-          '((:eval (if (buffer-file-name)
-    		   (abbreviate-file-name (buffer-file-name))
-    		 "%b"))))
-
-    ;; org default mode
-    (setq initial-major-mode 'org-mode)
-
-    ;; make cursor tab length on tab
-    (setq-default x-stretch-cursor t)
-
-    ;; Keep emacs custom-settings in separate file
-    (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-    (when (file-exists-p custom-file)
-      (load custom-file))
-
-    ;; Store all backup and autosave files in the tmp dir
-    (setq backup-directory-alist
-          `((".*" . ,temporary-file-directory)))
-    (setq auto-save-file-name-transforms
-          `((".*" ,temporary-file-directory t)))
-
-    ;; revert buffers automatically when file changed externally
-    (global-auto-revert-mode t)
-
-    ;; Make backups of files, even when they're in vcs
-    (setq vc-make-backup-files t)
-
-    ;; Fix empty pasteboard error
-    (setq save-interprogram-paste-before-kill nil)
-
-    ;; line highlihgt
-    (hl-line-mode t)
-
-    ;; enable recent files
-    (recentf-mode t)
-    #+end_src
-
-    #+RESULTS:
-    : t
-
-**** Elisp Formatter
-     #+begin_src emacs-lisp
-     ;;     (use-package elisp-format
-     ;;      :straight t)
-     #+end_src
-
-     #+RESULTS:
-     
-*** Display
+*** Theme
 
 **** Declare all themes as safe
 
@@ -149,160 +30,31 @@
      (setq custom-safe-themes t)
      #+end_src
 
-     #+RESULTS:
-     : t
 
-**** Install Doom Themes
-     This will install doom-themes from MELPA for use. To set the theme
-     change it in the =(load-theme 'doom-theme-name t)= line.
-
-     #+begin_src emacs-lisp
-     ;; Install doom-themes
-     (use-package doom-themes
-       :custom
-       (doom-themes-enable-bold t)
-       (doom-themes-enable-italic t)
-       :config
-       (doom-themes-visual-bell-config)
-       (doom-themes-org-config))
-     #+end_src
-
-**** Load the Theme                                                   :theme:
-
-     #+begin_src emacs-lisp
-     (load-theme 'modus-vivendi-tinted t)
-     #+end_src
-
-     #+RESULTS:
-     : t
-
-**** Load Doom Modeline
-
-     Doom Modeline is a modeline for the bottom of the Emacs window
-
-     #+begin_src emacs-lisp
-(use-package doom-modeline
-  :straight t
-  :init (doom-modeline-mode 1)
-  :custom
-  ;; Height
-  (doom-modeline-height 25)
-  
-  ;; Width
-  (doom-modeline-bar-width 4)
-  (doom-modeline-window-width-limit 85)
-  
-  ;; Icons
-  (doom-modeline-icon t)
-  (doom-modeline-major-mode-icon t)
-  (doom-modeline-major-mode-color-icon t)
-  (doom-modeline-buffer-state-icon t)
-  (doom-modeline-buffer-modification-icon t)
-  
-  ;; Text style
-  (doom-modeline-unicode-fallback nil)
-  (doom-modeline-minor-modes nil)
-  
-  ;; Buffer info
-  (doom-modeline-buffer-file-name-style 'truncate-upto-project)
-  (doom-modeline-buffer-encoding nil)
-  
-  ;; LSP/Eglot
-  (doom-modeline-lsp t)
-  (doom-modeline-check-simple-format t)
-  
-  ;; Git
-  (doom-modeline-vcs-max-length 12)
-  
-  ;; Environment
-  (doom-modeline-env-version t)
-  (doom-modeline-env-python-executable "python3")
-  
-  ;; Performance
-  (doom-modeline-enable-word-count nil)
-  (doom-modeline-indent-info nil))
-
-;; Ensure nerd-icons are installed
-(use-package nerd-icons
-  :straight t)
-     #+end_src
-
-     #+RESULTS:
-
-**** Zoom (golden-ratio)
-
-     Package that handles automatic window sizing based on active window
-
-     #+begin_src emacs-lisp
-     (use-package zoom
-       :init
-       (zoom-mode t)
-       :config
-       (custom-set-variables
-        '(zoom-size '(0.618 . 0.618))))
-     #+end_src
-
-     #+RESULTS:
-     : t
-
-**** Posframe
-     #+begin_src emacs-lisp
-(use-package posframe
-  :straight t
-  :config
-  ;; Global posframe settings
-  
-  ;; Default position handler for all posframes
-  (setq posframe-mouse-banish t)  ; Move mouse away from posframe
-  
-  ;; Default parameters for all posframes
-  (setq-default posframe-arghandler
-                (lambda (buffer-or-name key value)
-                  (or (and (eq key :internal-border-width) 10)
-                      (and (eq key :internal-border-color) "#51afef")
-                      (and (eq key :background-color) "#282c34")
-                      value)))
-  
-  ;; Posframe border style
-  (setq posframe-border-width 2)
-  
-  ;; Hide posframe on specific events
-  (add-hook 'posframe-hide-hook
-            (lambda () (set-cursor-color "white"))))
-     #+end_src
-
-#+RESULTS:
-
-**** Beacon
-     #+begin_src emacs-lisp
-     (use-package beacon
-       :straight t
-       :init
-       (beacon-mode 1))
-     #+end_src
-
-#+RESULTS:
-
-**** Wgrep
-     #+begin_src emacs-lisp
-     ;; wgrep - Edit grep results inline
-     (use-package wgrep
-       :straight t
-       :config
-       (setq wgrep-auto-save-buffer t))
-     #+end_src
+**** Install Themes
+Install various themes
+#+begin_src emacs-lisp
+  (use-package doom-themes)
+  (straight-use-package '(moe-theme :host github
+  				  :repo "kuanyui/moe-theme.el"
+  				  :branch "dev"))
+  (use-package ef-themes
+    :init
+    (ef-themes-take-over-modus-themes-mode 1)
+    :config
+    (setq modus-themes-mixed-fonts t)
+    (setq modus-themes-italic-constructs t))
+#+end_src
 
 #+RESULTS:
 : t
 
+**** Load my theme
+#+begin_src emacs-lisp
+  (load-theme 'moe-dark t)
+#+end_src
+
 *** Fonts
-
-    Using show-fonts and fontaine from Prot
-    [[https://protesilaos.com/emacs/show-font]]
-
-    =show-font= is for previewing fonts
-    =fontaine= is for configuring fontsf
-
 
     #+begin_src emacs-lisp
     (when (member "Iosevka Nerd Font Mono" (font-family-list))
@@ -348,400 +100,99 @@
     #+End_Src
 
     #+RESULTS:
-    | #[0 \301\211\207 [imenu-create-index-function org-imenu-get-tree] 2] | #[nil ((add-hook 'completion-at-point-functions #'cape-emoji nil t) (add-hook 'completion-at-point-functions #'org-roam-complete-link-at-point nil t)) nil] | visual-line-mode | variable-pitch-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
+    | variable-pitch-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
 
-    Adding Nerd Icons
+
+*** Nerd Icons
 
     #+begin_src emacs-lisp
     (use-package nerd-icons
       :straight t)
     #+end_src
 
-    #+RESULTS:
+*** Modeline
 
-*** Editor
-**** expand-region 
+*** Extras
+
+**** Zoom
+
+Package that handles automatic window sizing based on active window
+
+     #+begin_src emacs-lisp
+     (use-package zoom
+       :init
+       (zoom-mode t)
+       :config
+       (custom-set-variables
+        '(zoom-size '(0.618 . 0.618))))
+     #+end_src
+
+**** Posframe
+
+     #+begin_src emacs-lisp
+(use-package posframe
+  :straight t
+  :config
+  ;; Global posframe settings
+  
+  ;; Default position handler for all posframes
+  (setq posframe-mouse-banish t)  ; Move mouse away from posframe
+  
+  ;; Default parameters for all posframes
+  (setq-default posframe-arghandler
+                (lambda (buffer-or-name key value)
+                  (or (and (eq key :internal-border-width) 10)
+                      (and (eq key :internal-border-color) "#51afef")
+                      (and (eq key :background-color) "#282c34")
+                      value)))
+  
+  ;; Posframe border style
+  (setq posframe-border-width 2)
+  
+  ;; Hide posframe on specific events
+  (add-hook 'posframe-hide-hook
+            (lambda () (set-cursor-color "white"))))
+     #+end_src
+
+*** Editor settings tweaks
+Need to enable line numbers, column numbers, and a size indicator
+#+begin_src emacs-lisp
+  (line-number-mode t)
+  (column-number-mode t)
+  (size-indication-mode t)
+#+end_src
+
+Highlight line mode
+#+begin_src emacs-lisp
+  (hl-line-mode t)
+#+end_src
+
+Enable recent files mode
+#+begin_src emacs-lisp
+(recentf-mode t)
+#+end_src
+
+** Editing
+
+*** expand-region
       #+begin_src emacs-lisp
       (use-package expand-region
 	:straight t
 	:bind (("C-=" . er/expand-region)))
       #+end_src
 
-  #+RESULTS:
-  : er/expand-region
-
-**** save-place-mode
+*** save-place-move
      #+begin_src emacs-lisp
      (save-place-mode 1)
      #+end_src
 
-#+RESULTS:
-: t
-
-**** avy
+*** beacon
      #+begin_src emacs-lisp
-     (use-package avy
-     :straight t
-     :bind (("C-;" . avy-goto-char-timer)
-            ("C-:" . avy-goto-line)
-            ("M-g w" . avy-goto-word-1)
-            ("M-g c" . avy-goto-char-2))
-     :config
-     (setq avy-background t)
-     (setq avy-style 'at-full)
-     (setq avy-timeout-seconds 0.5)
-     (setq avy-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
-
-     ;; avy-zap - Zap to char using avy
-(use-package avy-zap
-  :straight t
-  :bind (("M-z" . avy-zap-to-char-dwim)
-         ("M-Z" . avy-zap-up-to-char-dwim)))
-
-;; ace-window - Window switching with avy
-(use-package ace-window
-  :straight t
-  :bind (("M-o" . ace-window))
-  :config
-  (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
-  (setq aw-scope 'frame))
-
-;; link-hint - Open links with avy
-(use-package link-hint
-  :straight t
-  :bind (("C-c l o" . link-hint-open-link)
-         ("C-c l c" . link-hint-copy-link)))
-     #+end_src
-
-#+RESULTS:
-: link-hint-copy-link
-
-*** Window Management
-    #+begin_src emacs-lisp
-      (use-package ace-window
-      :straight t
-      :bind (("M-o" . ace-window)
-             ("C-x o" . ace-window))
-      :config
-      (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
-      (setq aw-scope 'frame)
-      (setq aw-dispatch-always t)
-
-      ;; Actions available after M-o:
-      ;; x - delete window
-      ;; m - swap windows
-      ;; M - move window
-      ;; c - copy window
-      ;; j - select buffer
-      ;; n - select next window
-      ;; u - undo window config
-      ;; r - resize window
-      ;; ? - show help
-      )
-
-    (use-package winner
-    :ensure nil
-    :init (winner-mode)
-    :bind (("C-c <left>" . winner-undo)
-           ("C-c <right>" . winner-redo)))
-    #+end_src
-
-** Navigation
-
-** Editing
-
-** Appearance
-*** Themes
-*** Modeline
-*** Fonts
-*** Beacon
-*** Zoom (golden-ratio)
-** Org-Mode
-
-*** Settings
-    Change the following variables:
-
-    - =org-goto-auto-isearch= to allos for the use of n/p and f/b for org-goto =C-c C-j=
-    - =org-M-RET-may-split-lines= to prevent adding headings with =M-RET= in the middle of the line
-    - =org-yank-folded-subtrees= to allow for yanking (pasting) the contents of a killed (copy/cut) subtree
-    - =org-return-follows-link= allows you to use the RET key to follow links (default is =C-c C-o=)
-
-    #+begin_src emacs-lisp
-    (setq org-goto-auto-isearch nil
-          org-M-RET-may-split-lines nil
-          org-return-follows-link t
-          org-yank-olded-subtrees nil
-          org-adapt-indentation t
-          org-hide-leading-stars t
-          org-hide-emphasis-markers t
-          org-pretty-entities t
-          org-ellipsis "  ·"
-          org-src-fontify-natively t
-          org-src-tab-acts-natively t
-          org-edit-src-content-indentation 0)
-
-    (add-hook 'org-mode-hook 'visual-line-mode)
-
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-    ;; (use-package olivetti	       ;;
-    ;;   :hook (org-mode . olivetti-mode)) ;;
-    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-
-    #+end_src
-
-    #+RESULTS:
-    | olivetti-mode | visual-line-mode | variable-pitch-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
-
-*** Custom Org-Mode Functions
-
-    Here are my custom org-mode functions. They will include docstrings so there isn't
-    a great need for documentation here.
-
-    #+begin_src emacs-lisp
-    (defun arg-emacs-org-insert-drawer-correctly (arg)
-      "Insert a drawer or PROPERTIES drawer with prefix ARG. Places the cursor into
-    the new drawer."
-      (interactive "P")
-      (if arg
-          (let ((start (point))
-    	    (org-insert-property-drawer)
-    	    ;; Find the beginning of the drawer at point or after
-    	    (goto-char start)
-    	    (when (re-search-forward ":PROPERTIES:" nil t)
-    	      ;; Move to line after :PROPERTIES:
-    	      (forward-line 1)))
-    	(call-interactively 'org-insert-drawer))))
-
-    (define-key org-mode-map (kbd "C-c i")
-    	    'arg-emacs-org-insert-drawer-correctly)
-
-    ;; Assign keybinds for moving between links
-    (with-eval-after-load 'org
-      (define-key org-mode-map (kbd "M-n") #'org-next-link)
-      (define-key org-mode-map (kbd "M-p") #'prg-previous-link))
-    #+end_src
-
-    #+RESULTS:
-    : prg-previous-link
-
-
-*** Custom Org-Mode Keybinds :keybind:
-    :PROPERTIES:
-    :CUSTOM_ID: org_keys
-    :END:
-
-    #+begin_src emacs-lisp
-    (global-set-key (kbd "<f7>")
-    		'org-tags-view)
-    (global-set-key (kbd "C-c a")
-    		#'org-agenda)
-    #+end_src
-
-    #+RESULTS:
-    : org-agenda
-
-
-*** Org Modern
-
-    Modern Org mode package
-
-    #+begin_src emacs-lisp
-    (use-package org-modern
-      :config
-      (setq
-       org-auto-align-tags t
-       org-tags-column 0
-       org-fold-catch-invisible-edits 'show-and-error
-       org-special-ctrl-a/e t
-       org-insert-heading-respect-content t
-
-       ;; Don't style the following
-       org-modern-tag nil
-       org-modern-priority nil
-       org-modern-todo nil
-       org-modern-table nil
-
-       ;; Agenda styling
-       org-agenda-tags-column 0
-       org-agenda-block-separator ?─
-       org-agenda-time-grid
-       '((daily today require-timed)
-         (800 1000 1200 1400 1600 1800 2000)
-         " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
-       org-agenda-current-time-string
-       "⭠ now ─────────────────────────────────────────────────")
-
-      (global-org-modern-mode))
-
-    #+end_src
-
-    #+RESULTS:
-
-*** Org Superstar
-
-    This package enables pretty bullets in org mode
-
-    #+begin_src emacs-lisp
-    (use-package org-superstar
-        :straight t
-          :custom
-    ;; Use simple bullets that definitely exist in your font
-    (org-superstar-headline-bullets-list '("●" "○" "◆" "◇" "▶" "▷"))
-    ;; Or use these if you want more variety
-    ;; (org-superstar-headline-bullets-list '("◉" "○" "✸" "✿" "✤" "✜"))
-    (org-superstar-remove-leading-stars t)
-    (org-superstar-leading-bullet ?\s))
-
-    #+end_src
-
-    #+RESULTS:
-
-*** Org Bullets
-
-    #+begin_src emacs-lisp
-    ;; (use-package org-bullets
-    ;;   :config
-    ;;   (add-hook 'org-mode-hook (lambda ()
-    ;; 			     (org-bullets-mode 1))))
-    #+end_src
-
-    #+RESULTS:
-
-*** [#B] Org Contrib
-
-    Extra contrib packages to extend org mode
-
-    #+begin_src emacs-lisp
-    (use-package org-contrib
-      :straight t)
-    (require 'ox)
-    #+end_src
-
-    #+RESULTS:
-    : ox
-
-*** Org Agenda                                                   :org_agenda:
-
-    Org Agenda file is set with ~C-c ]~ and removed with ~C-c [~
-#+begin_src emacs-lisp
-(setq org-agenda-files '("~/org/agenda"))
-#+end_src
-
-#+RESULTS:
-: ~/org/agenda
-
-    My personal agenda file is in =~/org/agenda.org=
-
-*** Org Attach                                                   :org_attach:
-    :PROPERTIES:
-
-    :END:
-    Org Attachments are useful for adding files to org files.
-
-    Set org attach directory
-    #+begin_src emacs-lisp
-    (defvar arg-org-data-dir (expand-file-name "~/org/data")
-      "Variable for setting the data directory for org attach")
-    (unless (file-directory-p arg-org-data-dir)
-      (make-directory arg-org-data-dir t))
-    (if (file-directory-p arg-org-data-dir)
-        (setq org-attach-id-dir arg-org-data-dir)) 
-    #+end_src
-
-    #+RESULTS:
-    : ~/org/data
-
-    Defining some custom functions for org attach
-    #+begin_src emacs-lisp
-    ;; COPY and attach files to org headers using dired
-    (add-hook 'dired-mode-hook
-    	  (lambda ()
-    	    (define-key dired-mode-map (kbd "C-c C-x c")
-    			(lambda ()
-    			  (interactive)
-    			  (let ((org-attach-method 'cp))
-    			    (call-interactively #'org-attach-dired-to-subtree))))))
-    ;; MOVE and attach files to org headers using dired
-    (add-hook 'dired-mode-hook
-    	  (lambda ()
-    	    (define-key dired-mode-map (kbd "C-c C-x m")
-    			(lambda ()
-    			  (interactive)
-    			  (let ((org-attach-method 'mv))
-    			    (call-interactively #'org-attach-dired-to-subtree))))))
-    #+end_src
-
-*** Org Roam
-
-    Org-Roam is a note-taking system similar to zettelkasten.
-
-**** Install and Config
-
-     This installs and configures org-roam.
-     =(setq org-roam-v2-ack t)= is in the config to avoid the
-     warnings about migrating from v1.
-     =(org-roam-direcory "~/RoamNotes")= sets the directory that
-     stores the notes. Org-Roam will bulid a =sqlite= database
-     for storing the metadata for the nodes (notes) and the links
-     between them.
-
-     The variable =arg-emacs-org-roam-dir= assigns a directory
-     to be used for org-roam notes. There is logic to determine if
-     this directory exists, and if it does not then it should
-     create it.
-
-
-     #+begin_src emacs-lisp
-     (defvar arg-emacs-org-roam-dir "~/RoamNotes"
-       "Variable for Org Roam notes location")
-
-     (unless
-         (file-directory-p arg-emacs-org-roam-dir)
-       (make-directory arg-emacs-org-roam-dir))
-
-     (use-package org-roam
+     (use-package beacon
        :straight t
        :init
-       (setq org-roam-v2-ack t)
-       :custom
-       (org-roam-directory arg-emacs-org-roam-dir)
-       (org-roam-completion-everywhere t)
-       (org-roam-capture-templates
-        '(("d" "default" plain
-           "%?"
-           :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-           :unnarrowed t)))
-       :bind (("C-c n l" . org-roam-buffer-toggle)
-       	 ("C-c n f" . org-roam-node-find)
-       	 ("C-c n i" . org-roam-node-insert)
-     	 :map org-mode-map
-     	 ("C-M-i" . completion-at-point))
-       :config
-       (org-roam-setup))
-
-     ;; Set database autosync
-     (org-roam-db-autosync-enable)
+       (beacon-mode 1))
      #+end_src
-
-     #+RESULTS:
-     : t
-
-**** Capture Templates
-
-     Here are my capture templates for Org Roam. Keeping them here for easy access and editing.
-     [2025-10-19 Sun] Need to look into having these things in other org files and tangled into the config at some point.
-
-     #+begin_src emacs-lisp
-
-     #+end_src
-
-* Package Configs
-
-  Below are the configs for various third-party packages. These packages provide functionality beyond the
-  standard editor functions or augment existing functions.
-
-** Completion
 
    These packages ars focused on providing a better experience for completion
    in the minibuffer, editor, and anywhere else
@@ -758,7 +209,7 @@
 
     #+RESULTS:
     : t
-
+** Completion
 *** Vertico
 
     Vertico provides a cleaner minibuffer completion framework. Check [[roam:emacs-package-vertico][Vertico Notes]] for more info.
@@ -1047,8 +498,315 @@
 
    #+RESULTS:
    : ((MANPATH . :/usr/share/man:/usr/local/share/man:/Library/TeX/Distributions/.DefaultTeX/Contents/Man:) (PATH . /opt/homebrew/bin:/opt/homebrew/sbin:/Users/adamgrubbs/.npm-global/bin:/Users/adamgrubbs/.local/bin:/Users/adamgrubbs/.config/emacs/bin:/opt/homebrew/lib/node_modules:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/TeX/texbin))
-   
-** Git and Version Control
+
+*** Embark
+    #+begin_src emacs-lisp
+    (use-package embark
+        :straight t
+        :bind (("C-." . embark-act)
+               ("M-." . embark-dwim)
+               ("C-h B" . embark-bindings))
+        :config
+        (setq embark-indicators
+              '(embark-minimal-indicator
+                embark-highlight-indicator
+                embark-isearch-highlight-indicator))
+        (setq embark-prompter 'embark-completing-read-prompter))
+
+        ;; Embark + Consult integration (must-have)
+    (use-package embark-consult
+      :straight t
+      :after (embark consult)
+      :hook (embark-collect-mode . consult-preview-at-point-mode))
+
+
+    #+end_src
+
+
+** Navigation
+
+*** avy
+     #+begin_src emacs-lisp
+            (use-package avy
+            :straight t
+            :bind (("C-;" . avy-goto-char-timer)
+                   ("C-:" . avy-goto-line)
+                   ("M-g w" . avy-goto-word-1)
+                   ("M-g c" . avy-goto-char-2))
+            :config
+            (setq avy-background t)
+            (setq avy-style 'at-full)
+            (setq avy-timeout-seconds 0.5)
+            (setq avy-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l)))
+
+            ;; avy-zap - Zap to char using avy
+       (use-package avy-zap
+         :straight t
+         :bind (("M-z" . avy-zap-to-char-dwim)
+                ("M-Z" . avy-zap-up-to-char-dwim)))
+
+       ;; ace-window - Window switching with avy
+       (use-package ace-window
+         :straight t
+         :bind (("C-x o" . ace-window))
+         :config
+         (setq aw-keys '(?a ?s ?d ?f ?g ?h ?j ?k ?l))
+         (setq aw-scope 'frame)
+         (setq aw-dispatch-always t))
+
+       ;; link-hint - Open links with avy
+       (use-package link-hint
+         :straight t
+         :bind (("C-c l o" . link-hint-open-link)
+                ("C-c l c" . link-hint-copy-link)))
+     #+end_src
+
+** Org
+
+*** Settings
+    Change the following variables:
+
+    - =org-goto-auto-isearch= to allos for the use of n/p and f/b for org-goto =C-c C-j=
+    - =org-M-RET-may-split-lines= to prevent adding headings with =M-RET= in the middle of the line
+    - =org-yank-folded-subtrees= to allow for yanking (pasting) the contents of a killed (copy/cut) subtree
+    - =org-return-follows-link= allows you to use the RET key to follow links (default is =C-c C-o=)
+
+    #+begin_src emacs-lisp
+    (setq org-goto-auto-isearch nil
+          org-M-RET-may-split-lines nil
+          org-return-follows-link t
+          org-yank-olded-subtrees nil
+          org-adapt-indentation t
+          org-hide-leading-stars t
+          org-hide-emphasis-markers t
+          org-pretty-entities t
+          org-ellipsis "  ·"
+          org-src-fontify-natively t
+          org-src-tab-acts-natively t
+          org-edit-src-content-indentation 0)
+
+    (add-hook 'org-mode-hook 'visual-line-mode)
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; (use-package olivetti	       ;;
+    ;;   :hook (org-mode . olivetti-mode)) ;;
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+    #+end_src
+
+    #+RESULTS:
+    | olivetti-mode | visual-line-mode | variable-pitch-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
+
+*** Custom Org-Mode Functions
+
+    Here are my custom org-mode functions. They will include docstrings so there isn't
+    a great need for documentation here.
+
+    #+begin_src emacs-lisp
+    (defun arg-emacs-org-insert-drawer-correctly (arg)
+      "Insert a drawer or PROPERTIES drawer with prefix ARG. Places the cursor into
+    the new drawer."
+      (interactive "P")
+      (if arg
+          (let ((start (point))
+    	    (org-insert-property-drawer)
+    	    ;; Find the beginning of the drawer at point or after
+    	    (goto-char start)
+    	    (when (re-search-forward ":PROPERTIES:" nil t)
+    	      ;; Move to line after :PROPERTIES:
+    	      (forward-line 1)))
+    	(call-interactively 'org-insert-drawer))))
+
+    (define-key org-mode-map (kbd "C-c i")
+    	    'arg-emacs-org-insert-drawer-correctly)
+
+    ;; Assign keybinds for moving between links
+    (with-eval-after-load 'org
+      (define-key org-mode-map (kbd "M-n") #'org-next-link)
+      (define-key org-mode-map (kbd "M-p") #'prg-previous-link))
+    #+end_src
+
+    #+RESULTS:
+    : prg-previous-link
+
+
+*** Custom Org-Mode Keybinds :keybind:
+    :PROPERTIES:
+    :CUSTOM_ID: org_keys
+    :END:
+
+    #+begin_src emacs-lisp
+    (global-set-key (kbd "<f7>")
+    		'org-tags-view)
+    (global-set-key (kbd "C-c a")
+    		#'org-agenda)
+    #+end_src
+
+    #+RESULTS:
+    : org-agenda
+
+
+*** Org Modern
+
+    Modern Org mode package
+
+    #+begin_src emacs-lisp
+    (use-package org-modern
+      :config
+      (setq
+       org-auto-align-tags t
+       org-tags-column 0
+       org-fold-catch-invisible-edits 'show-and-error
+       org-special-ctrl-a/e t
+       org-insert-heading-respect-content t
+
+       ;; Don't style the following
+       org-modern-tag nil
+       org-modern-priority nil
+       org-modern-todo nil
+       org-modern-table nil
+
+       ;; Agenda styling
+       org-agenda-tags-column 0
+       org-agenda-block-separator ?─
+       org-agenda-time-grid
+       '((daily today require-timed)
+         (800 1000 1200 1400 1600 1800 2000)
+         " ┄┄┄┄┄ " "┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄")
+       org-agenda-current-time-string
+       "⭠ now ─────────────────────────────────────────────────")
+
+      (global-org-modern-mode))
+
+    #+end_src
+
+    #+RESULTS:
+
+*** Org Superstar
+
+    This package enables pretty bullets in org mode
+
+    #+begin_src emacs-lisp
+    (use-package org-superstar
+        :straight t
+          :custom
+    ;; Use simple bullets that definitely exist in your font
+    ;;(org-superstar-headline-bullets-list '("●" "○" "◆" "◇" "▶" "▷"))
+    ;; Or use these if you want more variety
+     (org-superstar-headline-bullets-list '("◉" "○" "✸" "✿" "✤" "✜"))
+    (org-superstar-remove-leading-stars t)
+    (org-superstar-leading-bullet ?\s))
+
+    #+end_src
+
+*** Org-Contrib
+
+    Extra contrib packages to extend org mode
+
+    #+begin_src emacs-lisp
+    (use-package org-contrib
+      :straight t)
+    (require 'ox)
+    #+end_src
+
+*** Org-Roam
+    Org-Roam is a note-taking system similar to zettelkasten.
+
+**** Install and Config
+
+     This installs and configures org-roam.
+     =(setq org-roam-v2-ack t)= is in the config to avoid the
+     warnings about migrating from v1.
+     =(org-roam-direcory "~/RoamNotes")= sets the directory that
+     stores the notes. Org-Roam will bulid a =sqlite= database
+     for storing the metadata for the nodes (notes) and the links
+     between them.
+
+     The variable =arg-emacs-org-roam-dir= assigns a directory
+     to be used for org-roam notes. There is logic to determine if
+     this directory exists, and if it does not then it should
+     create it.
+
+
+     #+begin_src emacs-lisp
+     (defvar arg-emacs-org-roam-dir "~/RoamNotes"
+       "Variable for Org Roam notes location")
+
+     (unless
+         (file-directory-p arg-emacs-org-roam-dir)
+       (make-directory arg-emacs-org-roam-dir))
+
+     (use-package org-roam
+       :straight t
+       :init
+       (setq org-roam-v2-ack t)
+       :custom
+       (org-roam-directory arg-emacs-org-roam-dir)
+       (org-roam-completion-everywhere t)
+       (org-roam-capture-templates
+        '(("d" "default" plain
+           "%?"
+           :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+           :unnarrowed t)))
+       :bind (("C-c n l" . org-roam-buffer-toggle)
+       	 ("C-c n f" . org-roam-node-find)
+       	 ("C-c n i" . org-roam-node-insert)
+     	 :map org-mode-map
+     	 ("C-M-i" . completion-at-point))
+       :config
+       (org-roam-setup))
+
+     ;; Set database autosync
+     (org-roam-db-autosync-enable)
+     #+end_src
+
+*** Org-Agenda
+    Org Agenda file is set with ~C-c ]~ and removed with ~C-c [~
+#+begin_src emacs-lisp
+(setq org-agenda-files '("~/org/agenda"))
+#+end_src
+
+*** Org Attach                                                   :org_attach:
+    :PROPERTIES:
+
+    :END:
+    Org Attachments are useful for adding files to org files.
+
+    Set org attach directory
+    #+begin_src emacs-lisp
+    (defvar arg-org-data-dir (expand-file-name "~/org/data")
+      "Variable for setting the data directory for org attach")
+    (unless (file-directory-p arg-org-data-dir)
+      (make-directory arg-org-data-dir t))
+    (if (file-directory-p arg-org-data-dir)
+        (setq org-attach-id-dir arg-org-data-dir)) 
+    #+end_src
+
+    #+RESULTS:
+    : ~/org/data
+
+    Defining some custom functions for org attach
+    #+begin_src emacs-lisp
+    ;; COPY and attach files to org headers using dired
+    (add-hook 'dired-mode-hook
+    	  (lambda ()
+    	    (define-key dired-mode-map (kbd "C-c C-x c")
+    			(lambda ()
+    			  (interactive)
+    			  (let ((org-attach-method 'cp))
+    			    (call-interactively #'org-attach-dired-to-subtree))))))
+    ;; MOVE and attach files to org headers using dired
+    (add-hook 'dired-mode-hook
+    	  (lambda ()
+    	    (define-key dired-mode-map (kbd "C-c C-x m")
+    			(lambda ()
+    			  (interactive)
+    			  (let ((org-attach-method 'mv))
+    			    (call-interactively #'org-attach-dired-to-subtree))))))
+    #+end_src
+
+** Version Control
    
 *** Magit
     #+begin_src emacs-lisp
@@ -1302,10 +1060,6 @@
   :bind (("C-c p f" . consult-projectile-find-file)
          ("C-c p p" . consult-projectile-switch-project)))
    #+end_src
-
-#+RESULTS:
-: consult-projectile-switch-projects
-
 ** Shell and Terminal
    Install vterm for terminal support
    #+begin_src emacs-lisp
@@ -1314,10 +1068,6 @@
      :defer t
      :bind (("C-c o t" . vterm-other-window)))
    #+end_src
-
-#+RESULTS:
-: vterm-other-window
-
 ** Snippets
    #+begin_src emacs-lisp
    (use-package tempel
@@ -1339,29 +1089,7 @@
      :straight t)
    #+end_src
 
-** Embark
-    #+begin_src emacs-lisp
-    (use-package embark
-        :straight t
-        :bind (("C-." . embark-act)
-               ("M-." . embark-dwim)
-               ("C-h B" . embark-bindings))
-        :config
-        (setq embark-indicators
-              '(embark-minimal-indicator
-                embark-highlight-indicator
-                embark-isearch-highlight-indicator))
-        (setq embark-prompter 'embark-completing-read-prompter))
-
-        ;; Embark + Consult integration (must-have)
-    (use-package embark-consult
-      :straight t
-      :after (embark consult)
-      :hook (embark-collect-mode . consult-preview-at-point-mode))
-
-
-    #+end_src
-
-#+RESULTS:
-| consult-preview-at-point-mode |
-
+* Local Variables
+# Local Variables:
+# eval: (add-hook 'after-save-hook (lambda ()(org-babel-tangle)) nil t)
+# End:

@@ -1,10 +1,7 @@
-;;; Package --- Summary
+;;; disable package.el
+(setq package-enable-at-startup nil)
 
-;;; Commentary:
-;; Emacs init file for loading pre-compiled config
-;; or tangling and loading literate org config tile
-
-;;; straight.el bootstrap
+;;; straight.el
 (defvar bootstrap-version)
 (let ((bootstrap-file
        (expand-file-name
@@ -22,14 +19,26 @@
   (load bootstrap-file nil 'nomessage))
 
 (straight-use-package 'org)
-;; Don't attempt to find/apply special file handlers to files
-;; loaded during startup
-(let ((file-name-handler-alist nil))
-  ;; If config is pre-compiled, then load that
-  (if (file-exists-p (expand-file-name "config.elc" user-emacs-directory))
-      (load-file (expand-file-name "config.elc" user-emacs-directory))
-    ;; Otherwise use org-babel to tangle and load the config
-    (require 'org)
-    (org-babel-load-file (expand-file-name "config.org" user-emacs-directory))))
+(setq straight-use-package-by-default t)
+(use-package org)
 
-;; init.el ends here
+;; custom tangle function
+(defun my/tangle-config ()
+  "Tangle config if org file is newer than tangled output."
+  (let* ((org-file "~/.emacs.d/config.org")
+         (el-file "~/.emacs.d/config.el"))
+    (when (and (file-exists-p org-file)
+               (or (not (file-exists-p el-file))
+                   (file-newer-than-file-p org-file el-file)))
+      (org-babel-tangle-file org-file))))
+
+;;; Stop asking about symlinks
+(setq vc-follow-symlinks t)
+
+;; keep emacs custom settings in separate file
+(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+(when (file-exists-p custom-file)
+  (load custom-file))
+
+(add-hook 'after-init-hook #'my/tangle-config)
+(org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
