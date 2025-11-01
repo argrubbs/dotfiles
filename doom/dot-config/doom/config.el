@@ -42,6 +42,7 @@
 ;; change `org-directory'. It must be set before org loads!
 (setq org-directory "~/org/")
 (setq org-roam-directory "~/RoamNotes")
+(setq org-agenda-files '("~/RoamNotes/agenda"))
 
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
@@ -74,7 +75,8 @@
 ;; etc).
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
-;; they are implemented.
+;; they are implemented
+(setq sp-autodelete-pair nil)
 
 (use-package! gptel
   :config
@@ -113,3 +115,47 @@
   :config
   (ellama-context-header-line-global-mode +1)
   (ellama-session-header-line-global-mode +1))
+
+;; notmuch/mbsync/msmtp settings
+(setq message-send-mail-function 'message-send-mail-with-sendmail
+      sendmail-program "/usr/bin/msmtp"
+      message-sendmail-extra-arguments '("--read-envelope-from")
+      message-sendmail-f-is-evil t)
+
+;; org-download settings
+(use-package! org-download
+  :bind (("C-c o d" . 'org-download-screenshot))
+  :config
+  (setq-default org-download-image-dir "./images")
+  (setq org-download-screenshot-method "spectacle -br -o %s"))
+
+(require 'org-download)
+(add-hook 'dired-mode-hook 'org-download-enable)
+
+;; Org-Capture templates
+(setq org-capture-templates
+      '(("t" "Todo" entry (file+headline "~/org/tasks.org" "Tasks")
+         "* TODO %?\n %i\n %a")
+        ("n" "Note" entry (file+datetree "~/org/notes.org")
+         "* %?\nEntered on %U\n %i\n %a")
+        ("m" "Meeting" entry (file+headline "~/org/meetings.org" "Meetings")
+         "* %? :meeting:\n%U\n** Attendees\n- \n** Notes\n")
+        ("j" "Journal" entry (file+datetree "~/org/journal.org")
+         "* %?\n%U\n")))
+
+(setq org-roam-capture-templates
+      '(("d" "default" plain "%?"
+         :target (file+head "%<%Y%m%d%H%M%S>-${slug}.org"
+                            "#+title: ${title}\n")
+         :unnarrowed t)
+        ("m" "meeting" plain "* Meeting Notes\nSCHEDULED: %^T\n\n** Attendees\n%^{Attendees}\n** Action Items\n*** TODO %^{Action Item}\n** Discussion\n%?"
+         :target (file+head "agenda/%<%Y%m%d%H%M%S>-${slug}.org"
+                            "${title}\n#+filetags: :meeting:\n#+category: meeting\n")
+         :unnarrowed t)
+        ("t" "task" plain "* TODO ${title}\nSCHEDULED: %^t\nDEADLINE: %^t\n%?"
+         :target (file+head "agenda/%<%Y%m%d%H%M%S>-${slug}.org"
+                            "${title}\n#+filetags: :task:\n#+category: task\n")
+         :unnarrowed t)))
+
+(after! org-roam
+  (add-hook 'org-roam-capture-new-node-hook #'org-mode))
