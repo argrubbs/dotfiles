@@ -22,6 +22,13 @@ zstyle ':omz:update' mode auto      # update automatically without asking
 #+end_src
 ##############################################################################
 
+#+begin_src shell
+export GPG_TTY=$(tty)
+gpg-connect-agent updatestartuptty /bye > /dev/null
+#+end_src
+
+#+RESULTS:
+
 # Uncomment the following line to enable command auto-correction.
 ##############################################################################
 #+begin_src shell
