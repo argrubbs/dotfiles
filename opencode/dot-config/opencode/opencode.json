@@ -5,11 +5,12 @@
       "npm": "@ai-sdk/openai-compatible",
       "name": "Ollama (local)",
       "options": {
-        "baseURL": "http://glados.local:11434/v1"
+        "baseURL": "http://localhost:11434/v1",
+        "num_ctx": "65536"
       },
       "models": {
-        "qwen3:8b-32k": {
-          "name": "qwen3:8b-32k"
+        "gpt-oss:20b": {
+          "name": "gpt-oss:20b"
         },
         "devstral:24b": {
           "name": "devstral:24b"
