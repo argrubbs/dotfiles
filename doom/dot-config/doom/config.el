@@ -95,30 +95,6 @@
                  :stream t
                  :models '(qwen3:8b llama3.2:3b)))
 
-(use-package! ellama
-  :bind (("C-c e" . ellama))
-  :hook (org-ctrl-c-ctrl-c-final . ellama-chat-send-last-message)
-  :init (setopt ellama-auto-scroll t)
-  (require 'llm-ollama)
-  (setopt ellama-provider
-          (make-llm-ollama
-           :chat-model "qwen3:8b"
-           :embedding-model "nomic-embed-text"
-           :default-chat-non-standard-params '(("num_ctx" . 8192))))
-  (setopt ollama-summarization-provider
-          (make-llm-ollama
-           :chat-model "qwen2.5:3b"
-           :embedding-model "nomic-embed-text"
-           :default-chat-non-standard-params '(("num_ctx" . 32768))))
-  (setopt ollama-coding-provider
-          (make-llm-ollama
-           :chat-model "qwen2.5-coder:3b"
-           :embedding-model "nomic-embed-text"
-           :default-chat-non-standard-params '(("num_ctx" . 32768))))
-  :config
-  (ellama-context-header-line-global-mode +1)
-  (ellama-session-header-line-global-mode +1))
-
 ;; notmuch/mbsync/msmtp settings
 (setq message-send-mail-function 'message-send-mail-with-sendmail
       sendmail-program "/usr/bin/msmtp"
@@ -163,27 +139,9 @@
 (after! org-roam
   (add-hook 'org-roam-capture-new-node-hook #'org-mode))
 
-(use-package! nyan-mode
-  :config
-  (setq nyan-animate-nyancat t)
-  (setq nyan-wavy-trail t))
 
-(use-package! wttrin
-  :bind ("C-c w" . wttrin)
-  :custom
-  (wttrin-default-locations '("Madison" "Sydney" "Atlanta")))
 
-(use-package! keycast
-  :bind ("C-c c k" . 'keycast-header-line-mode))
 
-(use-package! moe-theme
-  :config
-  (setq moe-theme-resize-title-markdown '(2.0 1.7 1.5 1.3 1.0 1.0))
-  (setq moe-theme-resize-title-org '(2.2 1.8 1.6 1.4 1.2 1.0 1.0 1.0 1.0))
-  (setq moe-theme-resize-title-rst '(2.0 1.7 1.5 1.3 1.1 1.0)))
-
-(custom-set-variables
- '(zoom-mode t))
 
 (use-package! docker
   :bind ("C-c d" . docker))

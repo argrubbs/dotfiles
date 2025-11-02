@@ -53,12 +53,3 @@
 ;; ...Or *all* packages (NOT RECOMMENDED; will likely break things)
 ;; (unpin! t)
 
-(package! ellama)
-(package! fireplace)
-(package! zone-nyan)
-(package! nyan-mode)
-(package! xkcd)
-(package! wttrin)
-(package! moe-theme)
-(package! zoom)
-(package! docker)
