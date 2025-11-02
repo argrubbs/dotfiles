@@ -52,6 +52,7 @@ export FZF_DEFAULT_OPTS="--preview '[[ -d {} ]] && eza -la {} || bat --style=num
 export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always {}'"
 
 export XDG_CONFIG_DIR="~/.config"
+export EMACS_PLUS_NO_PATH_INJECTION=1
 
 if [[ -f "/opt/homebrew/bin/brew" ]]
 then
