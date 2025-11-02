@@ -54,3 +54,9 @@
 ;; (unpin! t)
 
 (package! ellama)
+(package! fireplace)
+(package! zone-nyan)
+(package! nyan-mode)
+(package! xkcd)
+(package! moe-theme)
+(package! zoom)

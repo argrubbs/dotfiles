@@ -32,7 +32,6 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -77,6 +76,10 @@
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented
 (setq sp-autodelete-pair nil)
+
+(setq doom-font (font-spec :family "Iosevka Nerd Font Mono" :size 20)
+      doom-variable-pitch-font (font-spec :family "Iosevka Nerd Font" :size 22))
+(setq doom-theme 'doom-iosevkem)
 
 (use-package! gptel
   :config
@@ -159,3 +162,25 @@
 
 (after! org-roam
   (add-hook 'org-roam-capture-new-node-hook #'org-mode))
+
+(use-package! nyan-mode
+  :config
+  (setq nyan-animate-nyancat t)
+  (setq nyan-wavy-trail t))
+
+(use-package! wttrin
+  :bind ("C-c w" . wttrin)
+  :custom
+  (wttrin-default-locations '("Madison" "Sydney" "Atlanta")))
+
+(use-package! keycast
+  :bind ("C-c c k" . 'keycast-header-line-mode))
+
+(use-package! moe-theme
+  :config
+  (setq moe-theme-resize-title-markdown '(2.0 1.7 1.5 1.3 1.0 1.0))
+  (setq moe-theme-resize-title-org '(2.2 1.8 1.6 1.4 1.2 1.0 1.0 1.0 1.0))
+  (setq moe-theme-resize-title-rst '(2.0 1.7 1.5 1.3 1.1 1.0)))
+
+(custom-set-variables
+ '(zoom-mode t))
