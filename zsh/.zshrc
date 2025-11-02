@@ -5,9 +5,12 @@ ZSH_THEME="robbyrussell"
 
 zstyle ':omz:update' mode auto      # update automatically without asking
 
+export GPG_TTY=$(tty)
+gpg-connect-agent updatestartuptty /bye > /dev/null
+
 ENABLE_CORRECTION="true"
 
-COMPLETION_WAITING_DOTS="true"
+ COMPLETION_WAITING_DOTS="true"
 
 HIST_STAMPS="mm/dd/yyyy"
 
@@ -52,14 +55,13 @@ export FZF_DEFAULT_OPTS="--preview '[[ -d {} ]] && eza -la {} || bat --style=num
 export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always {}'"
 
 export XDG_CONFIG_DIR="~/.config"
-export EMACS_PLUS_NO_PATH_INJECTION=1
 
 if [[ -f "/opt/homebrew/bin/brew" ]]
 then
     eval "$(/opt/homebrew/bin/brew shellenv)"
 fi
 
-vterm_printf() {
+  vterm_printf() {
     if [ -n "$TMUX" ] \
         && { [ "${TERM%%-*}" = "tmux" ] \
             || [ "${TERM%%-*}" = "screen" ]; }; then
