@@ -1,0 +1,45 @@
+#+title: Kitty Terminal Config
+#+PROPERTY: header-args:conf :tangle ./dot-config/kitty/kitty.conf
+
+* Fonts
+
+Setting my font settings to use the Hack Nerd Font. Ensure this font is installed first.
+=brew install --cask font-hack-nerd-font=
+=sudo pacman -S nerd-fonts=
+
+#+begin_src conf :tangle dot-config/kitty/kitty.conf
+font_family "Hack Nerd Font Mono"
+bold_font auto
+italic_font auto
+font_size 18.0
+#+end_src
+
+* MacOS Options
+
+This setting prevents MacOS from using the =option= key for special characters which can intefere
+with various terminal apps and shortcuts. This remaps it internally to the expected =alt= key code.
+[[https://sw.kovidgoyal.net/kitty/conf/#opt-kitty.macos_option_as_alt][Kitty Terminal: macos_option_as_alt]]
+
+#+begin_src conf :tangle dot-config/kitty/kitty.conf
+macos_option_as_alt left
+#+end_src
+
+* Effects
+
+This setting adds a fun cursor trail that makes following the user's point easier.
+
+#+begin_src conf :tangle dot-config/kitty/kitty.conf
+cursor_trail 20
+#+end_src
+
+* Theme
+
+Set the Kitty terminal theme. Currently set to =Rose Pine=
+Use ~kitty +kitten themes~ to search through the list of included themes
+
+#+begin_src conf :tangle dot-config/kitty/kitty.conf
+# BEGIN_KITTY_THEME
+# Rose Pine
+include current-theme.conf
+# END_KITTY_THEME
+#+end_src
