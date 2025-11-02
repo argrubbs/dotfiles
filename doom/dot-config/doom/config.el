@@ -3,7 +3,6 @@
 ;; Place your private configuration here! Remember, you do not need to run 'doom
 ;; sync' after modifying this file!
 
-
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
 ;; (setq user-full-name "John Doe"
@@ -35,14 +34,9 @@
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
-(setq display-line-numbers-type t)
 
 ;; If you use `org' and don't want your org files in the default location below,
 ;; change `org-directory'. It must be set before org loads!
-(setq org-directory "~/org/")
-(setq org-roam-directory "~/RoamNotes")
-(setq org-agenda-files '("~/RoamNotes/agenda"))
-
 
 ;; Whenever you reconfigure a package, make sure to wrap your config in an
 ;; `after!' block, otherwise Doom's defaults may override your settings. E.g.
@@ -75,11 +69,17 @@
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented
+
+(setq org-directory "~/org/")
+(setq org-roam-directory "~/RoamNotes")
+(setq org-agenda-files '("~/RoamNotes/agenda"))
+
+(setq display-line-numbers-type t)
 (setq sp-autodelete-pair nil)
 
 (setq doom-font (font-spec :family "Iosevka Nerd Font Mono" :size 20)
       doom-variable-pitch-font (font-spec :family "Iosevka Nerd Font" :size 22))
-(setq doom-theme 'doom-iosevkem)
+(setq doom-theme 'modus-vivendi-tinted)
 
 (use-package! gptel
   :config
@@ -184,3 +184,6 @@
 
 (custom-set-variables
  '(zoom-mode t))
+
+(use-package! docker
+  :bind ("C-c d" . docker))

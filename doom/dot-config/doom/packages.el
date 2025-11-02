@@ -58,5 +58,7 @@
 (package! zone-nyan)
 (package! nyan-mode)
 (package! xkcd)
+(package! wttrin)
 (package! moe-theme)
 (package! zoom)
+(package! docker)
