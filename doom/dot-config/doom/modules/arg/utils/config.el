@@ -7,3 +7,7 @@
 
 (use-package! keycast
   :bind ("C-c c k" . 'keycast-header-line-mode))
+
+(use-package! exec-path-from-shell
+  :init
+  (exec-path-from-shell-initialize))

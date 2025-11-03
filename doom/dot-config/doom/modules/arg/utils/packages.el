@@ -4,3 +4,4 @@
 (package! wttrin)
 (package! keycast)
 (package! xkcd)
+(package! exec-path-from-shell)
