@@ -19,6 +19,8 @@
   (load bootstrap-file nil 'nomessage))
 
 (setq straight-use-package-by-default t)
+(straight-use-package 'org)
+(require 'org)
 
 ;; Load literate config
 (org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
