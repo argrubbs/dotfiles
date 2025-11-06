@@ -2405,11 +2405,15 @@ style focus while keeping secondary panes visible.
     #+begin_src emacs-lisp
     (use-package eglot
       :straight t
-      :hook ((python-mode . eglot-ensure)
+      :hook ((json-mode . eglot-ensure)
+             (json-ts-mode . eglot-ensure)
+             (python-mode . eglot-ensure)
              (python-ts-mode . eglot-ensure)
              (yaml-mode . eglot-ensure))
       :config
-      (dolist (mapping '((python-mode . ("pyright-langserver" "--stdio"))
+      (dolist (mapping '((json-mode . ("vscode-json-languageserver" "--stdio"))
+                         (json-ts-mode . ("vscode-json-languageserver" "--stdio"))
+                         (python-mode . ("pyright-langserver" "--stdio"))
                          (python-ts-mode . ("pyright-langserver" "--stdio"))
                          (yaml-mode . ("ansible-language-server" "--stdio"))))
         (add-to-list 'eglot-server-programs mapping))
@@ -2514,6 +2518,40 @@ style focus while keeping secondary panes visible.
 
 
 
+*** JSON
+    JSON files lean on tree-sitter remaps, jq utilities, and Eglot-backed validation so payloads stay tidy and inspectable.
+#+begin_src emacs-lisp
+  (defun arg/json-setup ()
+    "Configure indentation and navigation helpers for JSON buffers."
+    (setq-local tab-width 2)
+    (setq-local evil-shift-width 2)
+    (setq-local js-indent-level 2)
+    (when (boundp 'json-ts-mode-indent-offset)
+      (setq-local json-ts-mode-indent-offset 2)))
+
+  (use-package json-mode
+    :straight t
+    :mode ("\\.json\\'" . json-mode)
+    :hook ((json-mode . arg/json-setup)
+           (json-ts-mode . arg/json-setup))
+    :config
+    (setq json-reformat:indent-width 2
+          json-reformat:pretty-string? t))
+
+  (use-package jq-mode
+    :straight t
+    :mode ("\\.jq\\'" . jq-mode))
+
+  (use-package json-snatcher
+    :straight t
+    :after json-mode
+    :bind (:map json-mode-map
+                ("C-c C-p" . jsons-print-path)))
+#+end_src
+
+#+RESULTS:
+: jsons-print-path
+
 *** devdocs
     [[https://github.com/astoff/devdocs.el][devdocs.el]] keeps offline API docs in sync so lookups stay fast even without network access.
     #+begin_src emacs-lisp
@@ -2533,6 +2571,35 @@ style focus while keeping secondary panes visible.
 
 #+RESULTS:
 : devdocs-lookup
+
+*** Restclient
+    HTTP exploration lives in dedicated buffers with jq-powered filtering and Org Babel wiring so requests stay reproducible.
+#+begin_src emacs-lisp
+  (use-package restclient
+    :straight t
+    :mode (("\\.http\\'" . restclient-mode)
+           ("\\.rest\\'" . restclient-mode)
+           ("\\.req\\'" . restclient-mode))
+    :init
+    (add-hook 'restclient-mode-hook #'display-line-numbers-mode)
+    :config
+    (setq restclient-log-request t
+          restclient-same-buffer-response t))
+
+  (use-package restclient-jq
+    :straight t
+    :after (restclient jq-mode)
+    :bind (:map restclient-mode-map
+                ("C-c C-j" . restclient-jq-interactive)))
+
+  (use-package ob-restclient
+    :straight t
+    :after (restclient org)
+    :config
+    (with-eval-after-load 'org
+      (add-to-list 'org-babel-load-languages '(restclient . t))
+      (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)))
+#+end_src
 
 *** Tree-sitter
     [[https://github.com/renzmann/treesit-auto][treesit-auto]] manages language grammar downloads and mode remapping so tree-sitter features just work.
