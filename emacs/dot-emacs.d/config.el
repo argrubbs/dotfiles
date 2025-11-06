@@ -18,7 +18,7 @@
   (setq modus-themes-mixed-fonts t)
   (setq modus-themes-italic-constructs t))
 
-(load-theme 'moe-dark t)
+(load-theme 'modus-vivendi-tinted t)
 
 (when (member "Iosevka Nerd Font Mono" (font-family-list))
   (set-face-attribute 'default nil :family "Iosevka Nerd Font" :height 200 :weight 'semi-light)
@@ -74,7 +74,7 @@
   (doom-modeline-major-mode-color-icon t)
   (doom-modeline-buffer-state-icon t)
   (doom-modeline-buffer-modification-icon t)
-  (doom-modeline-minor-modes t)
+  (doom-modeline-minor-modes nil)
   (doom-modeline-enable-word-count t)
   (doom-modeline-buffer-encoding t)
   (doom-modeline-indent-info t)
@@ -111,6 +111,11 @@
   (add-hook 'posframe-hide-hook
             (lambda () (set-cursor-color "white"))))
 
+(use-package winner
+  :straight (:type built-in)
+  :init
+  (winner-mode 1))
+
 (line-number-mode t)
 (column-number-mode t)
 (size-indication-mode t)
@@ -129,23 +134,6 @@
   :straight t
   :init
   (beacon-mode 1))
-
-(use-package consult
-  :bind (("C-x b" . consult-buffer)
-         ("C-x 4 b" . consult-buffer-other-window)
-         ("C-x 5 b" . consult-buffer-other-frame)
-         ("M-y" . consult-yank-pop)
-         ("M-g g" . consult-goto-line)
-         ("M-g M-g" . consult-goto-line)
-         ("M-g i" . consult-imenu)
-         ("M-g I" . consult-imenu-multi)
-         ("M-s l" . consult-line)
-         ("M-s L" . consult-line-multi)
-         ("M-s r" . consult-ripgrep)
-         ("M-s f" . consult-find)
-         ("C-x r b" . consult-bookmark))
-  :config
-  (setq consult-narrow-key "<"))
 
 (use-package corfu
   :init
@@ -187,6 +175,621 @@
   :config
   (setq org-modern-star 'replace))
 
+(use-package evil
+  :init
+  (setq evil-want-integration t
+        evil-want-keybinding nil
+        evil-want-minibuffer t
+        evil-want-C-u-scroll t
+        evil-want-C-i-jump t
+        evil-respect-visual-line-mode t
+        evil-undo-system 'undo-redo
+        evil-want-Y-yank-to-eol t
+        evil-want-fine-undo t
+        evil-split-window-below t
+        evil-vsplit-window-right t)
+  :config
+  (evil-mode 1)
+  (setq evil-move-beyond-eol t
+        evil-kill-on-visual-paste nil)
+  (evil-set-leader '(normal visual motion emacs) (kbd "SPC"))
+  (evil-set-leader '(normal visual motion emacs) (kbd "C-SPC"))
+  (evil-define-key '(normal motion) 'global (kbd "j") #'evil-next-visual-line)
+  (evil-define-key '(normal motion) 'global (kbd "k") #'evil-previous-visual-line)
+  (evil-define-key 'normal 'global (kbd "Q") #'evil-ex)
+  (evil-define-key 'normal 'global (kbd "gx") #'browse-url-at-point)
+  (evil-define-key 'insert 'global (kbd "C-g") #'evil-normal-state)
+  (evil-define-key 'insert 'global (kbd "C-h") #'evil-delete-backward-char-and-join)
+  (evil-define-key '(normal visual) 'global (kbd "RET") #'evil-ex-nohighlight)
+  (dolist (mode '(term-mode vterm-mode comint-mode eshell-mode))
+    (evil-set-initial-state mode 'insert))
+  (dolist (mode '(magit-status-mode treemacs-mode))
+    (evil-set-initial-state mode 'normal)))
+
+(use-package general
+  :after evil
+  :config
+  (general-evil-setup t)
+  (defun arg/open-config-org ()
+    "Open the main literate configuration file."
+    (interactive)
+    (find-file (expand-file-name "config.org" user-emacs-directory)))
+
+  (defun arg/open-init-el ()
+    "Open init.el for quick edits."
+    (interactive)
+    (find-file (expand-file-name "init.el" user-emacs-directory)))
+
+  (defun arg/open-early-init-el ()
+    "Open early-init.el."
+    (interactive)
+    (find-file (expand-file-name "early-init.el" user-emacs-directory)))
+
+  (defun arg/open-config-directory ()
+    "Browse the Emacs configuration directory."
+    (interactive)
+    (dired user-emacs-directory))
+
+  (defun arg/open-scratch-buffer ()
+    "Switch to the *scratch* buffer, creating it if necessary."
+    (interactive)
+    (switch-to-buffer (get-buffer-create "*scratch*")))
+
+  (defun arg/open-messages-buffer ()
+    "Pop to the *Messages* buffer."
+    (interactive)
+    (pop-to-buffer "*Messages*"))
+
+  (defun arg/reload-init-file ()
+    "Reload init.el."
+    (interactive)
+    (load-file (expand-file-name "init.el" user-emacs-directory)))
+
+  (general-create-definer arg/leader
+    :states '(normal visual motion emacs)
+    :keymaps 'override
+    :prefix "SPC"
+    :global-prefix "C-SPC")
+  (general-create-definer arg/local-leader
+    :states '(normal visual)
+    :keymaps 'override
+    :prefix "SPC m"
+    :global-prefix "C-SPC m")
+  (arg/leader
+    "SPC" '(execute-extended-command :which-key "M-x")
+    "."   '(find-file :which-key "Find file")
+    "/"   '(consult-ripgrep :which-key "Ripgrep")
+    "'"   '(vterm :which-key "Vterm")
+    ";"   '(eval-expression :which-key "Eval expression")
+    "!"   '(shell-command :which-key "Shell command")
+    "&"   '(async-shell-command :which-key "Async shell command")
+    "TAB" '(mode-line-other-buffer :which-key "Last buffer")
+    "a" '(:ignore t :which-key "Applications")
+    "aa" '(org-agenda :which-key "Org agenda")
+    "ac" '(calendar :which-key "Calendar")
+    "ad" '(devdocs-lookup :which-key "DevDocs")
+    "ae" '(eglot :which-key "Eglot connect")
+    "am" '(arg/open-messages-buffer :which-key "Messages")
+    "ap" '(list-processes :which-key "Processes")
+    "as" '(arg/open-scratch-buffer :which-key "Scratch buffer")
+    "aw" '(eww :which-key "EWW")
+    "b" '(:ignore t :which-key "Buffers")
+    "bb" '(consult-buffer :which-key "Switch buffer")
+    "bB" '(consult-buffer-other-window :which-key "Switch other window")
+    "bd" '(kill-this-buffer :which-key "Kill buffer")
+    "bD" '(kill-buffer-and-window :which-key "Kill buffer & window")
+    "bI" '(ibuffer :which-key "Ibuffer")
+    "bK" '(kill-other-buffers :which-key "Kill other buffers")
+    "bm" '(arg/open-messages-buffer :which-key "Messages")
+    "bn" '(next-buffer :which-key "Next buffer")
+    "bN" '(evil-buffer-new :which-key "New buffer")
+    "bp" '(previous-buffer :which-key "Previous buffer")
+    "br" '(revert-buffer :which-key "Revert buffer")
+    "bs" '(save-buffer :which-key "Save buffer")
+    "bS" '(save-some-buffers :which-key "Save all buffers")
+    "c" '(:ignore t :which-key "Code")
+    "ca" '(eglot-code-actions :which-key "Code actions")
+    "cA" '(eglot-format :which-key "Format region")
+    "cc" '(compile :which-key "Compile")
+    "cC" '(recompile :which-key "Recompile")
+    "cD" '(eglot-find-declaration :which-key "Goto declaration")
+    "cd" '(xref-find-definitions :which-key "Goto definition")
+    "ce" '(consult-flymake :which-key "Diagnostics")
+    "cE" '(flymake-show-buffer-diagnostics :which-key "Buffer diagnostics")
+    "cf" '(eglot-format-buffer :which-key "Format buffer")
+    "cF" '(eglot-code-action-organize-imports :which-key "Organize imports")
+    "ci" '(consult-imenu :which-key "Imenu")
+    "cI" '(consult-imenu-multi :which-key "Imenu multi")
+    "cl" '(eglot :which-key "Eglot connect")
+    "cR" '(eglot-reconnect :which-key "Reconnect")
+    "cS" '(eglot-shutdown :which-key "Shutdown server")
+    "cT" '(treesit-explore-node-at-point :which-key "Tree-sit inspect")
+    "cX" '(xref-find-references :which-key "Find references")
+    "cr" '(eglot-rename :which-key "Rename symbol")
+    "d" '(:ignore t :which-key "Debug")
+    "db" '(dap-breakpoint-toggle :which-key "Toggle breakpoint")
+    "dc" '(dap-continue :which-key "Continue")
+    "dd" '(dap-debug :which-key "Debug")
+    "di" '(dap-step-in :which-key "Step in")
+    "do" '(dap-step-out :which-key "Step out")
+    "dr" '(dap-debug-recent :which-key "Recent session")
+    "dR" '(dap-restart-frame :which-key "Restart frame")
+    "ds" '(dap-switch-session :which-key "Switch session")
+    "dt" '(dap-ui-repl :which-key "DAP REPL")
+    "dT" '(dap-breakpoint-condition :which-key "Conditional breakpoint")
+    "e" '(:ignore t :which-key "Eval")
+    "eb" '(eval-buffer :which-key "Eval buffer")
+    "ed" '(eval-defun :which-key "Eval defun")
+    "ee" '(eval-expression :which-key "Eval expression")
+    "el" '(eval-last-sexp :which-key "Eval last sexp")
+    "er" '(eval-region :which-key "Eval region")
+    "f" '(:ignore t :which-key "Files")
+    "fD" '(delete-file :which-key "Delete file")
+    "fF" '(find-file :which-key "Open file (exact path)")
+    "fO" '(find-file-other-window :which-key "Open file other window")
+    "fR" '(recover-this-file :which-key "Recover file")
+    "fS" '(write-file :which-key "Write file")
+    "fe" '(:ignore t :which-key "Emacs config")
+    "fed" '(arg/open-config-directory :which-key "Browse config dir")
+    "fec" '(arg/open-config-org :which-key "config.org")
+    "fee" '(arg/open-early-init-el :which-key "early-init.el")
+    "fei" '(arg/open-init-el :which-key "init.el")
+    "fer" '(arg/reload-init-file :which-key "Reload init.el")
+    "ff" '(consult-find :which-key "Find file (Consult)")
+    "fr" '(consult-recent-file :which-key "Recent file")
+    "fs" '(save-buffer :which-key "Save file")
+    "g" '(:ignore t :which-key "Git")
+    "ga" '(magit-stage-buffer :which-key "Stage buffer")
+    "gA" '(magit-stage-file :which-key "Stage file")
+    "gb" '(magit-branch-checkout :which-key "Checkout branch")
+    "gc" '(magit-commit :which-key "Commit")
+    "gC" '(magit-clone :which-key "Clone repo")
+    "gd" '(magit-diff-dwim :which-key "Diff dwim")
+    "gD" '(magit-diff-range-dwim :which-key "Diff range")
+    "gg" '(magit-status :which-key "Status")
+    "gh" '(git-gutter:popup-hunk :which-key "Popup hunk")
+    "gH" '(git-gutter:stage-hunk :which-key "Stage hunk")
+    "gi" '(magit-init :which-key "Init repo")
+    "gl" '(magit-log :which-key "Log")
+    "gn" '(git-gutter:next-hunk :which-key "Next hunk")
+    "gp" '(git-gutter:previous-hunk :which-key "Prev hunk")
+    "gP" '(magit-push-current-to-pushremote :which-key "Push current")
+    "gr" '(magit-refresh :which-key "Refresh")
+    "gs" '(magit-status :which-key "Status")
+    "gt" '(git-timemachine-toggle :which-key "Time machine")
+    "h" '(:ignore t :which-key "Help")
+    "h." '(display-local-help :which-key "Local help")
+    "hA" '(apropos-command :which-key "Apropos command")
+    "ha" '(apropos :which-key "Apropos")
+    "hb" '(describe-bindings :which-key "Describe bindings")
+    "hc" '(describe-char :which-key "Describe char")
+    "hC" '(describe-coding-system :which-key "Coding systems")
+    "hd" '(view-echo-area-messages :which-key "Echo messages")
+    "he" '(arg/open-messages-buffer :which-key "Messages buffer")
+    "hf" '(describe-function :which-key "Describe function")
+    "hF" '(describe-face :which-key "Describe face")
+    "hI" '(info :which-key "Info manuals")
+    "hk" '(describe-key :which-key "Describe key")
+    "hl" '(view-lossage :which-key "View keys")
+    "hm" '(describe-mode :which-key "Describe mode")
+    "ho" '(consult-info :which-key "Info lookup")
+    "hp" '(describe-package :which-key "Describe package")
+    "hr" '(:ignore t :which-key "Reload")
+    "hrr" '(arg/reload-init-file :which-key "Reload init.el")
+    "hrt" '(consult-theme :which-key "Switch theme")
+    "hs" '(describe-symbol :which-key "Describe symbol")
+    "ht" '(consult-theme :which-key "Theme")
+    "hw" '(where-is :which-key "Where is")
+    "hv" '(describe-variable :which-key "Describe variable")
+    "i" '(:ignore t :which-key "Insert")
+    "ic" '(insert-char :which-key "Character")
+    "id" '(devdocs-lookup :which-key "DevDocs")
+    "ie" '(emoji-insert :which-key "Emoji")
+    "ik" '(insert-kbd-macro :which-key "Insert macro")
+    "ip" '(insert-register :which-key "Insert register")
+    "is" '(tempel-insert :which-key "Snippet")
+    "j" '(:ignore t :which-key "Jump")
+    "jj" '(avy-goto-char-timer :which-key "Avy char")
+    "jl" '(avy-goto-line :which-key "Avy line")
+    "js" '(evil-snipe-s :which-key "Snipe forward")
+    "jS" '(evil-snipe-S :which-key "Snipe backward")
+    "jw" '(avy-goto-word-0 :which-key "Avy word")
+    "m" '(:ignore t :which-key "Multiple cursors")
+    "ma" '(evil-mc-undo-all-cursors :which-key "Clear cursors")
+    "mA" '(evil-mc-make-and-goto-all-cursors :which-key "All cursors")
+    "mm" '(evil-mc-make-all-cursors :which-key "Match all")
+    "mn" '(evil-mc-make-and-goto-next-match :which-key "Next match")
+    "mp" '(evil-mc-make-and-goto-prev-match :which-key "Prev match")
+    "ms" '(evil-mc-mode :which-key "Toggle evil-mc")
+    "o" '(:ignore t :which-key "Org")
+    "oa" '(org-agenda :which-key "Agenda")
+    "oA" '(org-archive-subtree-default :which-key "Archive subtree")
+    "oc" '(org-capture :which-key "Capture")
+    "od" '(org-roam-dailies-goto-today :which-key "Dailies today")
+    "oe" '(org-export-dispatch :which-key "Export")
+    "of" '(org-roam-node-find :which-key "Roam find")
+    "oi" '(org-roam-node-insert :which-key "Roam insert")
+    "ol" '(org-toggle-link-display :which-key "Toggle links")
+    "om" '(org-tags-view :which-key "Tag search")
+    "on" '(org-add-note :which-key "Add note")
+    "or" '(org-roam-refile :which-key "Roam refile")
+    "os" '(org-store-link :which-key "Store link")
+    "ot" '(org-todo :which-key "Todo")
+    "p" '(:ignore t :which-key "Project")
+    "p!" '(projectile-run-shell-command-in-root :which-key "Run shell")
+    "pa" '(projectile-add-known-project :which-key "Add project")
+    "pA" '(projectile-project-info :which-key "Project info")
+    "pb" '(consult-projectile :which-key "Switch buffer")
+    "pC" '(projectile-configure-project :which-key "Configure")
+    "pc" '(projectile-compile-project :which-key "Compile project")
+    "pD" '(projectile-dired :which-key "Project dired")
+    "pd" '(projectile-remove-known-project :which-key "Remove project")
+    "pf" '(consult-projectile-find-file :which-key "Find file")
+    "pk" '(projectile-kill-buffers :which-key "Kill buffers")
+    "pp" '(projectile-switch-project :which-key "Switch project")
+    "pR" '(projectile-replace-regexp :which-key "Replace regexp")
+    "ps" '(consult-ripgrep :which-key "Search project")
+    "pt" '(projectile-test-project :which-key "Test project")
+    "pv" '(projectile-vc :which-key "Project VC")
+    "q" '(:ignore t :which-key "Session")
+    "qq" '(evil-quit-all :which-key "Quit Emacs")
+    "qQ" '(save-buffers-kill-terminal :which-key "Quit (save)")
+    "qr" '(arg/reload-init-file :which-key "Reload init.el")
+    "qs" '(save-some-buffers :which-key "Save all")
+    "r" '(:ignore t :which-key "Registers")
+    "rB" '(bookmark-set :which-key "Set bookmark")
+    "rb" '(consult-bookmark :which-key "Jump bookmark")
+    "rr" '(consult-register :which-key "List registers")
+    "rs" '(consult-register-store :which-key "Store register")
+    "rw" '(window-configuration-to-register :which-key "Window -> register")
+    "s" '(:ignore t :which-key "Search")
+    "sb" '(consult-line :which-key "Search buffer")
+    "sB" '(consult-line-multi :which-key "Search buffers")
+    "sc" '(consult-locate :which-key "Locate")
+    "sd" '(consult-dir :which-key "Consult dir")
+    "sf" '(consult-find :which-key "Find")
+    "sg" '(consult-ripgrep :which-key "Ripgrep")
+    "sh" '(consult-history :which-key "History")
+    "si" '(consult-imenu :which-key "Imenu")
+    "sI" '(consult-imenu-multi :which-key "Imenu multi")
+    "sm" '(consult-mark :which-key "Marks")
+    "sn" '(consult-line-multi :which-key "Lines (buffers)")
+    "so" '(consult-outline :which-key "Outline")
+    "sp" '(consult-projectile :which-key "Project buffers")
+    "st" '(consult-theme :which-key "Theme")
+    "su" '(consult-focus-lines :which-key "Keep lines")
+    "sx" '(consult-xref :which-key "Xref")
+    "t" '(:ignore t :which-key "Toggle")
+    "tb" '(global-display-line-numbers-mode :which-key "Line numbers (global)")
+    "tc" '(display-fill-column-indicator-mode :which-key "Fill column")
+    "tD" '(eldoc-mode :which-key "Eldoc")
+    "tE" '(eldoc-box-hover-mode :which-key "Eldoc hover")
+    "tF" '(flyspell-mode :which-key "Flyspell")
+    "tG" '(git-gutter-mode :which-key "Git gutter")
+    "tg" '(evil-goggles-mode :which-key "Evil goggles")
+    "ti" '(org-toggle-inline-images :which-key "Inline images")
+    "tL" '(display-line-numbers-mode :which-key "Line numbers (buffer)")
+    "tP" '(prettify-symbols-mode :which-key "Prettify symbols")
+    "tR" '(read-only-mode :which-key "Read only")
+    "tS" '(flyspell-prog-mode :which-key "Flyspell prog")
+    "tT" '(toggle-truncate-lines :which-key "Truncate lines")
+    "tV" '(visual-line-mode :which-key "Visual line")
+    "tw" '(whitespace-mode :which-key "Whitespace")
+    "u" '(:ignore t :which-key "Utilities")
+    "uo" '(org-store-link :which-key "Store link")
+    "ur" '(rename-uniquely :which-key "Rename unique")
+    "us" '(shell-command-on-region :which-key "Shell region")
+    "uu" '(universal-argument :which-key "Universal argument")
+    "w" '(:ignore t :which-key "Windows")
+    "w-" '(evil-window-split :which-key "Horizontal split")
+    "w/" '(evil-window-vsplit :which-key "Vertical split")
+    "w=" '(balance-windows :which-key "Balance windows")
+    "wD" '(delete-other-windows :which-key "Delete others")
+    "wd" '(delete-window :which-key "Delete window")
+    "wF" '(follow-mode :which-key "Follow mode")
+    "wf" '(make-frame-command :which-key "New frame")
+    "wH" '(evil-window-move-far-left :which-key "Move left")
+    "wJ" '(evil-window-move-far-down :which-key "Move down")
+    "wK" '(evil-window-move-far-up :which-key "Move up")
+    "wL" '(evil-window-move-far-right :which-key "Move right")
+    "wh" '(windmove-left :which-key "Window left")
+    "wO" '(other-frame :which-key "Other frame")
+    "wj" '(windmove-down :which-key "Window down")
+    "wk" '(windmove-up :which-key "Window up")
+    "wl" '(windmove-right :which-key "Window right")
+    "wo" '(delete-other-windows :which-key "Only window")
+    "wR" '(winner-redo :which-key "Winner redo")
+    "ws" '(split-window-below :which-key "Split below")
+    "wS" '(window-swap-states :which-key "Swap windows")
+    "wU" '(winner-undo :which-key "Winner undo")
+    "wW" '(ace-window :which-key "Ace window")
+    "wX" '(kill-buffer-and-window :which-key "Kill & window")
+    "ww" '(other-window :which-key "Other window")
+    "wv" '(split-window-right :which-key "Split right")
+    "x" '(:ignore t :which-key "Text")
+    "xb" '(bury-buffer :which-key "Bury buffer")
+    "xc" '(capitalize-region :which-key "Capitalize region")
+    "xg" '(goto-line :which-key "Goto line")
+    "xj" '(join-line :which-key "Join line")
+    "xk" '(kill-region :which-key "Kill region")
+    "xl" '(downcase-region :which-key "Lowercase")
+    "xp" '(mark-page :which-key "Mark page")
+    "xs" '(sort-lines :which-key "Sort lines")
+    "xU" '(upcase-region :which-key "Uppercase")
+    "xu" '(upcase-initials-region :which-key "Upcase initials")
+    "xw" '(delete-trailing-whitespace :which-key "Trim whitespace")
+    "y" '(:ignore t :which-key "Yank")
+    "yp" '(yank-pop :which-key "Yank pop")
+    "yr" '(copy-rectangle-as-kill :which-key "Copy rectangle")
+    "ys" '(evil-yank-line :which-key "Yank line")
+    "yy" '(consult-yank-pop :which-key "Yank history")
+    "z" '(:ignore t :which-key "Zoom")
+    "zz" '(zoom-mode :which-key "Toggle zoom")
+    "Z" '(:ignore t :which-key "Session")
+    "Zf" '(make-frame-command :which-key "New frame")
+    "Zq" '(evil-quit-all :which-key "Quit")
+    "Zs" '(save-some-buffers :which-key "Save all")
+    "ZZ" '(save-buffers-kill-emacs :which-key "Save and quit")))
+
+(use-package evil-collection
+  :after evil
+  :init
+  (setq evil-collection-company-use-tng nil
+        evil-collection-setup-minibuffer t)
+  :config
+  (evil-collection-init))
+
+(with-eval-after-load 'vterm
+  (evil-set-initial-state 'vterm-mode 'insert))
+(with-eval-after-load 'shell
+  (evil-set-initial-state 'shell-mode 'insert))
+
+(use-package evil-snipe
+  :after evil
+  :init
+  (setq evil-snipe-scope 'buffer
+        evil-snipe-repeat-keys t
+        evil-snipe-use-vim-sneak-behavior t)
+  :config
+  (evil-snipe-mode 1)
+  (evil-snipe-override-mode 1))
+
+(use-package evil-easymotion
+  :after evil
+  :config
+  (evilem-default-keybindings "gs"))
+
+(use-package evil-quickscope
+  :after evil
+  :straight (:host github :repo "hlissner/evil-quickscope")
+  :config
+  (global-evil-quickscope-mode 1))
+
+(use-package evil-visualstar
+  :after evil
+  :config
+  (global-evil-visualstar-mode 1))
+
+(use-package evil-surround
+  :after evil
+  :config
+  (global-evil-surround-mode 1))
+
+(use-package evil-commentary
+  :after evil
+  :config
+  (evil-commentary-mode))
+
+(use-package evil-matchit
+  :after evil
+  :config
+  (global-evil-matchit-mode 1))
+
+(use-package evil-exchange
+  :after evil
+  :config
+  (evil-exchange-install))
+
+(use-package evil-args
+  :after evil
+  :config
+  (define-key evil-inner-text-objects-map "a" #'evil-inner-arg)
+  (define-key evil-outer-text-objects-map "a" #'evil-outer-arg))
+
+(use-package evil-indent-plus
+  :after evil
+  :config
+  (evil-indent-plus-default-bindings))
+
+(use-package evil-lion
+  :after evil
+  :config
+  (evil-lion-mode))
+
+(use-package evil-textobj-tree-sitter
+  :straight (:host github :repo "meain/evil-textobj-tree-sitter")
+  :after evil
+  :config
+  (dolist (pair '((python-ts-mode      . "python")
+                  (tsx-ts-mode         . "tsx")
+                  (typescript-ts-mode  . "typescript")
+                  (js-ts-mode          . "javascript")
+                  (json-ts-mode        . "json")
+                  (css-ts-mode         . "css")
+                  (yaml-ts-mode        . "yaml")
+                  (toml-ts-mode        . "toml")
+                  (bash-ts-mode        . "bash")
+                  (sh-mode             . "bash")
+                  (c-ts-mode           . "c")
+                  (c++-ts-mode         . "cpp")
+                  (cmake-mode          . "cmake")
+                  (go-ts-mode          . "go")
+                  (rust-ts-mode        . "rust")
+                  (java-ts-mode        . "java")
+                  (kotlin-mode         . "kotlin")
+                  (ruby-ts-mode        . "ruby")
+                  (lua-ts-mode         . "lua")
+                  (html-mode           . "html")
+                  (css-mode            . "css")
+                  (markdown-mode       . "markdown")
+                  (markdown-ts-mode    . "markdown")
+                  (dockerfile-mode     . "dockerfile")
+                  (proto-mode          . "proto")
+                  (conf-toml-mode      . "toml")))
+    (add-to-list 'evil-textobj-tree-sitter-major-mode-language-alist pair))
+  (evil-define-key '(operator visual) 'global "af"
+    (evil-textobj-tree-sitter-get-textobj "function.outer"))
+  (evil-define-key '(operator visual) 'global "if"
+    (evil-textobj-tree-sitter-get-textobj "function.inner"))
+  (evil-define-key '(operator visual) 'global "ac"
+    (evil-textobj-tree-sitter-get-textobj "class.outer"))
+  (evil-define-key '(operator visual) 'global "ic"
+    (evil-textobj-tree-sitter-get-textobj "class.inner"))
+  (evil-define-key '(operator visual) 'global "ab"
+    (evil-textobj-tree-sitter-get-textobj "block.outer"))
+  (evil-define-key '(operator visual) 'global "ib"
+    (evil-textobj-tree-sitter-get-textobj "block.inner"))
+  (evil-define-key '(operator visual) 'global "aC"
+    (evil-textobj-tree-sitter-get-textobj "comment.outer"))
+  (evil-define-key '(operator visual) 'global "iC"
+    (evil-textobj-tree-sitter-get-textobj "comment.inner"))
+  (evil-define-key '(operator visual) 'global "ap"
+    (evil-textobj-tree-sitter-get-textobj "parameter.outer"))
+  (evil-define-key '(operator visual) 'global "ip"
+    (evil-textobj-tree-sitter-get-textobj "parameter.inner"))
+  (evil-define-key '(operator visual) 'global "aL"
+    (evil-textobj-tree-sitter-get-textobj "loop.outer"))
+  (evil-define-key '(operator visual) 'global "iL"
+    (evil-textobj-tree-sitter-get-textobj "loop.inner"))
+  (evil-define-key '(operator visual) 'global "ao"
+    (evil-textobj-tree-sitter-get-textobj "conditional.outer"))
+  (evil-define-key '(operator visual) 'global "io"
+    (evil-textobj-tree-sitter-get-textobj "conditional.inner"))
+  (evil-define-key '(operator visual) 'global "as"
+    (evil-textobj-tree-sitter-get-textobj "statement.outer"))
+  (evil-define-key '(operator visual) 'global "is"
+    (evil-textobj-tree-sitter-get-textobj "statement.inner"))
+  (evil-define-key '(operator visual) 'global "ak"
+    (evil-textobj-tree-sitter-get-textobj "call.outer"))
+  (evil-define-key '(operator visual) 'global "ik"
+    (evil-textobj-tree-sitter-get-textobj "call.inner")))
+
+(use-package evil-mc
+  :after (evil general)
+  :config
+  (global-evil-mc-mode 1)
+  (arg/leader
+    "mm" '(evil-mc-make-all-cursors :which-key "Match all")
+    "mn" '(evil-mc-make-and-goto-next-match :which-key "Next match")
+    "mp" '(evil-mc-make-and-goto-prev-match :which-key "Prev match")
+    "ma" '(evil-mc-undo-all-cursors :which-key "Clear cursors")
+    "ms" '(evil-mc-mode :which-key "Toggle evil-mc")))
+
+(use-package evil-multiedit
+  :after evil
+  :config
+  (evil-multiedit-default-keybinds))
+
+(use-package evil-cleverparens
+  :hook ((emacs-lisp-mode clojure-mode clojurescript-mode lisp-mode scheme-mode) . evil-cleverparens-mode)
+  :init
+  (setq evil-cleverparens-use-regular-insert t
+        evil-cleverparens-use-additional-movement-keys t))
+
+(use-package anzu
+  :init
+  (global-anzu-mode 1))
+
+(use-package evil-anzu
+  :after (evil anzu))
+
+(use-package evil-goggles
+  :after evil
+  :init
+  (setq evil-goggles-duration 0.15
+        evil-goggles-pulse t)
+  :config
+  (evil-goggles-mode))
+
+(use-package evil-numbers
+  :after evil
+  :config
+  (evil-define-key 'normal 'global (kbd "C-a") #'evil-numbers/inc-at-pt)
+  (evil-define-key 'normal 'global (kbd "C-x") #'evil-numbers/dec-at-pt)
+  (arg/leader
+    "n" '(:ignore t :which-key "Numbers")
+    "n+" '(evil-numbers/inc-at-pt :which-key "Increment")
+    "n-" '(evil-numbers/dec-at-pt :which-key "Decrement")))
+
+(use-package evil-unimpaired
+  :after evil
+  :straight (:host github :repo "zmaas/evil-unimpaired"))
+
+(use-package evil-escape
+  :after evil
+  :init
+  (setq evil-escape-key-sequence "jk"
+        evil-escape-delay 0.15
+        evil-escape-excluded-major-modes '(vterm-mode term-mode))
+  :config
+  (evil-escape-mode 1))
+
+(with-eval-after-load 'org
+  (arg/local-leader
+    :keymaps 'org-mode-map
+    "a" '(org-archive-subtree :which-key "Archive")
+    "b" '(org-babel-tangle :which-key "Tangle")
+    "c" '(org-cycle :which-key "Cycle visibility")
+    "d" '(org-deadline :which-key "Deadline")
+    "e" '(org-export-dispatch :which-key "Export")
+    "i" '(org-toggle-inline-images :which-key "Inline images")
+    "l" '(org-insert-link :which-key "Insert link")
+    "r" '(org-refile :which-key "Refile")
+    "s" '(org-schedule :which-key "Schedule")
+    "t" '(org-todo :which-key "Todo state")))
+
+(with-eval-after-load 'eglot
+  (arg/local-leader
+    :keymaps 'eglot-mode-map
+    "a" '(eglot-code-actions :which-key "Code actions")
+    "d" '(flymake-show-buffer-diagnostics :which-key "Diagnostics")
+    "D" '(flymake-show-project-diagnostics :which-key "Project diagnostics")
+    "f" '(eglot-format :which-key "Format region")
+    "F" '(eglot-format-buffer :which-key "Format buffer")
+    "h" '(eglot-help-at-point :which-key "Hover")
+    "o" '(eglot-code-action-organize-imports :which-key "Organize imports")
+    "r" '(eglot-rename :which-key "Rename")
+    "R" '(eglot-reconnect :which-key "Reconnect")
+    "s" '(eglot-shutdown :which-key "Shutdown")))
+
+(with-eval-after-load 'python
+  (arg/local-leader
+    :keymaps '(python-mode-map python-ts-mode-map)
+    "b" '(python-black-buffer :which-key "Black buffer")
+    "r" '(run-python :which-key "Start REPL")
+    "s" '(python-shell-send-buffer :which-key "Send buffer")
+    "t" '(:ignore t :which-key "Tests")
+    "tt" '(python-pytest-dispatch :which-key "Pytest dispatch")
+    "tf" '(python-pytest-file :which-key "Pytest file")
+    "tp" '(python-pytest-function :which-key "Pytest function")
+    "v" '(pyvenv-activate :which-key "Activate venv")))
+
+(with-eval-after-load 'magit
+  (arg/local-leader
+    :keymaps 'magit-mode-map
+    "b" '(magit-branch-checkout :which-key "Checkout")
+    "c" '(magit-commit :which-key "Commit")
+    "f" '(magit-fetch :which-key "Fetch")
+    "p" '(magit-push-current-to-pushremote :which-key "Push")
+    "r" '(magit-refresh :which-key "Refresh")))
+
+(with-eval-after-load 'vterm
+  (arg/local-leader
+    :keymaps 'vterm-mode-map
+    "c" '(vterm-copy-mode :which-key "Copy mode")
+    "p" '(vterm-yank :which-key "Paste")
+    "r" '(vterm-reset :which-key "Reset terminal")))
+
 (use-package dired
   :straight (:type built-in)
   :custom
@@ -203,7 +806,10 @@
   :init
   (vertico-mode)
   :custom
-  (vertico-cycle t))
+  (vertico-cycle t)
+  (vertico-resize nil)
+  (vertico-count 12)
+  (vertico-preselect 'first))
 
 (use-package orderless
   :straight t
@@ -214,9 +820,30 @@
 (use-package vertico-multiform
   :straight (:host github :repo "minad/vertico" :files ("vertico-multiform.el"))
   :after vertico
+  :bind (:map vertico-map
+              ("ESC" . vertico-multiform-undo))
   :config
-  (vertico-multiform-mode)
-  (add-to-list 'vertico-multiform-categories '(embark-keybinding grid)))
+  (vertico-multiform-mode 1)
+  (setq vertico-multiform-categories
+        '((consult-grep buffer)
+          (consult-location buffer)
+          (file reverse)
+          (t reverse))))
+
+(use-package vertico-directory
+  :after vertico
+  :straight (:host github :repo "minad/vertico" :files ("extensions/vertico-directory.el"))
+  :bind (:map vertico-map
+              ("<backspace>" . vertico-directory-delete-char)
+              ("M-<backspace>" . vertico-directory-delete-word)
+              ("RET" . vertico-directory-enter))
+  :init
+  (defun arg/vertico-directory-tidy-safe ()
+    "Wrapper around `vertico-directory-tidy' that guards missing overlays."
+    (when (and (boundp 'rfn-eshadow-overlay)
+               (overlayp rfn-eshadow-overlay))
+      (vertico-directory-tidy)))
+  :hook (rfn-eshadow-update-overlay . arg/vertico-directory-tidy-safe))
 
 (use-package magit
   :bind (("C-x g" . magit-status)
@@ -264,56 +891,71 @@
   (all-the-icons-completion-mode))
 
 (use-package consult
-  :bind (:map global-map
-	      ("M-g M-g" . consult-goto-line)
-	      ("M-s M-b" . consult-buffer)
-	      ("M-s M-f" . consult-find)
-	      ("M-s M-g" . consult-ripgrep)
-	      ("M-s M-h" . consult-history)
-	      ("M-s M-i" . consult-imenu)
-	      ("M-s M-l" . consult-line)
-	      ("M-s M-m" . consult-mark)
-	      ("M-s M-y" . consult-yank-pop)
-	      ("M-s M-s" . consult-outline)
-	      :map consult-narrow-map
-	      ("?" . consult-narrow-help))
   :hook (completion-list-mode . consult-preview-at-point-mode)
+  :bind (("C-x b" . consult-buffer)
+         ("C-x 4 b" . consult-buffer-other-window)
+         ("C-x 5 b" . consult-buffer-other-frame)
+         ("C-x r b" . consult-bookmark)
+         ("M-y" . consult-yank-pop)
+         ("M-g g" . consult-goto-line)
+         ("M-g M-g" . consult-goto-line)
+         ("M-g i" . consult-imenu)
+         ("M-g I" . consult-imenu-multi)
+         ("M-s b" . consult-buffer)
+         ("M-s f" . consult-find)
+         ("M-s g" . consult-ripgrep)
+         ("M-s h" . consult-history)
+         ("M-s i" . consult-imenu)
+         ("M-s l" . consult-line)
+         ("M-s L" . consult-line-multi)
+         ("M-s m" . consult-mark)
+         ("M-s o" . consult-outline)
+         ("M-s y" . consult-yank-pop)
+         :map consult-narrow-map
+         ("?" . consult-narrow-help)
+         :map minibuffer-local-map
+         ("M-s" . consult-history))
   :init
   (setq register-preview-delay 0.5
-	register-preview-function #'consult-register-format)
-  (advice-add #'retister-preview :override #'consult-register-window)
-  (setq xref-show-xrefs-function #'consult-xref
-	xref-show-definitions-function #'consult-xref)
+        register-preview-function #'consult-register-format
+        xref-show-xrefs-function #'consult-xref
+        xref-show-definitions-function #'consult-xref
+        consult-async-min-input 2
+        consult-async-input-debounce 0.25
+        consult-async-input-throttle 0.5
+        consult-narrow-key "<"
+        consult-line-numbers-widen t
+        consult-preview-key 'any
+        consult-find-args
+        (concat "find . -not ( "
+                "-path */.git* -prune "
+                "-or -path */.cache* -prune )"))
+  (when (fboundp 'projectile-project-root)
+    (with-eval-after-load 'projectile
+      (setq consult-project-function
+            (lambda (_)
+              (when-let ((root (projectile-project-root)))
+                (cons 'projectile root))))))
+  (advice-add #'register-preview :override #'consult-register-window)
   :config
-  (setq consult-line-numbers-widen t)
-  (setq consult-async-min-input 3)
-  (setq consult-async-input-debounce 0.5)
-  (setq consult-async-input-throttle 0.8)
-  (setq consult-narrow-key nil)
-  (setq consult-find-args
-	(concat "find . -not ( "
-		"-path */.git* -prune "
-		"-or -path */.cache* -prune )"))
-  (setq consult-preview-key 'any)
   (add-to-list 'consult-mode-histories '(vc-git-log-edit-mode . log-edit-comment-ring))
   (require 'consult-imenu)
 
-
   (use-package consult-org-roam
     :bind (("M-s M-o f" . consult-org-roam-file-find)
-	   ("M-s M-o l" . consult-org-roam-forward-links)
-	   ("M-s M-o b" . consult-org-roam-backlinks)
-	   ("M-s M-o s" . consult-org-roam-search)
-	   ("M-s M-o l" . consult-org-roam-backlinks-recursive))
+           ("M-s M-o l" . consult-org-roam-forward-links)
+           ("M-s M-o b" . consult-org-roam-backlinks)
+           ("M-s M-o s" . consult-org-roam-search)
+           ("M-s M-o L" . consult-org-roam-backlinks-recursive))
     :init
     (consult-org-roam-mode))
 
   (use-package consult-dir
     :straight t
     :bind (("C-x C-d" . consult-dir)
-	   :map minibuffer-local-completion-map
-	   ("C-x C-d" . consult-dir)
-	   ("C-x C-f" . consult-dir-jump-file))))
+           :map minibuffer-local-completion-map
+           ("C-x C-d" . consult-dir)
+           ("C-x C-f" . consult-dir-jump-file))))
 
 (use-package corfu
   :straight t
@@ -368,7 +1010,9 @@
 (use-package emacs
   :init
   (setq completion-cycle-threshold 3)
-  (setq tab-always-indent 'complete))
+  (setq tab-always-indent 'complete)
+  (setq-default indent-tabs-mode nil)
+  (setq-default tab-width 2))
 
 (use-package dabbrev
   :bind (("C-<tab>" . dabbrev-completion)
@@ -587,28 +1231,30 @@ the new drawer."
     (file-directory-p arg-emacs-org-roam-dir)
   (make-directory arg-emacs-org-roam-dir))
 
-(use-package org-roam
-  :straight t
-  :init
-  (setq org-roam-v2-ack t)
-  :custom
-  (org-roam-directory arg-emacs-org-roam-dir)
-  (org-roam-completion-everywhere t)
-  (org-roam-capture-templates
-   '(("d" "default" plain
-      "%?"
-      :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-      :unnarrowed t)))
-  :bind (("C-c n l" . org-roam-buffer-toggle)
-  	 ("C-c n f" . org-roam-node-find)
-  	 ("C-c n i" . org-roam-node-insert)
-	 :map org-mode-map
-	 ("C-M-i" . completion-at-point))
-  :config
-  (org-roam-setup))
-
-;; Set database autosync
-(org-roam-db-autosync-enable)
+(if (and (fboundp 'sqlite-available-p)
+         (sqlite-available-p))
+    (progn
+      (use-package org-roam
+        :straight t
+        :init
+        (setq org-roam-v2-ack t)
+        :custom
+        (org-roam-directory arg-emacs-org-roam-dir)
+        (org-roam-completion-everywhere t)
+        (org-roam-capture-templates
+         '(("d" "default" plain
+            "%?"
+            :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+            :unnarrowed t)))
+        :bind (("C-c n l" . org-roam-buffer-toggle)
+        	 ("C-c n f" . org-roam-node-find)
+        	 ("C-c n i" . org-roam-node-insert)
+      	 :map org-mode-map
+      	 ("C-M-i" . completion-at-point))
+        :config
+        (org-roam-setup)
+        (org-roam-db-autosync-enable)))
+  (message "Skipping org-roam setup: built-in SQLite support not available."))
 
 (setq org-agenda-files '("~/org/agenda"))
 
@@ -653,29 +1299,32 @@ the new drawer."
   :straight t
   :bind (("C-x v t" . git-timemachine)))
 
-(use-package forge
-  :straight t
-  :after magit
-  :config
-  ;; Gitlab settings
-  (setq forge-alist
-	 '(("gitlab.com" "gitlab.com/api/v4" "gitlab.com" forge-gitlab-repository)))
+(if (and (fboundp 'sqlite-available-p)
+         (sqlite-available-p))
+    (use-package forge
+      :straight t
+      :after magit
+      :config
+      ;; Gitlab settings
+      (setq forge-alist
+	     '(("gitlab.com" "gitlab.com/api/v4" "gitlab.com" forge-gitlab-repository)))
 
-  ;; Set number of topics to fetch
-  (setq forge-topic-list-limit '(60 . 10))  ; (issues . merge-requests)
+      ;; Set number of topics to fetch
+      (setq forge-topic-list-limit '(60 . 10))  ; (issues . merge-requests)
 
-  ;; Columns to show in topic list
-  (setq forge-topic-list-columns
-	 '(("#" 5 forge-topic-list-sort-by-number (:right-align t) number nil)
-	   ("Title" 60 t nil title nil)
-	   ("State" 6 t nil state nil)
-	   ("Updated" 10 t nil updated nil)))
+      ;; Columns to show in topic list
+      (setq forge-topic-list-columns
+	     '(("#" 5 forge-topic-list-sort-by-number (:right-align t) number nil)
+	       ("Title" 60 t nil title nil)
+	       ("State" 6 t nil state nil)
+	       ("Updated" 10 t nil updated nil)))
 
-  ;; Auto-fetch notifications
-  (setq forge-pull-notifications t)
+      ;; Auto-fetch notifications
+      (setq forge-pull-notifications t)
 
-  ;; Database location
-  (setq forge-database-file (expand-file-name "forge-database.sqlite" user-emacs-directory)))
+      ;; Database location
+      (setq forge-database-file (expand-file-name "forge-database.sqlite" user-emacs-directory)))
+  (message "Skipping Forge setup: built-in SQLite support not available."))
 
 (use-package git-messenger
   :straight t

@@ -11,6 +11,10 @@
 ** Base Settings
 
 *** Set initial mode to Org
+
+    Starting new sessions directly in [[https://orgmode.org][Org Mode]] gives me an outline-friendly scratch
+    buffer for quick notes and prototyping. This block swaps the default `lisp-interaction-mode`
+    for something that matches the literate structure of the rest of the configuration.
 #+begin_src emacs-lisp
   (setq initial-major-mode 'org-mode)
 #+end_src
@@ -18,6 +22,11 @@
 ** UI
 
 *** Theme
+
+    I keep a small library of curated themes so I can quickly swap moods without tripping
+    Emacs' safety prompts. The mix pulls from [[https://github.com/doomemacs/themes][doom-themes]], [[https://gitlab.com/protesilaos/modus-themes][modus-themes]],
+    [[https://github.com/kuanyui/moe-theme.el][moe-theme]], and [[https://gitlab.com/protesilaos/ef-themes][ef-themes]]—all opinionated palettes that cover dark, light,
+    and high-contrast scenarios.
 
 **** Declare all themes as safe
 
@@ -32,7 +41,13 @@
 
 
 **** Install Themes
-Install various themes
+
+     Each `use-package` stanza here installs a theme family. I rely on
+     - [[https://github.com/doomemacs/themes][doom-themes]] for bold, high-contrast options tuned for programming.
+     - [[https://gitlab.com/protesilaos/modus-themes][modus-themes]] and [[https://gitlab.com/protesilaos/ef-themes][ef-themes]] for meticulously accessible palettes maintained by Protesilaos Stavrou.
+     - [[https://github.com/kuanyui/moe-theme.el][moe-theme]] for a classic pastel aesthetic.
+     
+     Keeping them around means I can switch without reinstalling when I adjust the lighting in my workspace.
 #+begin_src emacs-lisp
   (use-package doom-themes)
   (use-package modus-themes
@@ -55,11 +70,21 @@ Install various themes
 : t
 
 **** Load my theme
+
+     I default to `modus-vivendi-tinted` because it balances contrast and saturation while
+     preserving accessible color pairs out of the box.
 #+begin_src emacs-lisp
-  (load-theme 'moe-dark t)
+  (load-theme 'modus-vivendi-tinted t)
 #+end_src
 
+#+RESULTS:
+: t
+
 *** Fonts
+
+    Font configuration prioritises [[https://github.com/be5invis/Iosevka][Iosevka Nerd Font]] for code, with handwriting-style
+    comments via [[https://fonts.google.com/specimen/Caveat][Caveat]] when available. I also rebalance Org typography by
+    magnifying headings and aligning fixed-pitch faces.
 
     #+begin_src emacs-lisp
     (when (member "Iosevka Nerd Font Mono" (font-family-list))
@@ -110,6 +135,9 @@ Install various themes
 
 *** Nerd Icons
 
+    [[https://github.com/rainstormstudio/nerd-icons.el][nerd-icons]] supplies a patched icon set that many UI packages tap into for glyphs.
+    Loading it centrally prevents each downstream package from reconfiguring fonts.
+
     #+begin_src emacs-lisp
     (use-package nerd-icons
       :straight t)
@@ -117,7 +145,8 @@ Install various themes
 
 *** Modeline
 
-    This is the modeline from Doom Emacs. It is feature-rich and performant.
+    [[https://github.com/seagle0128/doom-modeline][doom-modeline]] delivers the Doom Emacs status line experience in vanilla Emacs. It is
+    feature-rich and performant while remaining self-contained.
 
     #+begin_src emacs-lisp
     (use-package doom-modeline
@@ -131,7 +160,7 @@ Install various themes
       (doom-modeline-major-mode-color-icon t)
       (doom-modeline-buffer-state-icon t)
       (doom-modeline-buffer-modification-icon t)
-      (doom-modeline-minor-modes t)
+      (doom-modeline-minor-modes nil)
       (doom-modeline-enable-word-count t)
       (doom-modeline-buffer-encoding t)
       (doom-modeline-indent-info t)
@@ -143,7 +172,8 @@ Install various themes
 
 **** Zoom
 
-Package that handles automatic window sizing based on active window
+Package [[https://github.com/cyrus-and/zoom][zoom]] automatically resizes windows so the active buffer gets a golden-ratio
+style focus while keeping secondary panes visible.
 
      #+begin_src emacs-lisp
      (use-package zoom
@@ -156,6 +186,8 @@ Package that handles automatic window sizing based on active window
 
 **** Posframe
 
+     [[https://github.com/tumashu/posframe][posframe]] renders child frames for transient UIs (which-key, helpful, etc.). These
+     defaults standardise borders and colors so every consumer inherits the same look.
      #+begin_src emacs-lisp
 (use-package posframe
   :straight t
@@ -181,20 +213,33 @@ Package that handles automatic window sizing based on active window
             (lambda () (set-cursor-color "white"))))
      #+end_src
 
+**** Winner Mode
+
+     Built-in `winner-mode` lets me undo/redo window layout changes—essential when juggling
+     transient buffers.
+     #+begin_src emacs-lisp
+(use-package winner
+  :straight (:type built-in)
+  :init
+  (winner-mode 1))
+     #+end_src
+
 *** Editor settings tweaks
-Need to enable line numbers, column numbers, and a size indicator
+
+    These lightweight toggles expose contextual information—line and column numbers as well
+    as file size—without pulling in extra packages.
 #+begin_src emacs-lisp
   (line-number-mode t)
   (column-number-mode t)
   (size-indication-mode t)
 #+end_src
 
-Highlight line mode
+    Highlighting the current line makes it easier to track point in dense buffers.
 #+begin_src emacs-lisp
   (hl-line-mode t)
 #+end_src
 
-Enable recent files mode
+    `recentf-mode` surfaces the files I touched recently so the `SPC .` prompt stays relevant.
 #+begin_src emacs-lisp
 (recentf-mode t)
 #+end_src
@@ -202,6 +247,9 @@ Enable recent files mode
 ** Editing
 
 *** expand-region
+
+      [[https://github.com/magnars/expand-region.el][expand-region]] grows the active region semantically (symbols → lines → blocks), which
+      mirrors how I tend to select code in other editors.
       #+begin_src emacs-lisp
       (use-package expand-region
 	:straight t
@@ -209,11 +257,17 @@ Enable recent files mode
       #+end_src
 
 *** save-place-move
+
+     Built-in `save-place-mode` reopens files at the exact point I left them, which is vital
+     when hopping between large codebases.
      #+begin_src emacs-lisp
      (save-place-mode 1)
      #+end_src
 
 *** beacon
+
+     [[https://github.com/Malabarba/beacon][beacon]] briefly flashes the cursor position after jumps so I can orient myself after
+     switching windows or buffers.
      #+begin_src emacs-lisp
      (use-package beacon
        :straight t
@@ -221,35 +275,14 @@ Enable recent files mode
        (beacon-mode 1))
      #+end_src
 
-   These packages ars focused on providing a better experience for completion
-   in the minibuffer, editor, and anywhere else
+   The next group of packages refines completion behaviour across the minibuffer and in-buffer prompts.
 
      #+RESULTS:
-
-**** Consult
-     #+begin_src emacs-lisp
-(use-package consult
-  :bind (("C-x b" . consult-buffer)
-         ("C-x 4 b" . consult-buffer-other-window)
-         ("C-x 5 b" . consult-buffer-other-frame)
-         ("M-y" . consult-yank-pop)
-         ("M-g g" . consult-goto-line)
-         ("M-g M-g" . consult-goto-line)
-         ("M-g i" . consult-imenu)
-         ("M-g I" . consult-imenu-multi)
-         ("M-s l" . consult-line)
-         ("M-s L" . consult-line-multi)
-         ("M-s r" . consult-ripgrep)
-         ("M-s f" . consult-find)
-         ("C-x r b" . consult-bookmark))
-  :config
-  (setq consult-narrow-key "<"))
-     #+end_src
-
-     #+RESULTS:
-     : consult-bookmark
 
 **** Corfu
+
+     [[https://github.com/minad/corfu][Corfu]] provides a minimal completion popup with sane defaults. I enable the popup info
+     module and tweak delays so suggestions feel instantaneous.
      #+begin_src emacs-lisp
 (use-package corfu
   :init
@@ -271,6 +304,9 @@ Enable recent files mode
      : t
 
 **** Cape
+
+     [[https://github.com/minad/cape][Cape]] augments `completion-at-point-functions` with dabbrev, file, and other sources
+     so Corfu always has rich data to display.
      #+begin_src emacs-lisp
 (use-package cape
   :init
@@ -282,7 +318,12 @@ Enable recent files mode
 
 *** Keybindings
 
+    Modal bindings revolve around [[https://github.com/noctuid/general.el][general.el]] for leader dispatch and [[https://github.com/justbur/evil-collection][evil-collection]]
+    for per-mode integration. The tables below document each leader prefix so the intent stays clear.
+
 **** which-key
+
+     [[https://github.com/justbur/emacs-which-key][which-key]] displays pending key completions in a side window so the leader maps stay discoverable.
      #+begin_src emacs-lisp
 (use-package which-key
   :init
@@ -295,6 +336,8 @@ Enable recent files mode
      : t
 
 *** Org Mode
+
+    These defaults keep Org buffers visually pleasant and enable modern UI affordances like [[https://github.com/minad/org-modern][org-modern]] stars.
 
     #+begin_src emacs-lisp
 (use-package org
@@ -314,8 +357,1223 @@ Enable recent files mode
 
     #+RESULTS:
     : t
+** Evil
+
+   This section layers the [[https://github.com/emacs-evil/evil][Evil]] ecosystem to provide modal editing with rich text objects,
+   search helpers, and project-aware leader bindings.
+
+*** Core Modal Editing
+
+    Base Evil configuration plus leader setup lives here so the rest of the modules can assume consistent states.
+
+**** Evil core
+
+    The core [[https://github.com/emacs-evil/evil][evil]] package flips Emacs into Vim emulation. I enable integration hooks,
+    preserve visual-line motion, and set sane defaults around undo/redo and split behaviour.
+#+begin_src emacs-lisp
+(use-package evil
+  :init
+  (setq evil-want-integration t
+        evil-want-keybinding nil
+        evil-want-minibuffer t
+        evil-want-C-u-scroll t
+        evil-want-C-i-jump t
+        evil-respect-visual-line-mode t
+        evil-undo-system 'undo-redo
+        evil-want-Y-yank-to-eol t
+        evil-want-fine-undo t
+        evil-split-window-below t
+        evil-vsplit-window-right t)
+  :config
+  (evil-mode 1)
+  (setq evil-move-beyond-eol t
+        evil-kill-on-visual-paste nil)
+  (evil-set-leader '(normal visual motion emacs) (kbd "SPC"))
+  (evil-set-leader '(normal visual motion emacs) (kbd "C-SPC"))
+  (evil-define-key '(normal motion) 'global (kbd "j") #'evil-next-visual-line)
+  (evil-define-key '(normal motion) 'global (kbd "k") #'evil-previous-visual-line)
+  (evil-define-key 'normal 'global (kbd "Q") #'evil-ex)
+  (evil-define-key 'normal 'global (kbd "gx") #'browse-url-at-point)
+  (evil-define-key 'insert 'global (kbd "C-g") #'evil-normal-state)
+  (evil-define-key 'insert 'global (kbd "C-h") #'evil-delete-backward-char-and-join)
+  (evil-define-key '(normal visual) 'global (kbd "RET") #'evil-ex-nohighlight)
+  (dolist (mode '(term-mode vterm-mode comint-mode eshell-mode))
+    (evil-set-initial-state mode 'insert))
+  (dolist (mode '(magit-status-mode treemacs-mode))
+    (evil-set-initial-state mode 'normal)))
+#+end_src
+
+**** Leader keys
+
+     [[https://github.com/noctuid/general.el][general.el]] centralises the leader ecosystem so modal bindings stay declarative.
+     The tables outline the prefixes I reach for most often.
+
+     #+caption: Root `SPC` bindings
+     | Key      | Command                     | Description              |
+     |----------+-----------------------------+--------------------------|
+     | SPC SPC  | execute-extended-command    | Invoke `M-x`             |
+     | SPC .    | find-file                   | Visit file               |
+     | SPC /    | consult-ripgrep             | Project search with Ripgrep |
+     | SPC '    | vterm                       | Launch Vterm terminal    |
+     | SPC ;    | eval-expression             | Evaluate Elisp snippet   |
+     | SPC !    | shell-command               | Run shell command        |
+     | SPC &    | async-shell-command         | Run async shell command  |
+     | SPC TAB  | mode-line-other-buffer      | Switch to previous buffer |
+
+     #+caption: `SPC a` — Applications
+     | Key       | Command                     | Description            |
+     |-----------+-----------------------------+------------------------|
+     | SPC a a   | org-agenda                  | Jump into agenda       |
+     | SPC a c   | calendar                    | Open calendar          |
+     | SPC a d   | devdocs-lookup              | Query DevDocs          |
+     | SPC a e   | eglot                       | Connect to LSP server  |
+     | SPC a m   | arg/open-messages-buffer    | View `*Messages*`      |
+     | SPC a p   | list-processes              | Inspect processes      |
+     | SPC a s   | arg/open-scratch-buffer     | Open `*scratch*`       |
+     | SPC a w   | eww                         | Launch EWW browser     |
+
+     #+caption: `SPC b` — Buffers
+     | Key       | Command                          | Description              |
+     |-----------+----------------------------------+--------------------------|
+     | SPC b b   | consult-buffer                   | Switch buffer            |
+     | SPC b B   | consult-buffer-other-window      | Switch in other window   |
+     | SPC b d   | kill-this-buffer                 | Kill current buffer      |
+     | SPC b D   | kill-buffer-and-window           | Kill buffer & window     |
+     | SPC b I   | ibuffer                          | Open Ibuffer             |
+     | SPC b K   | kill-other-buffers               | Prune other buffers      |
+     | SPC b m   | arg/open-messages-buffer         | Messages buffer          |
+     | SPC b n   | next-buffer                      | Next buffer              |
+     | SPC b N   | evil-buffer-new                  | New empty buffer         |
+     | SPC b p   | previous-buffer                  | Previous buffer          |
+     | SPC b r   | revert-buffer                    | Reload buffer            |
+     | SPC b s   | save-buffer                      | Save buffer              |
+     | SPC b S   | save-some-buffers                | Save marked buffers      |
+
+     #+caption: `SPC c` — Code
+     | Key       | Command                               | Description                 |
+     |-----------+---------------------------------------+-----------------------------|
+     | SPC c a   | eglot-code-actions                    | Code actions                |
+     | SPC c A   | eglot-format                          | Format region               |
+     | SPC c c   | compile                               | Compile project             |
+     | SPC c C   | recompile                             | Re-run last compile         |
+     | SPC c D   | eglot-find-declaration                | Go to declaration           |
+     | SPC c d   | xref-find-definitions                 | Go to definition            |
+     | SPC c e   | consult-flymake                       | Inspect diagnostics         |
+     | SPC c E   | flymake-show-buffer-diagnostics       | Buffer diagnostics          |
+     | SPC c f   | eglot-format-buffer                   | Format buffer               |
+     | SPC c F   | eglot-code-action-organize-imports    | Organize imports            |
+     | SPC c i   | consult-imenu                         | Buffer outline              |
+     | SPC c I   | consult-imenu-multi                   | Multi-buffer outline        |
+     | SPC c l   | eglot                                 | Connect LSP                 |
+     | SPC c R   | eglot-reconnect                       | Reconnect server            |
+     | SPC c S   | eglot-shutdown                        | Shutdown server             |
+     | SPC c T   | treesit-explore-node-at-point         | Inspect tree-sitter node    |
+     | SPC c X   | xref-find-references                  | Find references             |
+     | SPC c r   | eglot-rename                          | Rename symbol               |
+
+     #+caption: `SPC d` — Debug
+     | Key       | Command                     | Description              |
+     |-----------+-----------------------------+--------------------------|
+     | SPC d b   | dap-breakpoint-toggle       | Toggle breakpoint        |
+     | SPC d c   | dap-continue                | Continue execution       |
+     | SPC d d   | dap-debug                   | Start debugger           |
+     | SPC d i   | dap-step-in                 | Step in                  |
+     | SPC d o   | dap-step-out                | Step out                 |
+     | SPC d r   | dap-debug-recent            | Resume recent session    |
+     | SPC d R   | dap-restart-frame           | Restart frame            |
+     | SPC d s   | dap-switch-session          | Switch session           |
+     | SPC d t   | dap-ui-repl                 | Open DAP REPL            |
+     | SPC d T   | dap-breakpoint-condition    | Conditional breakpoint   |
+
+     #+caption: `SPC e` — Evaluate
+     | Key       | Command             | Description            |
+     |-----------+---------------------+------------------------|
+     | SPC e b   | eval-buffer         | Evaluate buffer        |
+     | SPC e d   | eval-defun          | Evaluate defun         |
+     | SPC e e   | eval-expression     | Evaluate expression    |
+     | SPC e l   | eval-last-sexp      | Evaluate last sexp     |
+     | SPC e r   | eval-region         | Evaluate region        |
+
+     #+caption: `SPC f` — Files
+     | Key        | Command                       | Description                   |
+     |------------+-------------------------------+-------------------------------|
+     | SPC f D    | delete-file                   | Delete current file           |
+     | SPC f F    | find-file                     | Open file (explicit path)     |
+     | SPC f O    | find-file-other-window        | Open in other window          |
+     | SPC f R    | recover-this-file             | Recover autosave              |
+     | SPC f S    | write-file                    | Save as                       |
+     | SPC f e d  | arg/open-config-directory     | Browse config directory       |
+     | SPC f e c  | arg/open-config-org           | Open `config.org`             |
+     | SPC f e e  | arg/open-early-init-el        | Open `early-init.el`          |
+     | SPC f e i  | arg/open-init-el              | Open `init.el`                |
+     | SPC f e r  | arg/reload-init-file          | Reload init file              |
+     | SPC f f    | consult-find                  | Consult find                  |
+     | SPC f r    | consult-recent-file           | Recent files                  |
+     | SPC f s    | save-buffer                   | Save buffer                   |
+
+     #+caption: `SPC g` — Git
+     | Key       | Command                               | Description             |
+     |-----------+---------------------------------------+-------------------------|
+     | SPC g a   | magit-stage-buffer                    | Stage current buffer    |
+     | SPC g A   | magit-stage-file                      | Stage file              |
+     | SPC g b   | magit-branch-checkout                 | Checkout branch         |
+     | SPC g c   | magit-commit                          | Commit changes          |
+     | SPC g C   | magit-clone                           | Clone repository        |
+     | SPC g d   | magit-diff-dwim                       | Diff dwim               |
+     | SPC g D   | magit-diff-range-dwim                 | Diff range              |
+     | SPC g g   | magit-status                          | Magit status            |
+     | SPC g h   | git-gutter:popup-hunk                 | Show hunk popup         |
+     | SPC g H   | git-gutter:stage-hunk                 | Stage hunk              |
+     | SPC g i   | magit-init                            | Init repository         |
+     | SPC g l   | magit-log                             | View log                |
+     | SPC g n   | git-gutter:next-hunk                  | Next hunk               |
+     | SPC g p   | git-gutter:previous-hunk              | Previous hunk           |
+     | SPC g P   | magit-push-current-to-pushremote      | Push current branch     |
+     | SPC g r   | magit-refresh                         | Refresh status          |
+     | SPC g s   | magit-status                          | Magit status            |
+     | SPC g t   | git-timemachine-toggle                | Toggle time machine     |
+
+     #+caption: `SPC h` — Help
+     | Key        | Command                      | Description              |
+     |------------+------------------------------+--------------------------|
+     | SPC h .    | display-local-help           | Local help               |
+     | SPC h A    | apropos-command              | Apropos command          |
+     | SPC h a    | apropos                      | Apropos search           |
+     | SPC h b    | describe-bindings            | List active bindings     |
+     | SPC h c    | describe-char                | Describe character       |
+     | SPC h C    | describe-coding-system       | Coding systems           |
+     | SPC h d    | view-echo-area-messages      | Echo area messages       |
+     | SPC h e    | arg/open-messages-buffer     | Messages buffer          |
+     | SPC h f    | describe-function            | Describe function        |
+     | SPC h F    | describe-face                | Describe face            |
+     | SPC h I    | info                         | Info manuals             |
+     | SPC h k    | describe-key                 | Describe key             |
+     | SPC h l    | view-lossage                 | View key history         |
+     | SPC h m    | describe-mode                | Describe mode            |
+     | SPC h o    | consult-info                 | Consult Info             |
+     | SPC h p    | describe-package             | Describe package         |
+     | SPC h r r  | arg/reload-init-file         | Reload init file         |
+     | SPC h r t  | consult-theme                | Switch theme             |
+     | SPC h s    | describe-symbol              | Describe symbol          |
+     | SPC h t    | consult-theme                | Theme picker             |
+     | SPC h w    | where-is                     | Where-is lookup          |
+     | SPC h v    | describe-variable            | Describe variable        |
+
+     #+caption: `SPC i` — Insert
+     | Key       | Command                | Description              |
+     |-----------+------------------------+--------------------------|
+     | SPC i c   | insert-char            | Insert character         |
+     | SPC i d   | devdocs-lookup         | DevDocs lookup           |
+     | SPC i e   | emoji-insert           | Insert emoji             |
+     | SPC i k   | insert-kbd-macro       | Insert keyboard macro    |
+     | SPC i p   | insert-register        | Insert register          |
+     | SPC i s   | tempel-insert          | Insert snippet           |
+
+     #+caption: `SPC j` — Jump
+     | Key       | Command                | Description              |
+     |-----------+------------------------+--------------------------|
+     | SPC j j   | avy-goto-char-timer    | Jump to char             |
+     | SPC j l   | avy-goto-line          | Jump to line             |
+     | SPC j s   | evil-snipe-s           | Snipe forward            |
+     | SPC j S   | evil-snipe-S           | Snipe backward           |
+     | SPC j w   | avy-goto-word-0        | Jump to word             |
+
+     #+caption: `SPC m` — Multiple cursors
+     | Key       | Command                               | Description            |
+     |-----------+---------------------------------------+------------------------|
+     | SPC m a   | evil-mc-undo-all-cursors              | Clear cursors          |
+     | SPC m A   | evil-mc-make-and-goto-all-cursors     | Create all cursors     |
+     | SPC m m   | evil-mc-make-all-cursors              | Select all matches     |
+     | SPC m n   | evil-mc-make-and-goto-next-match      | Next match cursor      |
+     | SPC m p   | evil-mc-make-and-goto-prev-match      | Previous match cursor  |
+     | SPC m s   | evil-mc-mode                          | Toggle evil-mc         |
+
+     #+caption: `SPC o` — Org
+     | Key       | Command                      | Description              |
+     |-----------+------------------------------+--------------------------|
+     | SPC o a   | org-agenda                   | Agenda                   |
+     | SPC o A   | org-archive-subtree-default  | Archive subtree          |
+     | SPC o c   | org-capture                  | Capture note             |
+     | SPC o d   | org-roam-dailies-goto-today  | Daily note               |
+     | SPC o e   | org-export-dispatch          | Export                   |
+     | SPC o f   | org-roam-node-find           | Find roam node           |
+     | SPC o i   | org-roam-node-insert         | Insert roam link         |
+     | SPC o l   | org-toggle-link-display      | Toggle link display      |
+     | SPC o m   | org-tags-view                | Tag search               |
+     | SPC o n   | org-add-note                 | Add note                 |
+     | SPC o r   | org-roam-refile              | Refile roam note         |
+     | SPC o s   | org-store-link               | Store link               |
+     | SPC o t   | org-todo                     | Toggle TODO              |
+
+     #+caption: `SPC p` — Projects
+     | Key       | Command                                   | Description            |
+     |-----------+-------------------------------------------+------------------------|
+     | SPC p !   | projectile-run-shell-command-in-root      | Run project shell      |
+     | SPC p a   | projectile-add-known-project              | Add project            |
+     | SPC p A   | projectile-project-info                   | Project info           |
+     | SPC p b   | consult-projectile                        | Switch project buffer  |
+     | SPC p C   | projectile-configure-project              | Configure project      |
+     | SPC p c   | projectile-compile-project                | Compile project        |
+     | SPC p D   | projectile-dired                          | Project dired          |
+     | SPC p d   | projectile-remove-known-project           | Remove project         |
+     | SPC p f   | consult-projectile-find-file              | Find project file      |
+     | SPC p k   | projectile-kill-buffers                   | Kill project buffers   |
+     | SPC p p   | projectile-switch-project                 | Switch project         |
+     | SPC p R   | projectile-replace-regexp                 | Project replace regexp |
+     | SPC p s   | consult-ripgrep                           | Search project         |
+     | SPC p t   | projectile-test-project                   | Run tests              |
+     | SPC p v   | projectile-vc                             | Project VC             |
+
+     #+caption: `SPC q` — Session (lowercase)
+     | Key       | Command                       | Description            |
+     |-----------+-------------------------------+------------------------|
+     | SPC q q   | evil-quit-all                 | Quit Emacs             |
+     | SPC q Q   | save-buffers-kill-terminal    | Quit after saving      |
+     | SPC q r   | arg/reload-init-file          | Reload init file       |
+     | SPC q s   | save-some-buffers             | Save modified buffers  |
+
+     #+caption: `SPC r` — Registers
+     | Key       | Command                          | Description            |
+     |-----------+----------------------------------+------------------------|
+     | SPC r B   | bookmark-set                     | Set bookmark           |
+     | SPC r b   | consult-bookmark                 | Jump to bookmark       |
+     | SPC r r   | consult-register                 | Inspect registers      |
+     | SPC r s   | consult-register-store           | Store to register      |
+     | SPC r w   | window-configuration-to-register | Save window layout     |
+
+     #+caption: `SPC s` — Search
+     | Key       | Command                     | Description              |
+     |-----------+-----------------------------+--------------------------|
+     | SPC s b   | consult-line                | Search buffer            |
+     | SPC s B   | consult-line-multi          | Search across buffers    |
+     | SPC s c   | consult-locate              | Locate files             |
+     | SPC s d   | consult-dir                 | Browse directories       |
+     | SPC s f   | consult-find                | Find files               |
+     | SPC s g   | consult-ripgrep             | Ripgrep search           |
+     | SPC s h   | consult-history             | Search history           |
+     | SPC s i   | consult-imenu               | Jump by imenu            |
+     | SPC s I   | consult-imenu-multi         | Imenu across buffers     |
+     | SPC s m   | consult-mark                | Jump to marks            |
+     | SPC s n   | consult-line-multi          | Lines across buffers     |
+     | SPC s o   | consult-outline             | Document outline         |
+     | SPC s p   | consult-projectile          | Project buffers          |
+     | SPC s t   | consult-theme               | Pick theme               |
+     | SPC s u   | consult-focus-lines         | Keep matching lines      |
+     | SPC s x   | consult-xref                | Browse xref results      |
+
+     #+caption: `SPC t` — Toggle
+     | Key       | Command                           | Description            |
+     |-----------+-----------------------------------+------------------------|
+     | SPC t b   | global-display-line-numbers-mode  | Toggle global line nums |
+     | SPC t c   | display-fill-column-indicator-mode | Toggle fill column     |
+     | SPC t D   | eldoc-mode                        | Toggle Eldoc           |
+     | SPC t E   | eldoc-box-hover-mode              | Toggle Eldoc box       |
+     | SPC t F   | flyspell-mode                     | Toggle Flyspell        |
+     | SPC t G   | git-gutter-mode                   | Toggle git-gutter      |
+     | SPC t g   | evil-goggles-mode                 | Toggle evil-goggles    |
+     | SPC t i   | org-toggle-inline-images          | Toggle inline images   |
+     | SPC t L   | display-line-numbers-mode         | Toggle buffer line nums |
+     | SPC t P   | prettify-symbols-mode             | Toggle symbols         |
+     | SPC t R   | read-only-mode                    | Toggle read-only       |
+     | SPC t S   | flyspell-prog-mode                | Toggle Flyspell (prog) |
+     | SPC t T   | toggle-truncate-lines             | Toggle truncation      |
+     | SPC t V   | visual-line-mode                  | Toggle visual line     |
+     | SPC t w   | whitespace-mode                   | Toggle whitespace      |
+
+     #+caption: `SPC u` — Utilities
+     | Key       | Command                     | Description            |
+     |-----------+-----------------------------+------------------------|
+     | SPC u o   | org-store-link              | Store link             |
+     | SPC u r   | rename-uniquely             | Rename buffer uniquely |
+     | SPC u s   | shell-command-on-region     | Run shell on region    |
+     | SPC u u   | universal-argument          | Universal argument     |
+
+     #+caption: `SPC w` — Windows
+     | Key       | Command                            | Description            |
+     |-----------+------------------------------------+------------------------|
+     | SPC w -   | evil-window-split                  | Horizontal split       |
+     | SPC w /   | evil-window-vsplit                 | Vertical split         |
+     | SPC w =   | balance-windows                    | Balance windows        |
+     | SPC w D   | delete-other-windows               | Delete other windows   |
+     | SPC w d   | delete-window                      | Delete window          |
+     | SPC w F   | follow-mode                        | Follow mode            |
+     | SPC w f   | make-frame-command                 | New frame              |
+     | SPC w H   | evil-window-move-far-left          | Move far left          |
+     | SPC w J   | evil-window-move-far-down          | Move far down          |
+     | SPC w K   | evil-window-move-far-up            | Move far up            |
+     | SPC w L   | evil-window-move-far-right         | Move far right         |
+     | SPC w h   | windmove-left                      | Move left              |
+     | SPC w O   | other-frame                        | Other frame            |
+     | SPC w j   | windmove-down                      | Move down              |
+     | SPC w k   | windmove-up                        | Move up                |
+     | SPC w l   | windmove-right                     | Move right             |
+     | SPC w o   | delete-other-windows               | Only window            |
+     | SPC w R   | winner-redo                        | Redo layout            |
+     | SPC w s   | split-window-below                 | Split below            |
+     | SPC w S   | window-swap-states                 | Swap windows           |
+     | SPC w U   | winner-undo                        | Undo layout            |
+     | SPC w W   | ace-window                         | Ace window             |
+     | SPC w X   | kill-buffer-and-window             | Kill buffer & window   |
+     | SPC w w   | other-window                       | Cycle windows          |
+     | SPC w v   | split-window-right                 | Split right            |
+
+     #+caption: `SPC x` — Text
+     | Key       | Command                      | Description            |
+     |-----------+------------------------------+------------------------|
+     | SPC x b   | bury-buffer                  | Bury buffer            |
+     | SPC x c   | capitalize-region            | Capitalize region      |
+     | SPC x g   | goto-line                    | Go to line             |
+     | SPC x j   | join-line                    | Join lines             |
+     | SPC x k   | kill-region                  | Kill region            |
+     | SPC x l   | downcase-region              | Downcase region        |
+     | SPC x p   | mark-page                    | Mark page              |
+     | SPC x s   | sort-lines                   | Sort lines             |
+     | SPC x U   | upcase-region                | Upcase region          |
+     | SPC x u   | upcase-initials-region       | Capitalize initials    |
+     | SPC x w   | delete-trailing-whitespace   | Trim whitespace        |
+
+     #+caption: `SPC y` — Yank ring
+     | Key       | Command                      | Description            |
+     |-----------+------------------------------+------------------------|
+     | SPC y p   | yank-pop                     | Cycle kill-ring        |
+     | SPC y r   | copy-rectangle-as-kill       | Copy rectangle         |
+     | SPC y s   | evil-yank-line               | Yank line              |
+     | SPC y y   | consult-yank-pop             | Browse yank history    |
+
+     #+caption: `SPC z` — Zoom
+     | Key       | Command      | Description        |
+     |-----------+--------------+--------------------|
+     | SPC z z   | zoom-mode    | Toggle zoom-mode   |
+
+     #+caption: `SPC Z` — Session (uppercase)
+     | Key       | Command                       | Description            |
+     |-----------+-------------------------------+------------------------|
+     | SPC Z f   | make-frame-command            | Create new frame       |
+     | SPC Z q   | evil-quit-all                 | Quit Emacs             |
+     | SPC Z s   | save-some-buffers             | Save modified buffers  |
+     | SPC Z Z   | save-buffers-kill-emacs       | Save and quit          |
+#+begin_src emacs-lisp
+(use-package general
+  :after evil
+  :config
+  (general-evil-setup t)
+  (defun arg/open-config-org ()
+    "Open the main literate configuration file."
+    (interactive)
+    (find-file (expand-file-name "config.org" user-emacs-directory)))
+
+  (defun arg/open-init-el ()
+    "Open init.el for quick edits."
+    (interactive)
+    (find-file (expand-file-name "init.el" user-emacs-directory)))
+
+  (defun arg/open-early-init-el ()
+    "Open early-init.el."
+    (interactive)
+    (find-file (expand-file-name "early-init.el" user-emacs-directory)))
+
+  (defun arg/open-config-directory ()
+    "Browse the Emacs configuration directory."
+    (interactive)
+    (dired user-emacs-directory))
+
+  (defun arg/open-scratch-buffer ()
+    "Switch to the *scratch* buffer, creating it if necessary."
+    (interactive)
+    (switch-to-buffer (get-buffer-create "*scratch*")))
+
+  (defun arg/open-messages-buffer ()
+    "Pop to the *Messages* buffer."
+    (interactive)
+    (pop-to-buffer "*Messages*"))
+
+  (defun arg/reload-init-file ()
+    "Reload init.el."
+    (interactive)
+    (load-file (expand-file-name "init.el" user-emacs-directory)))
+
+  (general-create-definer arg/leader
+    :states '(normal visual motion emacs)
+    :keymaps 'override
+    :prefix "SPC"
+    :global-prefix "C-SPC")
+  (general-create-definer arg/local-leader
+    :states '(normal visual)
+    :keymaps 'override
+    :prefix "SPC m"
+    :global-prefix "C-SPC m")
+  (arg/leader
+    "SPC" '(execute-extended-command :which-key "M-x")
+    "."   '(find-file :which-key "Find file")
+    "/"   '(consult-ripgrep :which-key "Ripgrep")
+    "'"   '(vterm :which-key "Vterm")
+    ";"   '(eval-expression :which-key "Eval expression")
+    "!"   '(shell-command :which-key "Shell command")
+    "&"   '(async-shell-command :which-key "Async shell command")
+    "TAB" '(mode-line-other-buffer :which-key "Last buffer")
+    "a" '(:ignore t :which-key "Applications")
+    "aa" '(org-agenda :which-key "Org agenda")
+    "ac" '(calendar :which-key "Calendar")
+    "ad" '(devdocs-lookup :which-key "DevDocs")
+    "ae" '(eglot :which-key "Eglot connect")
+    "am" '(arg/open-messages-buffer :which-key "Messages")
+    "ap" '(list-processes :which-key "Processes")
+    "as" '(arg/open-scratch-buffer :which-key "Scratch buffer")
+    "aw" '(eww :which-key "EWW")
+    "b" '(:ignore t :which-key "Buffers")
+    "bb" '(consult-buffer :which-key "Switch buffer")
+    "bB" '(consult-buffer-other-window :which-key "Switch other window")
+    "bd" '(kill-this-buffer :which-key "Kill buffer")
+    "bD" '(kill-buffer-and-window :which-key "Kill buffer & window")
+    "bI" '(ibuffer :which-key "Ibuffer")
+    "bK" '(kill-other-buffers :which-key "Kill other buffers")
+    "bm" '(arg/open-messages-buffer :which-key "Messages")
+    "bn" '(next-buffer :which-key "Next buffer")
+    "bN" '(evil-buffer-new :which-key "New buffer")
+    "bp" '(previous-buffer :which-key "Previous buffer")
+    "br" '(revert-buffer :which-key "Revert buffer")
+    "bs" '(save-buffer :which-key "Save buffer")
+    "bS" '(save-some-buffers :which-key "Save all buffers")
+    "c" '(:ignore t :which-key "Code")
+    "ca" '(eglot-code-actions :which-key "Code actions")
+    "cA" '(eglot-format :which-key "Format region")
+    "cc" '(compile :which-key "Compile")
+    "cC" '(recompile :which-key "Recompile")
+    "cD" '(eglot-find-declaration :which-key "Goto declaration")
+    "cd" '(xref-find-definitions :which-key "Goto definition")
+    "ce" '(consult-flymake :which-key "Diagnostics")
+    "cE" '(flymake-show-buffer-diagnostics :which-key "Buffer diagnostics")
+    "cf" '(eglot-format-buffer :which-key "Format buffer")
+    "cF" '(eglot-code-action-organize-imports :which-key "Organize imports")
+    "ci" '(consult-imenu :which-key "Imenu")
+    "cI" '(consult-imenu-multi :which-key "Imenu multi")
+    "cl" '(eglot :which-key "Eglot connect")
+    "cR" '(eglot-reconnect :which-key "Reconnect")
+    "cS" '(eglot-shutdown :which-key "Shutdown server")
+    "cT" '(treesit-explore-node-at-point :which-key "Tree-sit inspect")
+    "cX" '(xref-find-references :which-key "Find references")
+    "cr" '(eglot-rename :which-key "Rename symbol")
+    "d" '(:ignore t :which-key "Debug")
+    "db" '(dap-breakpoint-toggle :which-key "Toggle breakpoint")
+    "dc" '(dap-continue :which-key "Continue")
+    "dd" '(dap-debug :which-key "Debug")
+    "di" '(dap-step-in :which-key "Step in")
+    "do" '(dap-step-out :which-key "Step out")
+    "dr" '(dap-debug-recent :which-key "Recent session")
+    "dR" '(dap-restart-frame :which-key "Restart frame")
+    "ds" '(dap-switch-session :which-key "Switch session")
+    "dt" '(dap-ui-repl :which-key "DAP REPL")
+    "dT" '(dap-breakpoint-condition :which-key "Conditional breakpoint")
+    "e" '(:ignore t :which-key "Eval")
+    "eb" '(eval-buffer :which-key "Eval buffer")
+    "ed" '(eval-defun :which-key "Eval defun")
+    "ee" '(eval-expression :which-key "Eval expression")
+    "el" '(eval-last-sexp :which-key "Eval last sexp")
+    "er" '(eval-region :which-key "Eval region")
+    "f" '(:ignore t :which-key "Files")
+    "fD" '(delete-file :which-key "Delete file")
+    "fF" '(find-file :which-key "Open file (exact path)")
+    "fO" '(find-file-other-window :which-key "Open file other window")
+    "fR" '(recover-this-file :which-key "Recover file")
+    "fS" '(write-file :which-key "Write file")
+    "fe" '(:ignore t :which-key "Emacs config")
+    "fed" '(arg/open-config-directory :which-key "Browse config dir")
+    "fec" '(arg/open-config-org :which-key "config.org")
+    "fee" '(arg/open-early-init-el :which-key "early-init.el")
+    "fei" '(arg/open-init-el :which-key "init.el")
+    "fer" '(arg/reload-init-file :which-key "Reload init.el")
+    "ff" '(consult-find :which-key "Find file (Consult)")
+    "fr" '(consult-recent-file :which-key "Recent file")
+    "fs" '(save-buffer :which-key "Save file")
+    "g" '(:ignore t :which-key "Git")
+    "ga" '(magit-stage-buffer :which-key "Stage buffer")
+    "gA" '(magit-stage-file :which-key "Stage file")
+    "gb" '(magit-branch-checkout :which-key "Checkout branch")
+    "gc" '(magit-commit :which-key "Commit")
+    "gC" '(magit-clone :which-key "Clone repo")
+    "gd" '(magit-diff-dwim :which-key "Diff dwim")
+    "gD" '(magit-diff-range-dwim :which-key "Diff range")
+    "gg" '(magit-status :which-key "Status")
+    "gh" '(git-gutter:popup-hunk :which-key "Popup hunk")
+    "gH" '(git-gutter:stage-hunk :which-key "Stage hunk")
+    "gi" '(magit-init :which-key "Init repo")
+    "gl" '(magit-log :which-key "Log")
+    "gn" '(git-gutter:next-hunk :which-key "Next hunk")
+    "gp" '(git-gutter:previous-hunk :which-key "Prev hunk")
+    "gP" '(magit-push-current-to-pushremote :which-key "Push current")
+    "gr" '(magit-refresh :which-key "Refresh")
+    "gs" '(magit-status :which-key "Status")
+    "gt" '(git-timemachine-toggle :which-key "Time machine")
+    "h" '(:ignore t :which-key "Help")
+    "h." '(display-local-help :which-key "Local help")
+    "hA" '(apropos-command :which-key "Apropos command")
+    "ha" '(apropos :which-key "Apropos")
+    "hb" '(describe-bindings :which-key "Describe bindings")
+    "hc" '(describe-char :which-key "Describe char")
+    "hC" '(describe-coding-system :which-key "Coding systems")
+    "hd" '(view-echo-area-messages :which-key "Echo messages")
+    "he" '(arg/open-messages-buffer :which-key "Messages buffer")
+    "hf" '(describe-function :which-key "Describe function")
+    "hF" '(describe-face :which-key "Describe face")
+    "hI" '(info :which-key "Info manuals")
+    "hk" '(describe-key :which-key "Describe key")
+    "hl" '(view-lossage :which-key "View keys")
+    "hm" '(describe-mode :which-key "Describe mode")
+    "ho" '(consult-info :which-key "Info lookup")
+    "hp" '(describe-package :which-key "Describe package")
+    "hr" '(:ignore t :which-key "Reload")
+    "hrr" '(arg/reload-init-file :which-key "Reload init.el")
+    "hrt" '(consult-theme :which-key "Switch theme")
+    "hs" '(describe-symbol :which-key "Describe symbol")
+    "ht" '(consult-theme :which-key "Theme")
+    "hw" '(where-is :which-key "Where is")
+    "hv" '(describe-variable :which-key "Describe variable")
+    "i" '(:ignore t :which-key "Insert")
+    "ic" '(insert-char :which-key "Character")
+    "id" '(devdocs-lookup :which-key "DevDocs")
+    "ie" '(emoji-insert :which-key "Emoji")
+    "ik" '(insert-kbd-macro :which-key "Insert macro")
+    "ip" '(insert-register :which-key "Insert register")
+    "is" '(tempel-insert :which-key "Snippet")
+    "j" '(:ignore t :which-key "Jump")
+    "jj" '(avy-goto-char-timer :which-key "Avy char")
+    "jl" '(avy-goto-line :which-key "Avy line")
+    "js" '(evil-snipe-s :which-key "Snipe forward")
+    "jS" '(evil-snipe-S :which-key "Snipe backward")
+    "jw" '(avy-goto-word-0 :which-key "Avy word")
+    "m" '(:ignore t :which-key "Multiple cursors")
+    "ma" '(evil-mc-undo-all-cursors :which-key "Clear cursors")
+    "mA" '(evil-mc-make-and-goto-all-cursors :which-key "All cursors")
+    "mm" '(evil-mc-make-all-cursors :which-key "Match all")
+    "mn" '(evil-mc-make-and-goto-next-match :which-key "Next match")
+    "mp" '(evil-mc-make-and-goto-prev-match :which-key "Prev match")
+    "ms" '(evil-mc-mode :which-key "Toggle evil-mc")
+    "o" '(:ignore t :which-key "Org")
+    "oa" '(org-agenda :which-key "Agenda")
+    "oA" '(org-archive-subtree-default :which-key "Archive subtree")
+    "oc" '(org-capture :which-key "Capture")
+    "od" '(org-roam-dailies-goto-today :which-key "Dailies today")
+    "oe" '(org-export-dispatch :which-key "Export")
+    "of" '(org-roam-node-find :which-key "Roam find")
+    "oi" '(org-roam-node-insert :which-key "Roam insert")
+    "ol" '(org-toggle-link-display :which-key "Toggle links")
+    "om" '(org-tags-view :which-key "Tag search")
+    "on" '(org-add-note :which-key "Add note")
+    "or" '(org-roam-refile :which-key "Roam refile")
+    "os" '(org-store-link :which-key "Store link")
+    "ot" '(org-todo :which-key "Todo")
+    "p" '(:ignore t :which-key "Project")
+    "p!" '(projectile-run-shell-command-in-root :which-key "Run shell")
+    "pa" '(projectile-add-known-project :which-key "Add project")
+    "pA" '(projectile-project-info :which-key "Project info")
+    "pb" '(consult-projectile :which-key "Switch buffer")
+    "pC" '(projectile-configure-project :which-key "Configure")
+    "pc" '(projectile-compile-project :which-key "Compile project")
+    "pD" '(projectile-dired :which-key "Project dired")
+    "pd" '(projectile-remove-known-project :which-key "Remove project")
+    "pf" '(consult-projectile-find-file :which-key "Find file")
+    "pk" '(projectile-kill-buffers :which-key "Kill buffers")
+    "pp" '(projectile-switch-project :which-key "Switch project")
+    "pR" '(projectile-replace-regexp :which-key "Replace regexp")
+    "ps" '(consult-ripgrep :which-key "Search project")
+    "pt" '(projectile-test-project :which-key "Test project")
+    "pv" '(projectile-vc :which-key "Project VC")
+    "q" '(:ignore t :which-key "Session")
+    "qq" '(evil-quit-all :which-key "Quit Emacs")
+    "qQ" '(save-buffers-kill-terminal :which-key "Quit (save)")
+    "qr" '(arg/reload-init-file :which-key "Reload init.el")
+    "qs" '(save-some-buffers :which-key "Save all")
+    "r" '(:ignore t :which-key "Registers")
+    "rB" '(bookmark-set :which-key "Set bookmark")
+    "rb" '(consult-bookmark :which-key "Jump bookmark")
+    "rr" '(consult-register :which-key "List registers")
+    "rs" '(consult-register-store :which-key "Store register")
+    "rw" '(window-configuration-to-register :which-key "Window -> register")
+    "s" '(:ignore t :which-key "Search")
+    "sb" '(consult-line :which-key "Search buffer")
+    "sB" '(consult-line-multi :which-key "Search buffers")
+    "sc" '(consult-locate :which-key "Locate")
+    "sd" '(consult-dir :which-key "Consult dir")
+    "sf" '(consult-find :which-key "Find")
+    "sg" '(consult-ripgrep :which-key "Ripgrep")
+    "sh" '(consult-history :which-key "History")
+    "si" '(consult-imenu :which-key "Imenu")
+    "sI" '(consult-imenu-multi :which-key "Imenu multi")
+    "sm" '(consult-mark :which-key "Marks")
+    "sn" '(consult-line-multi :which-key "Lines (buffers)")
+    "so" '(consult-outline :which-key "Outline")
+    "sp" '(consult-projectile :which-key "Project buffers")
+    "st" '(consult-theme :which-key "Theme")
+    "su" '(consult-focus-lines :which-key "Keep lines")
+    "sx" '(consult-xref :which-key "Xref")
+    "t" '(:ignore t :which-key "Toggle")
+    "tb" '(global-display-line-numbers-mode :which-key "Line numbers (global)")
+    "tc" '(display-fill-column-indicator-mode :which-key "Fill column")
+    "tD" '(eldoc-mode :which-key "Eldoc")
+    "tE" '(eldoc-box-hover-mode :which-key "Eldoc hover")
+    "tF" '(flyspell-mode :which-key "Flyspell")
+    "tG" '(git-gutter-mode :which-key "Git gutter")
+    "tg" '(evil-goggles-mode :which-key "Evil goggles")
+    "ti" '(org-toggle-inline-images :which-key "Inline images")
+    "tL" '(display-line-numbers-mode :which-key "Line numbers (buffer)")
+    "tP" '(prettify-symbols-mode :which-key "Prettify symbols")
+    "tR" '(read-only-mode :which-key "Read only")
+    "tS" '(flyspell-prog-mode :which-key "Flyspell prog")
+    "tT" '(toggle-truncate-lines :which-key "Truncate lines")
+    "tV" '(visual-line-mode :which-key "Visual line")
+    "tw" '(whitespace-mode :which-key "Whitespace")
+    "u" '(:ignore t :which-key "Utilities")
+    "uo" '(org-store-link :which-key "Store link")
+    "ur" '(rename-uniquely :which-key "Rename unique")
+    "us" '(shell-command-on-region :which-key "Shell region")
+    "uu" '(universal-argument :which-key "Universal argument")
+    "w" '(:ignore t :which-key "Windows")
+    "w-" '(evil-window-split :which-key "Horizontal split")
+    "w/" '(evil-window-vsplit :which-key "Vertical split")
+    "w=" '(balance-windows :which-key "Balance windows")
+    "wD" '(delete-other-windows :which-key "Delete others")
+    "wd" '(delete-window :which-key "Delete window")
+    "wF" '(follow-mode :which-key "Follow mode")
+    "wf" '(make-frame-command :which-key "New frame")
+    "wH" '(evil-window-move-far-left :which-key "Move left")
+    "wJ" '(evil-window-move-far-down :which-key "Move down")
+    "wK" '(evil-window-move-far-up :which-key "Move up")
+    "wL" '(evil-window-move-far-right :which-key "Move right")
+    "wh" '(windmove-left :which-key "Window left")
+    "wO" '(other-frame :which-key "Other frame")
+    "wj" '(windmove-down :which-key "Window down")
+    "wk" '(windmove-up :which-key "Window up")
+    "wl" '(windmove-right :which-key "Window right")
+    "wo" '(delete-other-windows :which-key "Only window")
+    "wR" '(winner-redo :which-key "Winner redo")
+    "ws" '(split-window-below :which-key "Split below")
+    "wS" '(window-swap-states :which-key "Swap windows")
+    "wU" '(winner-undo :which-key "Winner undo")
+    "wW" '(ace-window :which-key "Ace window")
+    "wX" '(kill-buffer-and-window :which-key "Kill & window")
+    "ww" '(other-window :which-key "Other window")
+    "wv" '(split-window-right :which-key "Split right")
+    "x" '(:ignore t :which-key "Text")
+    "xb" '(bury-buffer :which-key "Bury buffer")
+    "xc" '(capitalize-region :which-key "Capitalize region")
+    "xg" '(goto-line :which-key "Goto line")
+    "xj" '(join-line :which-key "Join line")
+    "xk" '(kill-region :which-key "Kill region")
+    "xl" '(downcase-region :which-key "Lowercase")
+    "xp" '(mark-page :which-key "Mark page")
+    "xs" '(sort-lines :which-key "Sort lines")
+    "xU" '(upcase-region :which-key "Uppercase")
+    "xu" '(upcase-initials-region :which-key "Upcase initials")
+    "xw" '(delete-trailing-whitespace :which-key "Trim whitespace")
+    "y" '(:ignore t :which-key "Yank")
+    "yp" '(yank-pop :which-key "Yank pop")
+    "yr" '(copy-rectangle-as-kill :which-key "Copy rectangle")
+    "ys" '(evil-yank-line :which-key "Yank line")
+    "yy" '(consult-yank-pop :which-key "Yank history")
+    "z" '(:ignore t :which-key "Zoom")
+    "zz" '(zoom-mode :which-key "Toggle zoom")
+    "Z" '(:ignore t :which-key "Session")
+    "Zf" '(make-frame-command :which-key "New frame")
+    "Zq" '(evil-quit-all :which-key "Quit")
+    "Zs" '(save-some-buffers :which-key "Save all")
+    "ZZ" '(save-buffers-kill-emacs :which-key "Save and quit")))
+#+end_src
+
+*** Mode integrations
+
+    These add-ons bridge Evil with third-party modes and terminals so modal editing stays consistent everywhere.
+
+**** evil-collection
+
+    [[https://github.com/emacs-evil/evil-collection][evil-collection]] ships pre-made keymaps for major modes, saving me from chasing per-mode tweaks.
+#+begin_src emacs-lisp
+(use-package evil-collection
+  :after evil
+  :init
+  (setq evil-collection-company-use-tng nil
+        evil-collection-setup-minibuffer t)
+  :config
+  (evil-collection-init))
+#+end_src
+
+**** Terminal helpers
+
+    Terminal buffers keep copy/paste and reset actions close at hand.
+
+     #+caption: `SPC m` — Vterm helpers
+     | Key         | Command        | Description        |
+     |-------------+----------------+--------------------|
+     | SPC m c     | vterm-copy-mode | Toggle copy mode   |
+     | SPC m p     | vterm-yank      | Paste text         |
+     | SPC m r     | vterm-reset     | Reset terminal     |
+
+    Shell-derived modes feel better starting in insert state so keystrokes map to terminal input immediately.
+#+begin_src emacs-lisp
+(with-eval-after-load 'vterm
+  (evil-set-initial-state 'vterm-mode 'insert))
+(with-eval-after-load 'shell
+  (evil-set-initial-state 'shell-mode 'insert))
+#+end_src
+
+*** Navigation enhancements
+
+    Motion plugins speed up cross-buffer travel by adding hint-based jumps and smarter f/F style finds.
+
+**** evil-snipe
+
+    [[https://github.com/hlissner/evil-snipe][evil-snipe]] emulates vim-sneak so I can jump with two-character targets scoped to the buffer.
+#+begin_src emacs-lisp
+(use-package evil-snipe
+  :after evil
+  :init
+  (setq evil-snipe-scope 'buffer
+        evil-snipe-repeat-keys t
+        evil-snipe-use-vim-sneak-behavior t)
+  :config
+  (evil-snipe-mode 1)
+  (evil-snipe-override-mode 1))
+#+end_src
+
+**** evil-easymotion
+
+    [[https://github.com/PythonNut/evil-easymotion][evil-easymotion]] layers hint-based jumps on top of motions, making long-distance navigation painless.
+#+begin_src emacs-lisp
+(use-package evil-easymotion
+  :after evil
+  :config
+  (evilem-default-keybindings "gs"))
+#+end_src
+
+**** evil-quickscope
+
+    [[https://github.com/hlissner/evil-quickscope][evil-quickscope]] highlights potential `f`/`t` targets so repositioning the cursor takes fewer guesses.
+#+begin_src emacs-lisp
+(use-package evil-quickscope
+  :after evil
+  :straight (:host github :repo "hlissner/evil-quickscope")
+  :config
+  (global-evil-quickscope-mode 1))
+#+end_src
+
+**** evil-visualstar
+
+    [[https://github.com/bling/evil-visualstar][evil-visualstar]] reuses Vim's `*`/`#` search behaviour for visual selections.
+#+begin_src emacs-lisp
+(use-package evil-visualstar
+  :after evil
+  :config
+  (global-evil-visualstar-mode 1))
+#+end_src
+
+*** Text objects and operators
+
+    Additional text objects keep structural editing ergonomic whether I'm working with lisps or tree-sitter-backed languages.
+
+**** evil-surround
+
+    [[https://github.com/emacs-evil/evil-surround][evil-surround]] ports surround.vim so changing brackets and quotes becomes a single command.
+#+begin_src emacs-lisp
+(use-package evil-surround
+  :after evil
+  :config
+  (global-evil-surround-mode 1))
+#+end_src
+
+**** evil-commentary
+
+    [[https://github.com/linktohack/evil-commentary][evil-commentary]] mirrors `gcc`/`gc` style toggles for comments.
+#+begin_src emacs-lisp
+(use-package evil-commentary
+  :after evil
+  :config
+  (evil-commentary-mode))
+#+end_src
+
+**** evil-matchit
+
+    [[https://github.com/redguardtoo/evil-matchit][evil-matchit]] makes `%` smarter by understanding language-specific delimiters.
+#+begin_src emacs-lisp
+(use-package evil-matchit
+  :after evil
+  :config
+  (global-evil-matchit-mode 1))
+#+end_src
+
+**** evil-exchange
+
+    [[https://github.com/Dewdrops/evil-exchange][evil-exchange]] swaps text objects without juggling registers.
+#+begin_src emacs-lisp
+(use-package evil-exchange
+  :after evil
+  :config
+  (evil-exchange-install))
+#+end_src
+
+**** evil-args
+
+    [[https://github.com/wcsmith/evil-args][evil-args]] adds motions for function arguments, which pair nicely with coding in lispy languages.
+#+begin_src emacs-lisp
+(use-package evil-args
+  :after evil
+  :config
+  (define-key evil-inner-text-objects-map "a" #'evil-inner-arg)
+  (define-key evil-outer-text-objects-map "a" #'evil-outer-arg))
+#+end_src
+
+**** evil-indent-plus
+
+    [[https://github.com/TheBB/evil-indent-plus][evil-indent-plus]] broadens indentation-aware text objects for blocks and paragraphs.
+#+begin_src emacs-lisp
+(use-package evil-indent-plus
+  :after evil
+  :config
+  (evil-indent-plus-default-bindings))
+#+end_src
+
+**** evil-lion
+
+    [[https://github.com/PythonNut/evil-lion][evil-lion]] provides alignment operators similar to vim-easy-align.
+#+begin_src emacs-lisp
+(use-package evil-lion
+  :after evil
+  :config
+  (evil-lion-mode))
+#+end_src
+
+**** evil-textobj-tree-sitter
+
+    [[https://github.com/meain/evil-textobj-tree-sitter][evil-textobj-tree-sitter]] exposes tree-sitter queries as motions, yielding language-aware text objects for functions, classes, loops, and more.
+#+begin_src emacs-lisp
+(use-package evil-textobj-tree-sitter
+  :straight (:host github :repo "meain/evil-textobj-tree-sitter")
+  :after evil
+  :config
+  (dolist (pair '((python-ts-mode      . "python")
+                  (tsx-ts-mode         . "tsx")
+                  (typescript-ts-mode  . "typescript")
+                  (js-ts-mode          . "javascript")
+                  (json-ts-mode        . "json")
+                  (css-ts-mode         . "css")
+                  (yaml-ts-mode        . "yaml")
+                  (toml-ts-mode        . "toml")
+                  (bash-ts-mode        . "bash")
+                  (sh-mode             . "bash")
+                  (c-ts-mode           . "c")
+                  (c++-ts-mode         . "cpp")
+                  (cmake-mode          . "cmake")
+                  (go-ts-mode          . "go")
+                  (rust-ts-mode        . "rust")
+                  (java-ts-mode        . "java")
+                  (kotlin-mode         . "kotlin")
+                  (ruby-ts-mode        . "ruby")
+                  (lua-ts-mode         . "lua")
+                  (html-mode           . "html")
+                  (css-mode            . "css")
+                  (markdown-mode       . "markdown")
+                  (markdown-ts-mode    . "markdown")
+                  (dockerfile-mode     . "dockerfile")
+                  (proto-mode          . "proto")
+                  (conf-toml-mode      . "toml")))
+    (add-to-list 'evil-textobj-tree-sitter-major-mode-language-alist pair))
+  (evil-define-key '(operator visual) 'global "af"
+    (evil-textobj-tree-sitter-get-textobj "function.outer"))
+  (evil-define-key '(operator visual) 'global "if"
+    (evil-textobj-tree-sitter-get-textobj "function.inner"))
+  (evil-define-key '(operator visual) 'global "ac"
+    (evil-textobj-tree-sitter-get-textobj "class.outer"))
+  (evil-define-key '(operator visual) 'global "ic"
+    (evil-textobj-tree-sitter-get-textobj "class.inner"))
+  (evil-define-key '(operator visual) 'global "ab"
+    (evil-textobj-tree-sitter-get-textobj "block.outer"))
+  (evil-define-key '(operator visual) 'global "ib"
+    (evil-textobj-tree-sitter-get-textobj "block.inner"))
+  (evil-define-key '(operator visual) 'global "aC"
+    (evil-textobj-tree-sitter-get-textobj "comment.outer"))
+  (evil-define-key '(operator visual) 'global "iC"
+    (evil-textobj-tree-sitter-get-textobj "comment.inner"))
+  (evil-define-key '(operator visual) 'global "ap"
+    (evil-textobj-tree-sitter-get-textobj "parameter.outer"))
+  (evil-define-key '(operator visual) 'global "ip"
+    (evil-textobj-tree-sitter-get-textobj "parameter.inner"))
+  (evil-define-key '(operator visual) 'global "aL"
+    (evil-textobj-tree-sitter-get-textobj "loop.outer"))
+  (evil-define-key '(operator visual) 'global "iL"
+    (evil-textobj-tree-sitter-get-textobj "loop.inner"))
+  (evil-define-key '(operator visual) 'global "ao"
+    (evil-textobj-tree-sitter-get-textobj "conditional.outer"))
+  (evil-define-key '(operator visual) 'global "io"
+    (evil-textobj-tree-sitter-get-textobj "conditional.inner"))
+  (evil-define-key '(operator visual) 'global "as"
+    (evil-textobj-tree-sitter-get-textobj "statement.outer"))
+  (evil-define-key '(operator visual) 'global "is"
+    (evil-textobj-tree-sitter-get-textobj "statement.inner"))
+  (evil-define-key '(operator visual) 'global "ak"
+    (evil-textobj-tree-sitter-get-textobj "call.outer"))
+  (evil-define-key '(operator visual) 'global "ik"
+    (evil-textobj-tree-sitter-get-textobj "call.inner")))
+#+end_src
+
+*** Multi-cursor and structural editing
+
+    Multi-cursor helpers and paredit-like behaviour ensure repetitive edits stay fast without leaving modal flow.
+
+**** evil-mc
+
+    [[https://github.com/gabesoft/evil-mc][evil-mc]] brings multi-cursor editing to Evil and the extra leader bindings mirror
+    the defaults from vim-visual-multi.
+#+begin_src emacs-lisp
+(use-package evil-mc
+  :after (evil general)
+  :config
+  (global-evil-mc-mode 1)
+  (arg/leader
+    "mm" '(evil-mc-make-all-cursors :which-key "Match all")
+    "mn" '(evil-mc-make-and-goto-next-match :which-key "Next match")
+    "mp" '(evil-mc-make-and-goto-prev-match :which-key "Prev match")
+    "ma" '(evil-mc-undo-all-cursors :which-key "Clear cursors")
+    "ms" '(evil-mc-mode :which-key "Toggle evil-mc")))
+#+end_src
+
+**** evil-multiedit
+
+    [[https://github.com/hlissner/evil-multiedit][evil-multiedit]] supplements evil-mc with regexp-driven selection workflows.
+#+begin_src emacs-lisp
+(use-package evil-multiedit
+  :after evil
+  :config
+  (evil-multiedit-default-keybinds))
+#+end_src
+
+**** evil-cleverparens
+
+    [[https://github.com/luxbock/evil-cleverparens][evil-cleverparens]] keeps structured editing commands balanced when working in Lisps.
+#+begin_src emacs-lisp
+(use-package evil-cleverparens
+  :hook ((emacs-lisp-mode clojure-mode clojurescript-mode lisp-mode scheme-mode) . evil-cleverparens-mode)
+  :init
+  (setq evil-cleverparens-use-regular-insert t
+        evil-cleverparens-use-additional-movement-keys t))
+#+end_src
+
+*** Visual feedback and UX
+
+    These packages provide search statistics, animated operations, number increments, and faster escapes to polish the modal experience.
+
+**** anzu + evil-anzu
+
+    [[https://github.com/emacsorphanage/anzu][anzu]] shows live match counts in the mode line, and [[https://github.com/emacs-evil/evil-anzu][evil-anzu]] integrates that feedback with Evil's `/` search.
+#+begin_src emacs-lisp
+(use-package anzu
+  :init
+  (global-anzu-mode 1))
+
+(use-package evil-anzu
+  :after (evil anzu))
+#+end_src
+
+**** evil-goggles
+
+    [[https://github.com/edkolev/evil-goggles][evil-goggles]] animates operations like yank and delete so it's obvious what happened.
+#+begin_src emacs-lisp
+(use-package evil-goggles
+  :after evil
+  :init
+  (setq evil-goggles-duration 0.15
+        evil-goggles-pulse t)
+  :config
+  (evil-goggles-mode))
+#+end_src
+
+**** evil-numbers
+
+    [[https://github.com/cofi/evil-numbers][evil-numbers]] increments or decrements numbers in place. I expose the commands via leader keys too.
+
+     #+caption: `SPC n` — Number adjustments
+     | Key       | Command                     | Description    |
+     |-----------+-----------------------------+----------------|
+     | SPC n +   | evil-numbers/inc-at-pt      | Increment      |
+     | SPC n -   | evil-numbers/dec-at-pt      | Decrement      |
+
+#+begin_src emacs-lisp
+(use-package evil-numbers
+  :after evil
+  :config
+  (evil-define-key 'normal 'global (kbd "C-a") #'evil-numbers/inc-at-pt)
+  (evil-define-key 'normal 'global (kbd "C-x") #'evil-numbers/dec-at-pt)
+  (arg/leader
+    "n" '(:ignore t :which-key "Numbers")
+    "n+" '(evil-numbers/inc-at-pt :which-key "Increment")
+    "n-" '(evil-numbers/dec-at-pt :which-key "Decrement")))
+#+end_src
+
+**** evil-unimpaired
+
+    [[https://github.com/zmaas/evil-unimpaired][evil-unimpaired]] ports tpope's unimpaired mappings, giving handy `[`/`]` pairs for hopping between buffers and hunks.
+#+begin_src emacs-lisp
+(use-package evil-unimpaired
+  :after evil
+  :straight (:host github :repo "zmaas/evil-unimpaired"))
+#+end_src
+
+**** evil-escape
+
+    [[https://github.com/syl20bnr/evil-escape][evil-escape]] lets me exit insert state quickly with `jk`, a muscle memory borrowed from Vim.
+#+begin_src emacs-lisp
+(use-package evil-escape
+  :after evil
+  :init
+  (setq evil-escape-key-sequence "jk"
+        evil-escape-delay 0.15
+        evil-escape-excluded-major-modes '(vterm-mode term-mode))
+  :config
+  (evil-escape-mode 1))
+#+end_src
+
+*** Local leader bindings
+
+    Contextual `SPC m` bindings live closest to the modes they enhance so muscle memory stays consistent across languages.
+
+**** Org helpers
+
+    Org gets a focused local leader to keep capture, scheduling, and metadata commands under `SPC m`.
+
+     #+caption: `SPC m` — Org mode helpers
+     | Key         | Command                     | Description            |
+     |-------------+-----------------------------+------------------------|
+     | SPC m a     | org-archive-subtree         | Archive subtree        |
+     | SPC m b     | org-babel-tangle            | Re-tangle buffer       |
+     | SPC m c     | org-cycle                   | Cycle heading          |
+     | SPC m d     | org-deadline                | Set deadline           |
+     | SPC m e     | org-export-dispatch         | Export menu            |
+     | SPC m i     | org-toggle-inline-images    | Toggle inline images   |
+     | SPC m l     | org-insert-link             | Insert link            |
+     | SPC m r     | org-refile                  | Refile subtree         |
+     | SPC m s     | org-schedule                | Schedule item          |
+     | SPC m t     | org-todo                    | Toggle TODO state      |
+#+begin_src emacs-lisp
+(with-eval-after-load 'org
+  (arg/local-leader
+    :keymaps 'org-mode-map
+    "a" '(org-archive-subtree :which-key "Archive")
+    "b" '(org-babel-tangle :which-key "Tangle")
+    "c" '(org-cycle :which-key "Cycle visibility")
+    "d" '(org-deadline :which-key "Deadline")
+    "e" '(org-export-dispatch :which-key "Export")
+    "i" '(org-toggle-inline-images :which-key "Inline images")
+    "l" '(org-insert-link :which-key "Insert link")
+    "r" '(org-refile :which-key "Refile")
+    "s" '(org-schedule :which-key "Schedule")
+    "t" '(org-todo :which-key "Todo state")))
+#+end_src
+
+**** Eglot helpers
+
+    LSP interactions share a consistent local map so language servers expose the same motions everywhere.
+
+     #+caption: `SPC m` — Eglot helpers
+     | Key         | Command                                | Description            |
+     |-------------+----------------------------------------+------------------------|
+     | SPC m a     | eglot-code-actions                     | Code actions           |
+     | SPC m d     | flymake-show-buffer-diagnostics        | Buffer diagnostics     |
+     | SPC m D     | flymake-show-project-diagnostics       | Project diagnostics    |
+     | SPC m f     | eglot-format                           | Format region          |
+     | SPC m F     | eglot-format-buffer                    | Format buffer          |
+     | SPC m h     | eglot-help-at-point                    | Hover help             |
+     | SPC m o     | eglot-code-action-organize-imports     | Organize imports       |
+     | SPC m r     | eglot-rename                           | Rename symbol          |
+     | SPC m R     | eglot-reconnect                        | Reconnect server       |
+     | SPC m s     | eglot-shutdown                         | Shutdown server        |
+#+begin_src emacs-lisp
+(with-eval-after-load 'eglot
+  (arg/local-leader
+    :keymaps 'eglot-mode-map
+    "a" '(eglot-code-actions :which-key "Code actions")
+    "d" '(flymake-show-buffer-diagnostics :which-key "Diagnostics")
+    "D" '(flymake-show-project-diagnostics :which-key "Project diagnostics")
+    "f" '(eglot-format :which-key "Format region")
+    "F" '(eglot-format-buffer :which-key "Format buffer")
+    "h" '(eglot-help-at-point :which-key "Hover")
+    "o" '(eglot-code-action-organize-imports :which-key "Organize imports")
+    "r" '(eglot-rename :which-key "Rename")
+    "R" '(eglot-reconnect :which-key "Reconnect")
+    "s" '(eglot-shutdown :which-key "Shutdown")))
+#+end_src
+
+**** Python helpers
+
+    Python buffers get a sub-map for formatting, REPL access, and pytest runners.
+
+     #+caption: `SPC m` — Python helpers
+     | Key         | Command                       | Description            |
+     |-------------+-------------------------------+------------------------|
+     | SPC m b     | python-black-buffer           | Format with Black      |
+     | SPC m r     | run-python                    | Start REPL             |
+     | SPC m s     | python-shell-send-buffer      | Send buffer to REPL    |
+     | SPC m t t   | python-pytest-dispatch        | Pytest dispatcher      |
+     | SPC m t f   | python-pytest-file            | Run current file       |
+     | SPC m t p   | python-pytest-function        | Run current test       |
+     | SPC m v     | pyvenv-activate               | Activate virtualenv    |
+#+begin_src emacs-lisp
+(with-eval-after-load 'python
+  (arg/local-leader
+    :keymaps '(python-mode-map python-ts-mode-map)
+    "b" '(python-black-buffer :which-key "Black buffer")
+    "r" '(run-python :which-key "Start REPL")
+    "s" '(python-shell-send-buffer :which-key "Send buffer")
+    "t" '(:ignore t :which-key "Tests")
+    "tt" '(python-pytest-dispatch :which-key "Pytest dispatch")
+    "tf" '(python-pytest-file :which-key "Pytest file")
+    "tp" '(python-pytest-function :which-key "Pytest function")
+    "v" '(pyvenv-activate :which-key "Activate venv")))
+#+end_src
+
+**** Magit helpers
+
+    Inside Magit buffers I keep the essentials on `SPC m` to avoid reaching for the transient menus.
+
+     #+caption: `SPC m` — Magit helpers
+     | Key         | Command                                 | Description          |
+     |-------------+-----------------------------------------+----------------------|
+     | SPC m b     | magit-branch-checkout                   | Checkout branch      |
+     | SPC m c     | magit-commit                            | Commit               |
+     | SPC m f     | magit-fetch                             | Fetch remotes        |
+     | SPC m p     | magit-push-current-to-pushremote        | Push current branch  |
+     | SPC m r     | magit-refresh                           | Refresh status       |
+#+begin_src emacs-lisp
+(with-eval-after-load 'magit
+  (arg/local-leader
+    :keymaps 'magit-mode-map
+    "b" '(magit-branch-checkout :which-key "Checkout")
+    "c" '(magit-commit :which-key "Commit")
+    "f" '(magit-fetch :which-key "Fetch")
+    "p" '(magit-push-current-to-pushremote :which-key "Push")
+    "r" '(magit-refresh :which-key "Refresh")))
+#+end_src
+
+**** Terminal helpers
+
+    Terminal buffers keep copy/paste and reset actions close at hand.
+
+     #+caption: `SPC m` — Vterm helpers
+     | Key         | Command        | Description        |
+     |-------------+----------------+--------------------|
+     | SPC m c     | vterm-copy-mode | Toggle copy mode   |
+     | SPC m p     | vterm-yank      | Paste text         |
+     | SPC m r     | vterm-reset     | Reset terminal     |
+#+begin_src emacs-lisp
+(with-eval-after-load 'vterm
+  (arg/local-leader
+    :keymaps 'vterm-mode-map
+    "c" '(vterm-copy-mode :which-key "Copy mode")
+    "p" '(vterm-yank :which-key "Paste")
+    "r" '(vterm-reset :which-key "Reset terminal")))
+#+end_src
 ** Completion
+
+   Completion is composed from Vertico/Orderless in the minibuffer, Corfu/Cape in buffers, and Embark/Consult overlays for actions.
 *** Dired
+
+     Built-in `dired` plus [[https://github.com/Fuco1/dired-hacks][dired-subtree]] gives a project-friendly file explorer with inline expansion.
      #+begin_src emacs-lisp
 (use-package dired
   :straight (:type built-in)
@@ -334,7 +1592,7 @@ Enable recent files mode
 
 *** Vertico
 
-    Vertico provides a performant and minimalistic vertical completion UI.
+    [[https://github.com/minad/vertico][Vertico]] provides a performant and minimalistic vertical completion UI.
 
     #+begin_src emacs-lisp
     (use-package vertico
@@ -342,10 +1600,13 @@ Enable recent files mode
       :init
       (vertico-mode)
       :custom
-      (vertico-cycle t))
+      (vertico-cycle t)
+      (vertico-resize nil)
+      (vertico-count 12)
+      (vertico-preselect 'first))
     #+end_src
 
-    This package provides more flexible, order-agnostic filtering of candidates.
+    [[https://github.com/oantolin/orderless][orderless]] supplies flexible, order-agnostic filtering on top of the default completion styles.
 
     #+begin_src emacs-lisp
     (use-package orderless
@@ -355,21 +1616,49 @@ Enable recent files mode
       (completion-category-overrides '((file (styles partial-completion)))))
     #+end_src
 
-    Sacha Chua's configuration uses vertico-multiform to have different completion
+    Inspired by Sacha Chua's configuration, `vertico-multiform` switches display styles per category for extra polish.
     display styles for different commands.
 
     #+begin_src emacs-lisp
     (use-package vertico-multiform
       :straight (:host github :repo "minad/vertico" :files ("vertico-multiform.el"))
       :after vertico
+      :bind (:map vertico-map
+                  ("ESC" . vertico-multiform-undo))
       :config
-      (vertico-multiform-mode)
-      (add-to-list 'vertico-multiform-categories '(embark-keybinding grid)))
+      (vertico-multiform-mode 1)
+      (setq vertico-multiform-categories
+            '((consult-grep buffer)
+              (consult-location buffer)
+              (file reverse)
+              (t reverse))))
     #+end_src
+
+**** vertico-directory
+    The `vertico-directory` extension streamlines file-name completion with smarter deletion behaviour inside the minibuffer.
+#+begin_src emacs-lisp
+    (use-package vertico-directory
+      :after vertico
+      :straight (:host github :repo "minad/vertico" :files ("extensions/vertico-directory.el"))
+      :bind (:map vertico-map
+                  ("<backspace>" . vertico-directory-delete-char)
+                  ("M-<backspace>" . vertico-directory-delete-word)
+                  ("RET" . vertico-directory-enter))
+      :init
+      (defun arg/vertico-directory-tidy-safe ()
+        "Wrapper around `vertico-directory-tidy' that guards missing overlays."
+        (when (and (boundp 'rfn-eshadow-overlay)
+                   (overlayp rfn-eshadow-overlay))
+          (vertico-directory-tidy)))
+      :hook (rfn-eshadow-update-overlay . arg/vertico-directory-tidy-safe))
+#+end_src
 
 *** Git
 
+    Even in completion contexts I keep lightweight Magit access and Forge integration handy.
+
 **** Magit
+     Minimal Magit wiring for quick status buffers from completion prompts.
      #+begin_src emacs-lisp
 (use-package magit
   :bind (("C-x g" . magit-status)
@@ -382,6 +1671,7 @@ Enable recent files mode
      : magit-dispatch
 
 **** Forge
+     Forge snippets ensure access tokens are configured so issue queries work from Magit.
      Set up ~/.authinfo.gpg or ~/.authinfo with:
      ~machine gitlab.com/api/v4 login YOUR_USERNAME^forge password YOUR_TOKEN~
      #+begin_src emacs-lisp
@@ -410,7 +1700,7 @@ Enable recent files mode
       #+end_src
 **** Marginalia
 
-    Marginalia provides extra info into the minibuffer completions. It's really just that.
+    [[https://github.com/minad/marginalia][Marginalia]] provides extra annotations in the minibuffer so candidates carry context like documentation or project.
 
     #+begin_src emacs-lisp
     (use-package marginalia
@@ -435,60 +1725,75 @@ Enable recent files mode
 
 *** Consult
 
-    Consult provides search and navigation commands based on the Emacs completion function [[help:completing-read][completing-read]]. Check out [[id:2F9DB448-1184-4DB2-8C21-B54023F292CC][Consult]] for more.
+    [[https://github.com/minad/consult][Consult]] provides search and navigation commands based on the Emacs completion function [[help:completing-read][completing-read]]. Check out [[id:2F9DB448-1184-4DB2-8C21-B54023F292CC][Consult]] for more.
 
     #+begin_src emacs-lisp
     (use-package consult
-      :bind (:map global-map
-    	      ("M-g M-g" . consult-goto-line)
-    	      ("M-s M-b" . consult-buffer)
-    	      ("M-s M-f" . consult-find)
-    	      ("M-s M-g" . consult-ripgrep)
-    	      ("M-s M-h" . consult-history)
-    	      ("M-s M-i" . consult-imenu)
-    	      ("M-s M-l" . consult-line)
-    	      ("M-s M-m" . consult-mark)
-    	      ("M-s M-y" . consult-yank-pop)
-    	      ("M-s M-s" . consult-outline)
-    	      :map consult-narrow-map
-    	      ("?" . consult-narrow-help))
       :hook (completion-list-mode . consult-preview-at-point-mode)
+      :bind (("C-x b" . consult-buffer)
+             ("C-x 4 b" . consult-buffer-other-window)
+             ("C-x 5 b" . consult-buffer-other-frame)
+             ("C-x r b" . consult-bookmark)
+             ("M-y" . consult-yank-pop)
+             ("M-g g" . consult-goto-line)
+             ("M-g M-g" . consult-goto-line)
+             ("M-g i" . consult-imenu)
+             ("M-g I" . consult-imenu-multi)
+             ("M-s b" . consult-buffer)
+             ("M-s f" . consult-find)
+             ("M-s g" . consult-ripgrep)
+             ("M-s h" . consult-history)
+             ("M-s i" . consult-imenu)
+             ("M-s l" . consult-line)
+             ("M-s L" . consult-line-multi)
+             ("M-s m" . consult-mark)
+             ("M-s o" . consult-outline)
+             ("M-s y" . consult-yank-pop)
+             :map consult-narrow-map
+             ("?" . consult-narrow-help)
+             :map minibuffer-local-map
+             ("M-s" . consult-history))
       :init
       (setq register-preview-delay 0.5
-    	register-preview-function #'consult-register-format)
-      (advice-add #'retister-preview :override #'consult-register-window)
-      (setq xref-show-xrefs-function #'consult-xref
-    	xref-show-definitions-function #'consult-xref)
+            register-preview-function #'consult-register-format
+            xref-show-xrefs-function #'consult-xref
+            xref-show-definitions-function #'consult-xref
+            consult-async-min-input 2
+            consult-async-input-debounce 0.25
+            consult-async-input-throttle 0.5
+            consult-narrow-key "<"
+            consult-line-numbers-widen t
+            consult-preview-key 'any
+            consult-find-args
+            (concat "find . -not ( "
+                    "-path */.git* -prune "
+                    "-or -path */.cache* -prune )"))
+      (when (fboundp 'projectile-project-root)
+        (with-eval-after-load 'projectile
+          (setq consult-project-function
+                (lambda (_)
+                  (when-let ((root (projectile-project-root)))
+                    (cons 'projectile root))))))
+      (advice-add #'register-preview :override #'consult-register-window)
       :config
-      (setq consult-line-numbers-widen t)
-      (setq consult-async-min-input 3)
-      (setq consult-async-input-debounce 0.5)
-      (setq consult-async-input-throttle 0.8)
-      (setq consult-narrow-key nil)
-      (setq consult-find-args
-    	(concat "find . -not ( "
-    		"-path */.git* -prune "
-    		"-or -path */.cache* -prune )"))
-      (setq consult-preview-key 'any)
       (add-to-list 'consult-mode-histories '(vc-git-log-edit-mode . log-edit-comment-ring))
       (require 'consult-imenu)
 
-
       (use-package consult-org-roam
         :bind (("M-s M-o f" . consult-org-roam-file-find)
-    	   ("M-s M-o l" . consult-org-roam-forward-links)
-    	   ("M-s M-o b" . consult-org-roam-backlinks)
-    	   ("M-s M-o s" . consult-org-roam-search)
-    	   ("M-s M-o l" . consult-org-roam-backlinks-recursive))
+               ("M-s M-o l" . consult-org-roam-forward-links)
+               ("M-s M-o b" . consult-org-roam-backlinks)
+               ("M-s M-o s" . consult-org-roam-search)
+               ("M-s M-o L" . consult-org-roam-backlinks-recursive))
         :init
         (consult-org-roam-mode))
 
       (use-package consult-dir
         :straight t
         :bind (("C-x C-d" . consult-dir)
-    	   :map minibuffer-local-completion-map
-    	   ("C-x C-d" . consult-dir)
-    	   ("C-x C-f" . consult-dir-jump-file))))
+               :map minibuffer-local-completion-map
+               ("C-x C-d" . consult-dir)
+               ("C-x C-f" . consult-dir-jump-file))))
     #+end_src
 
     #+RESULTS:
@@ -496,7 +1801,7 @@ Enable recent files mode
     
 *** Corfu
 
-    Corfu is an in-buffer completion framework that provides a completion popup.
+    [[https://github.com/minad/corfu][Corfu]] is an in-buffer completion framework that provides a completion popup.
 
     #+begin_src emacs-lisp
 	    (use-package corfu
@@ -552,7 +1857,9 @@ Enable recent files mode
     (use-package emacs
       :init
       (setq completion-cycle-threshold 3)
-      (setq tab-always-indent 'complete))
+      (setq tab-always-indent 'complete)
+      (setq-default indent-tabs-mode nil)
+      (setq-default tab-width 2))
 
     (use-package dabbrev
       :bind (("C-<tab>" . dabbrev-completion)
@@ -566,7 +1873,7 @@ Enable recent files mode
     #+RESULTS:
     : dabbrev-expand
 
-    Nerd icons in Corfu
+    [[https://github.com/minad/nerd-icons-corfu][nerd-icons-corfu]] adds rich icons beside completion candidates.
 
     #+begin_src emacs-lisp
     (use-package nerd-icons-corfu
@@ -584,7 +1891,7 @@ Enable recent files mode
 
 *** Cape
 
-    Cape (Completion-at-Point Extensions) are providers for Corfu completion
+    [[https://github.com/minad/cape][Cape]] (Completion-at-Point Extensions) are providers for Corfu completion.
 
     #+begin_src emacs-lisp
     (use-package cape
@@ -641,6 +1948,8 @@ Enable recent files mode
     
 *** Set exec-path from shell
 
+    [[https://github.com/purcell/exec-path-from-shell][exec-path-from-shell]] syncs environment variables from my login shell so CLI tools resolve correctly inside GUI Emacs.
+
     #+begin_src emacs-lisp
     (use-package exec-path-from-shell
       :straight t
@@ -652,7 +1961,9 @@ Enable recent files mode
    : ((MANPATH . :/usr/share/man:/usr/local/share/man:/Library/TeX/Distributions/.DefaultTeX/Contents/Man:) (PATH . /opt/homebrew/bin:/opt/homebrew/sbin:/Users/adamgrubbs/.npm-global/bin:/Users/adamgrubbs/.local/bin:/Users/adamgrubbs/.config/emacs/bin:/opt/homebrew/lib/node_modules:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/Library/TeX/texbin))
 
 *** Embark
-    #+begin_src emacs-lisp
+
+    [[https://github.com/oantolin/embark][Embark]] turns completion candidates into actionable contexts so I can run commands on them without leaving the minibuffer.
+#+begin_src emacs-lisp
     (use-package embark
         :straight t
         :bind (("C-." . embark-act)
@@ -677,7 +1988,10 @@ Enable recent files mode
 
 ** Navigation
 
+   Jumping utilities like Avy and Ace Window speed up movement without leaving home row.
+
 *** avy
+    [[https://github.com/abo-abo/avy][avy]] gives me jump commands across the window; related extensions like [[https://github.com/abo-abo/avy][avy-zap]], [[https://github.com/abo-abo/ace-window][ace-window]], and [[https://github.com/noctuid/link-hint.el][link-hint]] build on the same hinting mechanics for deletion, window switching, and link following.
      #+begin_src emacs-lisp
             (use-package avy
             :straight t
@@ -714,6 +2028,8 @@ Enable recent files mode
      #+end_src
 
 ** Org
+
+   Org mode acts as the backbone for notes and project management, so these sections polish both the core experience and the PKM tooling around it.
 
 *** Settings
     Change the following variables:
@@ -752,8 +2068,7 @@ Enable recent files mode
 
 *** Custom Org-Mode Functions
 
-    Here are my custom org-mode functions. They will include docstrings so there isn't
-    a great need for documentation here.
+    Helper functions wrap common editing tasks like inserting drawers or jumping between links. Docstrings capture full behaviour, but this section keeps the wiring close to the configuration.
 
     #+begin_src emacs-lisp
     (defun arg-emacs-org-insert-drawer-correctly (arg)
@@ -788,6 +2103,14 @@ Enable recent files mode
     :CUSTOM_ID: org_keys
     :END:
 
+    Global shortcuts keep agenda navigation handy even outside Org buffers.
+
+     #+caption: Global Org shortcuts
+     | Key       | Command        | Description        |
+     |-----------+----------------+--------------------|
+     | <f7>      | org-tags-view  | Search by tag      |
+     | C-c a     | org-agenda     | Launch agenda view |
+
     #+begin_src emacs-lisp
     (global-set-key (kbd "<f7>")
     		'org-tags-view)
@@ -801,7 +2124,7 @@ Enable recent files mode
 
 *** Org Modern
 
-    Modern Org mode package
+    [[https://github.com/minad/org-modern][org-modern]] refines Org's typography and agenda faces without forcing a theme change.
 
     #+begin_src emacs-lisp
     (use-package org-modern
@@ -837,7 +2160,7 @@ Enable recent files mode
 
 *** Org Superstar
 
-    This package enables pretty bullets in org mode
+    [[https://github.com/integral-dw/org-superstar-mode][org-superstar]] supplies prettier bullets for Org headings and TODO states.
 
     #+begin_src emacs-lisp
     (use-package org-superstar
@@ -854,7 +2177,7 @@ Enable recent files mode
 
 *** Org-Contrib
 
-    Extra contrib packages to extend org mode
+    [[https://orgmode.org/worg/org-contrib/][org-contrib]] pulls in optional exporters and utilities that aren't part of core Org.
 
     #+begin_src emacs-lisp
     (use-package org-contrib
@@ -863,7 +2186,7 @@ Enable recent files mode
     #+end_src
 
 *** Org-Roam
-    Org-Roam is a note-taking system similar to zettelkasten.
+    [[https://github.com/org-roam/org-roam][Org-roam]] is a note-taking system similar to zettelkasten.
 
 **** Install and Config
 
@@ -889,31 +2212,35 @@ Enable recent files mode
          (file-directory-p arg-emacs-org-roam-dir)
        (make-directory arg-emacs-org-roam-dir))
 
-     (use-package org-roam
-       :straight t
-       :init
-       (setq org-roam-v2-ack t)
-       :custom
-       (org-roam-directory arg-emacs-org-roam-dir)
-       (org-roam-completion-everywhere t)
-       (org-roam-capture-templates
-        '(("d" "default" plain
-           "%?"
-           :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
-           :unnarrowed t)))
-       :bind (("C-c n l" . org-roam-buffer-toggle)
-       	 ("C-c n f" . org-roam-node-find)
-       	 ("C-c n i" . org-roam-node-insert)
-     	 :map org-mode-map
-     	 ("C-M-i" . completion-at-point))
-       :config
-       (org-roam-setup))
-
-     ;; Set database autosync
-     (org-roam-db-autosync-enable)
+     (if (and (fboundp 'sqlite-available-p)
+              (sqlite-available-p))
+         (progn
+           (use-package org-roam
+             :straight t
+             :init
+             (setq org-roam-v2-ack t)
+             :custom
+             (org-roam-directory arg-emacs-org-roam-dir)
+             (org-roam-completion-everywhere t)
+             (org-roam-capture-templates
+              '(("d" "default" plain
+                 "%?"
+                 :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+                 :unnarrowed t)))
+             :bind (("C-c n l" . org-roam-buffer-toggle)
+             	 ("C-c n f" . org-roam-node-find)
+             	 ("C-c n i" . org-roam-node-insert)
+           	 :map org-mode-map
+           	 ("C-M-i" . completion-at-point))
+             :config
+             (org-roam-setup)
+             (org-roam-db-autosync-enable)))
+       (message "Skipping org-roam setup: built-in SQLite support not available."))
      #+end_src
 
 *** Org-Agenda
+    Agenda files default to `~/org/agenda`, matching the shortcuts defined earlier (`C-c a`).
+
     Org Agenda file is set with ~C-c ]~ and removed with ~C-c [~
 #+begin_src emacs-lisp
 (setq org-agenda-files '("~/org/agenda"))
@@ -923,7 +2250,7 @@ Enable recent files mode
     :PROPERTIES:
 
     :END:
-    Org Attachments are useful for adding files to org files.
+    Org attachments (documented in the [[https://orgmode.org/manual/Attachments.html][Org manual]]) live alongside notes and inherit IDs so exported documents can reference external artefacts safely.
 
     Set org attach directory
     #+begin_src emacs-lisp
@@ -960,7 +2287,10 @@ Enable recent files mode
 
 ** Version Control
    
+   Version control tooling leans on Magit plus a few companion packages for diff hints, blame overlays, and forge integration.
+   
 *** Magit
+    [[https://magit.vc][Magit]] is the primary porcelain; the keybindings mirror the default `C-x g` flow for muscle memory.
     #+begin_src emacs-lisp
     (use-package magit
       :straight t
@@ -974,6 +2304,7 @@ Enable recent files mode
 
 *** Git Support Packages
 **** git-gutter
+    [[https://github.com/emacsorphanage/git-gutter][git-gutter]] paints margin indicators for modified hunks.
     #+begin_src emacs-lisp
         (use-package git-gutter
           :straight t
@@ -981,43 +2312,50 @@ Enable recent files mode
           (global-git-gutter-mode 1))
  #+end_src
 **** git-timemachine
+    [[https://codeberg.org/pidu/git-timemachine][git-timemachine]] lets me step through file history inline.
     #+begin_src emacs-lisp
         (use-package git-timemachine
           :straight t
           :bind (("C-x v t" . git-timemachine)))
  #+end_src
 **** forge
+     [[https://github.com/magit/forge][Forge]] adds issue and merge-request triage from inside Magit.
+
      Forge  Setup for GitLab:
      1. Create token at https://gitlab.com/-/profile/personal_access_tokens
      2. Scopes: =api=, =read_user=, =read_repository=
      3. Add to =~/.authinfo.gpg= or =~/.authinfo=
 	~machine gitlab.com/api/v4 login YOUR_USERNAME^forge password YOUR_TOKEN~
 	 #+begin_src emacs-lisp
-	 (use-package forge
-	   :straight t
-	   :after magit
-	   :config
-	   ;; Gitlab settings
-	   (setq forge-alist
-		 '(("gitlab.com" "gitlab.com/api/v4" "gitlab.com" forge-gitlab-repository)))
+	 (if (and (fboundp 'sqlite-available-p)
+                  (sqlite-available-p))
+	     (use-package forge
+	       :straight t
+	       :after magit
+	       :config
+	       ;; Gitlab settings
+	       (setq forge-alist
+		     '(("gitlab.com" "gitlab.com/api/v4" "gitlab.com" forge-gitlab-repository)))
 
-	   ;; Set number of topics to fetch
-	   (setq forge-topic-list-limit '(60 . 10))  ; (issues . merge-requests)
+	       ;; Set number of topics to fetch
+	       (setq forge-topic-list-limit '(60 . 10))  ; (issues . merge-requests)
 
-	   ;; Columns to show in topic list
-	   (setq forge-topic-list-columns
-		 '(("#" 5 forge-topic-list-sort-by-number (:right-align t) number nil)
-		   ("Title" 60 t nil title nil)
-		   ("State" 6 t nil state nil)
-		   ("Updated" 10 t nil updated nil)))
+	       ;; Columns to show in topic list
+	       (setq forge-topic-list-columns
+		     '(("#" 5 forge-topic-list-sort-by-number (:right-align t) number nil)
+		       ("Title" 60 t nil title nil)
+		       ("State" 6 t nil state nil)
+		       ("Updated" 10 t nil updated nil)))
 
-	   ;; Auto-fetch notifications
-	   (setq forge-pull-notifications t)
+	       ;; Auto-fetch notifications
+	       (setq forge-pull-notifications t)
 
-	   ;; Database location
-	   (setq forge-database-file (expand-file-name "forge-database.sqlite" user-emacs-directory)))
-      #+end_src
+	       ;; Database location
+	       (setq forge-database-file (expand-file-name "forge-database.sqlite" user-emacs-directory)))
+	   (message "Skipping Forge setup: built-in SQLite support not available."))
+     #+end_src
 **** git-messenger
+    [[https://github.com/emacsorphanage/git-messenger][git-messenger]] shows blame info for the current line in a popup.
     #+begin_src emacs-lisp
     (use-package git-messenger
       :straight t
@@ -1027,6 +2365,7 @@ Enable recent files mode
     	git-messenger:use-magit-popup t))
     #+end_src
 **** diff-hl
+    [[https://github.com/dgutov/diff-hl][diff-hl]] paints VC markers in the fringe and updates them on the fly.
     #+begin_src emacs-lisp
         (use-package diff-hl
           :straight t
@@ -1037,6 +2376,7 @@ Enable recent files mode
 
     #+end_src
 **** blamer
+     [[https://github.com/Artawower/blamer.el][blamer.el]] shows inline blame metadata so I can spot who touched a line without opening Magit.
      #+begin_src emacs-lisp
 (use-package blamer
   :straight t
@@ -1061,7 +2401,9 @@ Enable recent files mode
 
 ** Programming
    
-;; Bridge between Consult and Eglot for symbol navigation
+   Language tooling centres around Eglot for LSP support, with tree-sitter text objects, sideline diagnostics, and language-specific helpers.
+*** consult-eglot
+    [[https://github.com/mohkale/consult-eglot][consult-eglot]] bridges Consult's UI with Eglot's symbol search so I can browse workspace definitions quickly.
 #+begin_src emacs-lisp
 (use-package consult-eglot
   :straight t
@@ -1070,6 +2412,7 @@ Enable recent files mode
 #+end_src
 
 *** eglot
+    [[https://github.com/joaotavora/eglot][Eglot]] handles LSP duties for Python and YAML while companion packages provide inline diagnostics and hover popups.
     #+begin_src emacs-lisp
     (use-package eglot
       :straight t
@@ -1124,6 +2467,7 @@ Enable recent files mode
     : eldoc-box-eglot-help-at-point
 
 *** flycheck
+    I keep the old [[https://www.flycheck.org][Flycheck]] wiring around for quick experiments, but Flymake handles diagnostics day-to-day.
     #+begin_src emacs-lisp
     ;; (use-package flycheck
     ;; :straight t
@@ -1141,6 +2485,7 @@ Enable recent files mode
 : t
 
 *** ansible
+    YAML and Ansible support bundles indentation tweaks, the [[https://github.com/k1LoW/emacs-ansible][ansible]] minor mode, docs, and lint integration via flymake-yamllint.
     #+begin_src emacs-lisp
           ;; Ansible Language Server
       (use-package ansible
@@ -1181,6 +2526,7 @@ Enable recent files mode
 
 
 *** devdocs
+    [[https://github.com/astoff/devdocs.el][devdocs.el]] keeps offline API docs in sync so lookups stay fast even without network access.
     #+begin_src emacs-lisp
     (use-package devdocs
     :straight t
@@ -1200,6 +2546,7 @@ Enable recent files mode
 : devdocs-lookup
 
 *** Tree-sitter
+    [[https://github.com/renzmann/treesit-auto][treesit-auto]] manages language grammar downloads and mode remapping so tree-sitter features just work.
     #+begin_src emacs-lisp
     (when (fboundp 'treesit-available-p)
       (use-package treesit-auto
@@ -1219,6 +2566,7 @@ Enable recent files mode
     #+end_src
 
 *** Python
+    Python support stitches together tree-sitter remaps, auto-venv activation, Eglot workspace configuration, Black/Isort formatting, [[https://github.com/emacs-lsp/dap-mode][DAP mode]], and pytest helpers.
     #+begin_src emacs-lisp
     (require 'project)
 
@@ -1390,6 +2738,7 @@ Enable recent files mode
     #+end_src
 
 **** Poetry Integration
+    [[https://github.com/alphapapa/poetry.el][poetry.el]] tracks virtualenvs created by Poetry so interpreter hooks stay in sync.
     #+begin_src emacs-lisp
     (use-package poetry
       :straight t
@@ -1399,7 +2748,7 @@ Enable recent files mode
 
 ** Projects
 
-   Using =projectile= for project management
+   [[https://github.com/bbatsov/projectile][Projectile]] handles project discovery, while consult-projectile keeps completion consistent.
 
    #+begin_src emacs-lisp
 (use-package projectile
@@ -1420,7 +2769,7 @@ Enable recent files mode
          ("C-c p p" . consult-projectile-switch-project)))
    #+end_src
 ** Shell and Terminal
-   Install vterm for terminal support
+   [[https://github.com/akermu/emacs-libvterm][vterm]] provides a fast libvterm-backed terminal inside Emacs.
    #+begin_src emacs-lisp
    (use-package vterm
      :straight t
@@ -1428,6 +2777,7 @@ Enable recent files mode
      :bind (("C-c o t" . vterm-other-window)))
    #+end_src
 ** Snippets
+   [[https://github.com/minad/tempel][Tempel]] provides lightweight snippets, with extra collections and CAPF integration so templates appear inside Corfu.
    #+begin_src emacs-lisp
    (use-package tempel
      :straight t
