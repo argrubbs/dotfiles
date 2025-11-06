@@ -559,12 +559,6 @@
   :config
   (evilem-default-keybindings "gs"))
 
-(use-package evil-quickscope
-  :after evil
-  :straight (:host github :repo "hlissner/evil-quickscope")
-  :config
-  (global-evil-quickscope-mode 1))
-
 (use-package evil-visualstar
   :after evil
   :config

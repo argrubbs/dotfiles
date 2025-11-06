@@ -1144,17 +1144,6 @@ style focus while keeping secondary panes visible.
   (evilem-default-keybindings "gs"))
 #+end_src
 
-**** evil-quickscope
-
-    [[https://github.com/hlissner/evil-quickscope][evil-quickscope]] highlights potential `f`/`t` targets so repositioning the cursor takes fewer guesses.
-#+begin_src emacs-lisp
-(use-package evil-quickscope
-  :after evil
-  :straight (:host github :repo "hlissner/evil-quickscope")
-  :config
-  (global-evil-quickscope-mode 1))
-#+end_src
-
 **** evil-visualstar
 
     [[https://github.com/bling/evil-visualstar][evil-visualstar]] reuses Vim's `*`/`#` search behaviour for visual selections.
