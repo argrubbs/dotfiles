@@ -13,7 +13,8 @@
       package-enable-at-startup nil
       straight-repository-branch "develop"
       native-comp-async-jobs-number 0
-      straight-build-jobs 0)
+      straight-build-jobs 0
+      vc-follow-symlinks t)
 ;;; Frame Settings
 (setq frame-resize-pixelwise t
       use-dialog-box t

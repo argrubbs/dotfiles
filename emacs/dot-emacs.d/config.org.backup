@@ -1,12 +1,33 @@
 #+TITLE: ARG Emacs
 #+AUTHOR: Adam Grubbs
 :PROPERTIES:
+<<<<<<< HEAD
 #+PROPERTY: header-args :tangle config.el
 #+STARTUP: contents
 #+RESULTS: silent
 :END:
 
 * Emacs Configuration
+=======
+#+PROPERTY: header-args :tangle yes :results silent
+#+STARTUP: overview
+:END:
+* Configuration
+  :PROPERTIES:
+  :VISIBILITY: children
+  :END:
+** straight.el
+   #+begin_src emacs-lisp
+   ;; Configure straight.el to use use-package by default
+   (setq straight-use-package-by-default t)
+   (straight-use-package 'use-package)
+   #+end_src
+** My Info 
+   #+begin_src emacs-lisp
+   (setq user-full-name "Adam Grubbs"
+         user-main-address "argrubbs@users.noreply.github.com")
+   #+end_src
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
 
 ** Base Settings
 
@@ -15,9 +36,124 @@
   (setq initial-major-mode 'org-mode)
 #+end_src
 
+<<<<<<< HEAD
 ** UI
 
 *** Theme
+=======
+   (defcustom arg-dotfiles-config-files-directory "emacs/dot-emacs.d/"
+     "The directory path inside `arg/dotfiles-folder' where emacs config files are stored."
+     :type 'string
+     :group 'dotfiles)
+   #+end_src
+** Custom Functions
+   #+begin_src emacs-lisp
+   #+end_src
+** Emacs Init
+
+*** Settings
+
+    Sane Defaults
+    #+begin_src emacs-lisp
+    ;; menu shit remove
+    (mapc
+     (lambda (mode)
+       (when (fboundp mode)
+         (funcall mode -1)))
+     ' (menu-bar-mode tool-bar-mode scroll-bar-mode))
+
+    (unless (file-directory-p "~/dev")
+      (make-directory "~/dev" t)
+      (setq default-directory "~/dev"))
+
+    ;; Init
+    (setq inhibit-default-init t
+          inhibit-startup-echo-area-message t
+          inhibit-startup-screen t
+          initial-scratch-message nil)
+
+    ;; warn when opening files bigger than 100MB
+    (setq large-file-warning-threshold 100000000)
+
+    (defconst gas-savefile-dir (expand-file-name "savefile" user-emacs-directory))
+
+    ;; Create the savefile dir if it doesn't exist
+    (unless (file-exists-p gas-savefile-dir)
+      (make-directory gas-savefile-dir))
+
+    ;;; UI
+    ;; No blink cursor
+    (blink-cursor-mode -1)
+
+    (setq use-dialog-box nil)
+
+    ;; disable bell ring
+    (setq ring-bell-function 'ignore)
+
+    ;; nice scrolling
+    (setq scroll-margin 0
+          scroll-conservatively 100000
+          scroll-preserve-screen-position 1)
+
+    ;; mode line settings
+    (line-number-mode t)
+    (column-number-mode t)
+    (size-indication-mode t)
+
+    ;; enable y/n answers
+    (fset 'yes-or-no-p 'y-or-n-p)
+
+    ;; useful frame title
+    (setq frame-title-format
+          '((:eval (if (buffer-file-name)
+    		   (abbreviate-file-name (buffer-file-name))
+    		 "%b"))))
+
+    ;; org default mode
+    (setq initial-major-mode 'org-mode)
+
+    ;; make cursor tab length on tab
+    (setq-default x-stretch-cursor t)
+
+    ;; Keep emacs custom-settings in separate file
+    (setq custom-file (expand-file-name "custom.el" user-emacs-directory))
+    (when (file-exists-p custom-file)
+      (load custom-file))
+
+    ;; Store all backup and autosave files in the tmp dir
+    (setq backup-directory-alist
+          `((".*" . ,temporary-file-directory)))
+    (setq auto-save-file-name-transforms
+          `((".*" ,temporary-file-directory t)))
+
+    ;; revert buffers automatically when file changed externally
+    (global-auto-revert-mode t)
+
+    ;; Make backups of files, even when they're in vcs
+    (setq vc-make-backup-files t)
+
+    ;; Fix empty pasteboard error
+    (setq save-interprogram-paste-before-kill nil)
+
+    ;; line highlight
+    (hl-line-mode t)
+
+    ;; enable recent files
+    (recentf-mode t)
+    #+end_src
+
+    #+RESULTS:
+    : t
+
+**** Elisp Formatter
+     #+begin_src emacs-lisp
+     ;; (use-package elisp-format)
+     #+end_src
+
+     #+RESULTS:
+     
+*** Display
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
 
 **** Declare all themes as safe
 
@@ -31,19 +167,15 @@
      #+end_src
 
 
+<<<<<<< HEAD
 **** Install Themes
 Install various themes
 #+begin_src emacs-lisp
   (use-package doom-themes)
-  (use-package modus-themes
-    :straight t
-    :defer t)
   (straight-use-package '(moe-theme :host github
   				  :repo "kuanyui/moe-theme.el"
   				  :branch "dev"))
   (use-package ef-themes
-    :straight t
-    :after modus-themes
     :init
     (ef-themes-take-over-modus-themes-mode 1)
     :config
@@ -90,7 +222,7 @@ Install various themes
     (require 'org-indent)
     (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
 
-    (set-face-attribute 'org-block nil            :foreground 'unspecified :inherit
+    (set-face-attribute 'org-block nil            :foreground nil :inherit
     		    'fixed-pitch :height 0.85)
     (set-face-attribute 'org-code nil             :inherit '(shadow fixed-pitch) :height 0.85)
     (set-face-attribute 'org-indent nil           :inherit '(org-hide fixed-pitch) :height 0.85)
@@ -117,33 +249,91 @@ Install various themes
 
 *** Modeline
 
-    This is the modeline from Doom Emacs. It is feature-rich and performant.
-
-    #+begin_src emacs-lisp
-    (use-package doom-modeline
-      :straight t
-      :init (doom-modeline-mode 1)
-      :custom
-      (doom-modeline-height 30)
-      (doom-modeline-bar-width 5)
-      (doom-modeline-persp-name t)
-      (doom-modeline-major-mode-icon t)
-      (doom-modeline-major-mode-color-icon t)
-      (doom-modeline-buffer-state-icon t)
-      (doom-modeline-buffer-modification-icon t)
-      (doom-modeline-minor-modes t)
-      (doom-modeline-enable-word-count t)
-      (doom-modeline-buffer-encoding t)
-      (doom-modeline-indent-info t)
-      (doom-modeline-checker-simple-format t)
-      (doom-modeline-vcs-max-length 20))
-    #+end_src
-
 *** Extras
 
 **** Zoom
 
 Package that handles automatic window sizing based on active window
+=======
+**** Install Doom Themes
+     This will install doom-themes from MELPA for use. To set the theme
+     change it in the =(load-theme 'doom-theme-name t)= line.
+
+     #+begin_src emacs-lisp
+     ;; Install doom-themes
+     (use-package doom-themes
+       :custom
+       (doom-themes-enable-bold t)
+       (doom-themes-enable-italic t)
+       :config
+       (doom-themes-visual-bell-config)
+       (doom-themes-org-config))
+     #+end_src
+
+**** Load the Theme                                                   :theme:
+
+     #+begin_src emacs-lisp
+     (load-theme 'modus-vivendi-tinted t)
+     #+end_src
+
+     #+RESULTS:
+     : t
+
+**** Load Doom Modeline
+
+     Doom Modeline is a modeline for the bottom of the Emacs window
+
+     #+begin_src emacs-lisp
+(use-package doom-modeline
+  :init (doom-modeline-mode 1)
+  :custom
+  ;; Height
+  (doom-modeline-height 25)
+  
+  ;; Width
+  (doom-modeline-bar-width 4)
+  (doom-modeline-window-width-limit 85)
+  
+  ;; Icons
+  (doom-modeline-icon t)
+  (doom-modeline-major-mode-icon t)
+  (doom-modeline-major-mode-color-icon t)
+  (doom-modeline-buffer-state-icon t)
+  (doom-modeline-buffer-modification-icon t)
+  
+  ;; Text style
+  (doom-modeline-unicode-fallback nil)
+  (doom-modeline-minor-modes nil)
+  
+  ;; Buffer info
+  (doom-modeline-buffer-file-name-style 'truncate-upto-project)
+  (doom-modeline-buffer-encoding nil)
+  
+  ;; LSP/Eglot
+  (doom-modeline-lsp t)
+  (doom-modeline-check-simple-format t)
+  
+  ;; Git
+  (doom-modeline-vcs-max-length 12)
+  
+  ;; Environment
+  (doom-modeline-env-version t)
+  (doom-modeline-env-python-executable "python3")
+  
+  ;; Performance
+  (doom-modeline-enable-word-count nil)
+  (doom-modeline-indent-info nil))
+
+;; Ensure nerd-icons are installed
+(use-package nerd-icons)
+     #+end_src
+
+     #+RESULTS:
+
+**** Zoom (golden-ratio)
+
+     Package that handles automatic window sizing based on active window
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
 
      #+begin_src emacs-lisp
      (use-package zoom
@@ -154,11 +344,20 @@ Package that handles automatic window sizing based on active window
         '(zoom-size '(0.618 . 0.618))))
      #+end_src
 
+<<<<<<< HEAD
 **** Posframe
 
      #+begin_src emacs-lisp
 (use-package posframe
   :straight t
+=======
+     #+RESULTS:
+     : t
+
+**** Posframe
+     #+begin_src emacs-lisp
+(use-package posframe
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
   :config
   ;; Global posframe settings
   
@@ -174,6 +373,7 @@ Package that handles automatic window sizing based on active window
                       value)))
   
   ;; Posframe border style
+<<<<<<< HEAD
   (setq posframe-border-width 2)
   
   ;; Hide posframe on specific events
@@ -223,6 +423,56 @@ Enable recent files mode
 
    These packages ars focused on providing a better experience for completion
    in the minibuffer, editor, and anywhere else
+=======
+  (setq posframe-border-width 2))
+     #+end_src
+
+     #+RESULTS:
+     : t
+
+*** Completion
+
+**** Vertico
+     #+begin_src emacs-lisp
+(use-package vertico
+  :init
+  (vertico-mode)
+  :config
+  (setq vertico-cycle t)
+  (setq vertico-resize nil))
+
+(use-package vertico-posframe
+  :after vertico
+  :config
+  (vertico-posframe-mode 1)
+  (setq vertico-posframe-poshandler #'posframe-poshandler-frame-center)
+  (setq vertico-posframe-border-width 2)
+  (setq vertico-posframe-parameters
+        '((left-fringe . 8)
+          (right-fringe . 8))))
+     #+end_src
+
+     #+RESULTS:
+     : t
+
+**** Marginalia
+     #+begin_src emacs-lisp
+(use-package marginalia
+  :init
+  (marginalia-mode))
+     #+end_src
+
+     #+RESULTS:
+     : t
+
+**** Orderless
+     #+begin_src emacs-lisp
+(use-package orderless
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles basic partial-completion)))))
+     #+end_src
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
 
      #+RESULTS:
 
@@ -314,8 +564,15 @@ Enable recent files mode
 
     #+RESULTS:
     : t
+<<<<<<< HEAD
 ** Completion
-*** Dired
+*** Vertico
+=======
+
+*** File Management
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
+
+**** Dired
      #+begin_src emacs-lisp
 (use-package dired
   :straight (:type built-in)
@@ -331,41 +588,6 @@ Enable recent files mode
 
      #+RESULTS:
      : dired-subtree-toggle
-
-*** Vertico
-
-    Vertico provides a performant and minimalistic vertical completion UI.
-
-    #+begin_src emacs-lisp
-    (use-package vertico
-      :straight t
-      :init
-      (vertico-mode)
-      :custom
-      (vertico-cycle t))
-    #+end_src
-
-    This package provides more flexible, order-agnostic filtering of candidates.
-
-    #+begin_src emacs-lisp
-    (use-package orderless
-      :straight t
-      :custom
-      (completion-styles '(orderless basic))
-      (completion-category-overrides '((file (styles partial-completion)))))
-    #+end_src
-
-    Sacha Chua's configuration uses vertico-multiform to have different completion
-    display styles for different commands.
-
-    #+begin_src emacs-lisp
-    (use-package vertico-multiform
-      :straight (:host github :repo "minad/vertico" :files ("vertico-multiform.el"))
-      :after vertico
-      :config
-      (vertico-multiform-mode)
-      (add-to-list 'vertico-multiform-categories '(embark-keybinding grid)))
-    #+end_src
 
 *** Git
 
@@ -405,11 +627,7 @@ Enable recent files mode
        ;; Auto-fetch notifications
        (setq forge-pull-notifications t)
 
-       ;; Database location
-       (setq forge-database-file (expand-file-name "forge-database.sqlite" user-emacs-directory)))
-      #+end_src
-**** Marginalia
-
+<<<<<<< HEAD
     Marginalia provides extra info into the minibuffer completions. It's really just that.
 
     #+begin_src emacs-lisp
@@ -532,22 +750,6 @@ Enable recent files mode
       :after corfu
       :config
       (setq corfu-margin-formatters '(nerd-icons-corfu-formatter)))
-
-    ;; Add prettier icons in completions
-    (use-package kind-icon
-      :straight t
-      :after corfu
-      :custom
-      (kind-icon-default-face 'corfu-default)
-      :config
-      (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
-
-    ;; Ensure Corfu UI works over SSH and terminals
-    (use-package corfu-terminal
-      :straight t
-      :after corfu
-      :init
-      (corfu-terminal-mode 1))
 
     (use-package emacs
       :init
@@ -1016,11 +1218,18 @@ Enable recent files mode
 
 	   ;; Database location
 	   (setq forge-database-file (expand-file-name "forge-database.sqlite" user-emacs-directory)))
+=======
+       ;; Database location
+       (setq forge-database-file (expand-file-name "forge-database.sqlite" user-emacs-directory)))
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
       #+end_src
 **** git-messenger
     #+begin_src emacs-lisp
     (use-package git-messenger
+<<<<<<< HEAD
       :straight t
+=======
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
       :bind ("C-x v p" . git-messenger:popup-message)
       :config
       (setq git-messenger:show-detail t
@@ -1028,6 +1237,7 @@ Enable recent files mode
     #+end_src
 **** diff-hl
     #+begin_src emacs-lisp
+<<<<<<< HEAD
         (use-package diff-hl
           :straight t
           :config
@@ -1035,11 +1245,20 @@ Enable recent files mode
           (diff-hl-flydiff-mode))
 
 
+=======
+    (use-package diff-hl
+      :config
+      (global-diff-hl-mode)
+      (diff-hl-flydiff-mode))
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
     #+end_src
 **** blamer
      #+begin_src emacs-lisp
 (use-package blamer
+<<<<<<< HEAD
   :straight t
+=======
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
   :bind (("s-i" . blamer-show-commit-info)
          ("C-c i" . blamer-show-posframe-commit-info))
   :defer 20
@@ -1048,7 +1267,7 @@ Enable recent files mode
   (blamer-min-offset 70)
   :custom-face
   (blamer-face ((t :foreground "#7a88cf"
-                    :background unspecified
+                    :background nil
                     :height 140
                     :italic t)))
   :config
@@ -1061,30 +1280,23 @@ Enable recent files mode
 
 ** Programming
    
-;; Bridge between Consult and Eglot for symbol navigation
-#+begin_src emacs-lisp
-(use-package consult-eglot
-  :straight t
-  :after (consult eglot)
-  :bind (("C-c C-d" . consult-eglot-symbols)))
-#+end_src
-
 *** eglot
     #+begin_src emacs-lisp
-    (use-package eglot
-      :straight t
-      :hook ((python-mode . eglot-ensure)
-             (python-ts-mode . eglot-ensure)
-             (yaml-mode . eglot-ensure))
-      :config
-      (dolist (mapping '((python-mode . ("pyright-langserver" "--stdio"))
-                         (python-ts-mode . ("pyright-langserver" "--stdio"))
-                         (yaml-mode . ("ansible-language-server" "--stdio"))))
-        (add-to-list 'eglot-server-programs mapping))
-      ;; Improve LSP responsiveness and enable PyCharm-like auto-imports
-      (setq eglot-send-changes-idle-time 0.2)
-      (setq eglot-ignored-server-capabilities nil)
-      (define-key eglot-mode-map (kbd "C-c C-r") #'eglot-rename))
+<<<<<<< HEAD
+          (use-package eglot
+            :straight t
+            :hook ((python-mode . eglot-ensure)
+          	 (yaml-mode . eglot-ensure))
+            :config
+            (add-to-list 'eglot-server-programs
+                         '(python-mode . ("pyright-langserver" "--stdio")))
+            (add-to-list 'eglot-server-programs
+                         '(yaml-mode . ("ansible-language-server" "--stdio")))
+            (add-hook 'python-mode-hook
+          	    (lambda ()
+                        (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
+              (setq eglot-ignored-server-capabilities 
+              '(:workspaceDidChangeConfiguration)))
 
     (use-package sideline
       :straight t
@@ -1118,6 +1330,51 @@ Enable recent files mode
                   ("C-k" . arg/eldoc-box-scroll-up)
                   ("C-j" . arg/eldoc-box-scroll-down)
                   ("M-h" . eldoc-box-eglot-help-at-point)))
+=======
+(use-package eglot
+  :hook ((python-mode . eglot-ensure)
+	 (yaml-mode . eglot-ensure))
+  :config
+  (add-to-list 'eglot-server-programs
+               '(python-mode . ("pyright-langserver" "--stdio")))
+  (add-to-list 'eglot-server-programs
+               '(yaml-mode . ("ansible-language-server" "--stdio")))
+  (add-hook 'python-mode-hook
+	    (lambda ()
+              (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
+  (setq eglot-ignored-server-capabilities 
+        '(:workspaceDidChangeConfiguration)))
+
+(use-package sideline
+  :hook (flymake-mode . sideline-mode)
+  :config
+  (setq sideline-flymake-display-mode 'line)
+  (setq sideline-backends-right '(sideline-flymake)))
+
+(use-package sideline-flymake
+  :after (sideline flymake)
+  :hook (flymake-mode . sideline-mode))
+
+(use-package eldoc-box
+  :config
+  (defun arg/eldoc-box-scroll-up ()
+    "Scroll up in `eldoc-box--frame'"
+    (interactive)
+    (with-current-buffer eldoc-box--buffer
+      (with-selected-frame eldoc-box--frame
+        (scroll-down 3))))
+  (defun arg/eldoc-box-scroll-down ()
+    "Scroll down in `eldoc-box--frame'"
+    (interactive)
+    (with-current-buffer eldoc-box--buffer
+      (with-selected-frame eldoc-box--frame
+        (scroll-up 3))))
+  :bind
+  (:map eglot-mode-map
+        ("C-k" . arg/eldoc-box-scroll-up)
+        ("C-j" . arg/eldoc-box-scroll-down)
+        ("M-h" . eldoc-box-eglot-help-at-point)))
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
     #+end_src
 
     #+RESULTS:
@@ -1126,12 +1383,19 @@ Enable recent files mode
 *** flycheck
     #+begin_src emacs-lisp
     ;; (use-package flycheck
+<<<<<<< HEAD
     ;; :straight t
     ;; :config
     ;; (add-hook 'after-init-hook #'global-flycheck-mode))
 
     ;; (use-package flycheck-eglot
     ;;   :straight t
+=======
+    ;;   :config
+    ;;   (add-hook 'after-init-hook #'global-flycheck-mode))
+
+    ;; (use-package flycheck-eglot
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
     ;;   :after (flycheck eglot)
     ;;   :config
     ;;   (global-flycheck-eglot-mode 1))
@@ -1142,6 +1406,7 @@ Enable recent files mode
 
 *** ansible
     #+begin_src emacs-lisp
+<<<<<<< HEAD
           ;; Ansible Language Server
       (use-package ansible
         :straight t
@@ -1158,31 +1423,49 @@ Enable recent files mode
     :hook (yaml-mode . ansible-doc-mode)
     :bind (:map ansible-doc-mode-map
                 ("C-c ?" . ansible-doc)))
+=======
+;; Ansible Language Server
+(use-package ansible
+  :hook ((yaml-mode . ansible)
+         (yaml-ts-mode . ansible)))
+
+(use-package yaml-mode
+  :mode (("\\.ya?ml\\'" . yaml-mode)
+         ("\\.ansible\\'" . yaml-mode)))
+
+(use-package ansible-doc
+  :hook (yaml-mode . ansible-doc-mode)
+  :bind (:map ansible-doc-mode-map
+              ("C-c ?" . ansible-doc)))
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
 
 (add-hook 'yaml-mode-hook
       (lambda ()
         (define-key yaml-mode-map (kbd "RET") 'newline-and-indent)))
-
-    ;; Enable YAML linting if available
-    (use-package flymake-yamllint
-      :straight t
-      :hook (yaml-mode . flymake-yamllint-setup))
-
-    ;; Run ansible-lint automatically when available
-    (add-hook 'yaml-mode-hook
-      (lambda ()
-        (when (executable-find "ansible-lint")
-          (flymake-mode 1))))
     #+end_src
 
 #+RESULTS:
 | #[nil ((define-key yaml-mode-map (kbd RET) 'newline-and-indent) (setq indent-tabs-mode nil) (setq tab-width 2) (add-hook 'completion-at-point-functions (lambda (&rest _) (untabify (line-beginning-position) (line-end-position)) nil) 100 t)) nil] | #[nil ((define-key yaml-mode-map (kbd RET) 'newline-and-indent) (setq indent-tabs-mode nil) (setq tab-width 2) (add-hook 'post-self-insert-hook (lambda nil (when (eq (char-before) 9) (atomic-change-group (delete-char -1) (insert (make-string tab-width 32))))) nil t)) nil] | #[nil ((define-key yaml-mode-map (kbd RET) 'newline-and-indent) (setq indent-tabs-mode nil) (add-hook 'before-save-hook (lambda nil (untabify (point-min) (point-max))) nil t)) nil] | yaml-set-imenu-generic-expression | #[nil ((define-key yaml-mode-map (kbd RET) 'newline-and-indent)) nil] | ansible-doc-mode | ansible | eglot-ensure |
 
 
+*** python
+    #+begin_src emacs-lisp
+    (use-package pyvenv
+<<<<<<< HEAD
+      :straight t
+=======
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
+      :config
+      (setq pyvenv-mode-line-indicator '(pyvenv-virtual-env-name ("[venv:" pyvenv-virtual-env-name "] "))))
+    #+end_src
+
+    #+RESULTS:
+    : t
 
 *** devdocs
     #+begin_src emacs-lisp
     (use-package devdocs
+<<<<<<< HEAD
     :straight t
     :bind (("C-h D" . devdocs-lookup)
            ("C-c d d" . devdocs-lookup))
@@ -1194,208 +1477,22 @@ Enable recent files mode
               (lambda () (setq-local devdocs-current-docs '("ansible~2.11"))))
     (add-hook 'emacs-lisp-mode-hook
               (lambda () (setq-local devdocs-current-docs '("elisp")))))
+=======
+      :bind (("C-h D" . devdocs-lookup)
+             ("C-c d d" . devdocs-lookup))
+      :config
+      ;; Install docs for your languages
+      (add-hook 'python-mode-hook
+                (lambda () (setq-local devdocs-current-docs '("python~3.13"))))
+      (add-hook 'yaml-mode-hook
+                (lambda () (setq-local devdocs-current-docs '("ansible~2.11"))))
+      (add-hook 'emacs-lisp-mode-hook
+                (lambda () (setq-local devdocs-current-docs '("elisp")))))
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
     #+end_src
 
 #+RESULTS:
 : devdocs-lookup
-
-*** Tree-sitter
-    #+begin_src emacs-lisp
-    (when (fboundp 'treesit-available-p)
-      (use-package treesit-auto
-        :straight t
-        :demand t
-        :init
-        (setq treesit-auto-install 'prompt)
-        (setq treesit-auto-language-source-alist
-              '((bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
-                (json . ("https://github.com/tree-sitter/tree-sitter-json"))
-                (python . ("https://github.com/tree-sitter/tree-sitter-python"))
-                (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
-                (yaml . ("https://github.com/ikatyang/tree-sitter-yaml"))))
-        :config
-        (treesit-auto-add-to-auto-mode-alist 'all)
-        (global-treesit-auto-mode)))
-    #+end_src
-
-*** Python
-    #+begin_src emacs-lisp
-    (require 'project)
-
-    (use-package python
-      :ensure nil
-      :hook ((python-mode . arg/python-setup)
-             (python-ts-mode . arg/python-setup))
-      :init
-      (setq python-shell-interpreter "python3"
-            python-shell-completion-native-enable nil
-            python-indent-guess-indent-offset-verbose nil)
-      (with-eval-after-load 'treesit-auto
-        (when (boundp 'major-mode-remap-alist)
-          (add-to-list 'major-mode-remap-alist
-                       '(python-mode . python-ts-mode))))
-      :config
-      (setq python-indent-offset 4
-            python-fill-docstring-style 'pep-257-nn))
-
-    (defun arg/python--project-root ()
-      "Return project root for the current buffer if any."
-      (let ((proj (project-current nil)))
-        (when proj
-          (project-root proj))))
-
-    (defun arg/python--auto-venv ()
-      "Activate a project-local virtual environment when available."
-      (when (and (featurep 'pyvenv)
-                 (boundp 'pyvenv-virtual-env)
-                 (not pyvenv-virtual-env)
-                 (buffer-file-name))
-        (let ((root (arg/python--project-root)))
-          (when root
-            (catch 'venv-found
-              (dolist (dir '(".venv" ".env" "venv" "env"))
-                (let ((candidate (expand-file-name dir root)))
-                  (when (file-directory-p candidate)
-                    (pyvenv-activate candidate)
-                    (throw 'venv-found candidate)))))))))
-
-    (defun arg/python-eglot-setup ()
-      "Apply Pyright workspace configuration for the current buffer."
-      (setq-local eglot-workspace-configuration
-                  (list :pyright
-                        (list :analysis
-                              (list :autoImportCompletions t
-                                    :autoSearchPaths t
-                                    :diagnosticMode "workspace"
-                                    :typeCheckingMode "basic"
-                                    :useLibraryCodeForTypes t))
-                        :python
-                        (list :analysis
-                              (list :autoImportCompletions t
-                                    :autoSearchPaths t)
-                              :pythonPath python-shell-interpreter
-                              :venvPath (or (and (boundp 'pyvenv-workon-home)
-                                                 pyvenv-workon-home)
-                                            (getenv "WORKON_HOME"))))))
-
-    (defun arg/python-enable-black ()
-      "Enable Black formatting when available."
-      (when (and (require 'python-black nil t)
-                 (executable-find python-black-command))
-        (python-black-on-save-mode 1)))
-
-    (defun arg/python-enable-ruff ()
-      "Enable Ruff linting via Flymake when available."
-      (when (and (require 'flymake-ruff nil t)
-                 (executable-find flymake-ruff-ruff-executable))
-        (flymake-ruff-load)))
-
-    (defun arg/python-dap-setup ()
-      "Configure DAP for the current Python buffer."
-      (require 'dap-python)
-      (setq dap-python-debugger 'debugpy
-            dap-python-executable python-shell-interpreter))
-
-    (defun arg/python-pytest-setup-keys ()
-      "Local keybindings for pytest helpers."
-      (local-set-key (kbd "C-c t t") #'python-pytest-dispatch)
-      (local-set-key (kbd "C-c t f") #'python-pytest-file)
-      (local-set-key (kbd "C-c t .") #'python-pytest-function))
-
-    (defun arg/python-setup ()
-      "Common setup routine for Python buffers."
-      (setq-local fill-column 88)
-      (setq-local tab-width 4)
-      (arg/python-eglot-setup)
-      (arg/python--auto-venv)
-      (arg/python-enable-black)
-      (arg/python-enable-ruff)
-      (when (boundp 'completion-at-point-functions)
-        (let ((capfs (copy-sequence completion-at-point-functions)))
-          (dolist (fn '(tempel-expand eglot-completion-at-point))
-            (when (fboundp fn)
-              (setq capfs (delq fn capfs))))
-          (dolist (fn '(tempel-expand eglot-completion-at-point))
-            (when (fboundp fn)
-              (setq capfs (cons fn capfs))))
-          (setq-local completion-at-point-functions capfs))))
-
-    (use-package pyvenv
-      :straight t
-      :init
-      (setenv "WORKON_HOME"
-              (or (getenv "WORKON_HOME")
-                  (expand-file-name "~/.virtualenvs")))
-      :config
-      (pyvenv-mode 1)
-      (pyvenv-tracking-mode 1))
-
-    (use-package python-black
-      :straight t
-      :after python
-      :custom
-      (python-black-command "black")
-      (python-black-extra-args '("--line-length" "88")))
-
-    (use-package flymake-ruff
-      :straight t
-      :after python
-      :init
-      (setq flymake-ruff-ruff-executable "ruff"))
-
-    (use-package dap-mode
-      :straight t
-      :commands (dap-debug dap-debug-edit-template)
-      :init
-      (setq dap-auto-configure-features
-            '(sessions locals controls tooltip))
-      :config
-      (dap-auto-configure-mode 1))
-
-    (use-package dap-python
-      :ensure nil
-      :straight nil
-      :after (dap-mode python)
-      :hook ((python-mode . arg/python-dap-setup)
-             (python-ts-mode . arg/python-dap-setup)))
-
-    (use-package python-pytest
-      :straight t
-      :after python
-      :commands (python-pytest-dispatch python-pytest-file python-pytest-function)
-      :hook ((python-mode . arg/python-pytest-setup-keys)
-             (python-ts-mode . arg/python-pytest-setup-keys))
-      :custom
-      (python-pytest-executable "pytest"))
-
-    ;; Automatically organize imports on save (PyCharm-like)
-    (use-package python-isort
-      :straight t
-      :hook ((python-mode . python-isort-on-save-mode)
-             (python-ts-mode . python-isort-on-save-mode)))
-
-    ;; Enable auto-format and lint fix on save
-    (with-eval-after-load 'python
-      (add-hook 'before-save-hook #'python-black-buffer)
-      (add-hook 'before-save-hook #'flymake-ruff-fix)
-      (define-key python-mode-map (kbd "C-c i") #'arg/python-auto-install-missing))
-
-    (defun arg/python-auto-install-missing ()
-      "Install missing Python modules automatically when prompted by Eglot diagnostics."
-      (interactive)
-      (let ((pkg (thing-at-point 'symbol)))
-        (when pkg
-          (compile (format "poetry add %s" pkg)))))
-
-    #+end_src
-
-**** Poetry Integration
-    #+begin_src emacs-lisp
-    (use-package poetry
-      :straight t
-      :config
-      (poetry-tracking-mode 1))
-    #+end_src
 
 ** Projects
 
@@ -1403,7 +1500,10 @@ Enable recent files mode
 
    #+begin_src emacs-lisp
 (use-package projectile
+<<<<<<< HEAD
   :straight t
+=======
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
   :init
   (projectile-mode +1)
   :bind (:map projectile-mode-map
@@ -1414,7 +1514,10 @@ Enable recent files mode
   (setq projectile-enable-caching t))
 
 (use-package consult-projectile
+<<<<<<< HEAD
   :straight t
+=======
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
   :after (consult projectile)
   :bind (("C-c p f" . consult-projectile-find-file)
          ("C-c p p" . consult-projectile-switch-project)))
@@ -1423,72 +1526,65 @@ Enable recent files mode
    Install vterm for terminal support
    #+begin_src emacs-lisp
    (use-package vterm
+<<<<<<< HEAD
      :straight t
+=======
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
      :defer t
      :bind (("C-c o t" . vterm-other-window)))
    #+end_src
 ** Snippets
    #+begin_src emacs-lisp
    (use-package tempel
+<<<<<<< HEAD
      :straight t
+=======
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)
      :defer t
      :bind (("M-+" . tempel-complete)
-   	    ("M-*" . tempel-insert))
+   	 ("M-*" . tempel-insert))
      :init
-     (setq tempel-path
-           (list (expand-file-name "modules/snippets.eld" user-emacs-directory)
-                 (expand-file-name "templates/*.eld" user-emacs-directory)))
      (defun tempel-setup-capf ()
        (setq-local completion-at-point-functions
-   		  (cons #'tempel-expand
-   			completion-at-point-functions)))
+   		(cons #'tempel-expand
+   		      completion-at-point-functions)))
 
      (add-hook 'conf-mode-hook 'tempel-setup-capf)
      (add-hook 'prog-mode-hook 'tempel-setup-capf)
      (add-hook 'text-mode-hook 'tempel-setup-capf))
 
+<<<<<<< HEAD
    (use-package tempel-collection
      :straight t)
-   #+end_src
-
-   #+begin_src emacs-lisp
-   ;; Enhance Tempel integration with Corfu, Cape, and Eglot
-   (with-eval-after-load 'tempel
-     (with-eval-after-load 'cape
-       (add-to-list 'completion-at-point-functions #'tempel-expand -1))
-     (with-eval-after-load 'eglot
-       (add-hook 'eglot-managed-mode-hook
-                 (lambda ()
-                   (add-hook 'completion-at-point-functions #'tempel-expand nil t)))))
-
-   ;; Natural Tab navigation inside snippets
-   (with-eval-after-load 'tempel
-     (define-key tempel-map (kbd "TAB") 'tempel-next)
-     (define-key tempel-map (kbd "<tab>") 'tempel-next)
-     (define-key tempel-map (kbd "S-TAB") 'tempel-previous)
-     (define-key tempel-map (kbd "<backtab>") 'tempel-previous))
-
-   ;; Enable language-specific snippet hooks
-   (dolist (hook '(python-mode-hook python-ts-mode-hook yaml-mode-hook ansible-hook org-mode-hook))
-     (add-hook hook 'tempel-setup-capf))
-
-   ;; Optional snippet menu via Embark/Consult
-   (defun arg/tempel-embark ()
-     "Open Tempel snippets via Embark interface."
-     (interactive)
-     (let ((templates (tempel--templates)))
-       (consult--read (mapcar #'car templates)
-                      :prompt "Snippet: "
-                      :require-match t
-                      :history 'arg/tempel-snippet-history
-                      :state (lambda (name)
-                               (when-let ((template (alist-get name templates nil nil #'string=)))
-                                 (tempel-insert template))))))
-
-   (global-set-key (kbd "C-c s") #'arg/tempel-embark)
    #+end_src
 
 * Local Variables
 # Local Variables:
 # eval: (add-hook 'after-save-hook (lambda ()(org-babel-tangle)) nil t)
 # End:
+=======
+   (use-package tempel-collection)
+   #+end_src
+
+** Embark
+    #+begin_src emacs-lisp
+    (use-package embark
+        :bind (("C-." . embark-act)
+               ("M-." . embark-dwim)
+               ("C-h B" . embark-bindings))
+        :config
+        (setq embark-indicators
+              '(embark-minimal-indicator
+                embark-highlight-indicator
+                embark-isearch-highlight-indicator))
+        (setq embark-prompter 'embark-completing-read-prompter))
+
+    ;; Embark + Consult integration
+    (use-package embark-consult
+      :after (embark consult)
+      :hook (embark-collect-mode . consult-preview-at-point-mode))
+    #+end_src
+
+#+RESULTS:
+| consult-preview-at-point-mode |
+>>>>>>> 7cda92d (Switched to straight.el, lots of changes)

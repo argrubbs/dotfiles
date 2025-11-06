@@ -16,17 +16,18 @@
          'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
+  (load bootstrap-file nil 'nomessage)
+
+(straight-pull-recipe-repositories)
+)
 
 (setq straight-use-package-by-default t)
+(setq enable-local-variables :all)
 (straight-use-package 'org)
 (require 'org)
 
 ;; Load literate config
 (org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
-
-;;; Stop asking about symlinks
-(setq vc-follow-symlinks t)
 
 ;; keep emacs custom settings in separate file
 (setq custom-file (expand-file-name "custom.el" user-emacs-directory))

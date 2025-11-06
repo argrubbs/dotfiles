@@ -3,10 +3,15 @@
 (setq custom-safe-themes t)
 
 (use-package doom-themes)
+(use-package modus-themes
+  :straight t
+  :defer t)
 (straight-use-package '(moe-theme :host github
 				  :repo "kuanyui/moe-theme.el"
 				  :branch "dev"))
 (use-package ef-themes
+  :straight t
+  :after modus-themes
   :init
   (ef-themes-take-over-modus-themes-mode 1)
   :config
@@ -43,7 +48,7 @@
 (require 'org-indent)
 (set-face-attribute 'org-indent nil :inherit '(org-hide fixed-pitch))
 
-(set-face-attribute 'org-block nil            :foreground nil :inherit
+(set-face-attribute 'org-block nil            :foreground 'unspecified :inherit
 		    'fixed-pitch :height 0.85)
 (set-face-attribute 'org-code nil             :inherit '(shadow fixed-pitch) :height 0.85)
 (set-face-attribute 'org-indent nil           :inherit '(org-hide fixed-pitch) :height 0.85)
@@ -57,6 +62,24 @@
 
 (use-package nerd-icons
   :straight t)
+
+(use-package doom-modeline
+  :straight t
+  :init (doom-modeline-mode 1)
+  :custom
+  (doom-modeline-height 30)
+  (doom-modeline-bar-width 5)
+  (doom-modeline-persp-name t)
+  (doom-modeline-major-mode-icon t)
+  (doom-modeline-major-mode-color-icon t)
+  (doom-modeline-buffer-state-icon t)
+  (doom-modeline-buffer-modification-icon t)
+  (doom-modeline-minor-modes t)
+  (doom-modeline-enable-word-count t)
+  (doom-modeline-buffer-encoding t)
+  (doom-modeline-indent-info t)
+  (doom-modeline-checker-simple-format t)
+  (doom-modeline-vcs-max-length 20))
 
 (use-package zoom
   :init
@@ -107,54 +130,122 @@
   :init
   (beacon-mode 1))
 
-(setq read-file-name-completion-ignore-case t
-      read-buffer-completion-ignore-case t
-      completion-ignore-case t)
+(use-package consult
+  :bind (("C-x b" . consult-buffer)
+         ("C-x 4 b" . consult-buffer-other-window)
+         ("C-x 5 b" . consult-buffer-other-frame)
+         ("M-y" . consult-yank-pop)
+         ("M-g g" . consult-goto-line)
+         ("M-g M-g" . consult-goto-line)
+         ("M-g i" . consult-imenu)
+         ("M-g I" . consult-imenu-multi)
+         ("M-s l" . consult-line)
+         ("M-s L" . consult-line-multi)
+         ("M-s r" . consult-ripgrep)
+         ("M-s f" . consult-find)
+         ("C-x r b" . consult-bookmark))
+  :config
+  (setq consult-narrow-key "<"))
+
+(use-package corfu
+  :init
+  (global-corfu-mode)
+  (corfu-popupinfo-mode)
+  :custom
+  (corfu-cycle t)
+  (corfu-auto t)
+  (corfu-auto-prefix 2)
+  (corfu-auto-delay 0.0)
+  (corfu-quit-at-boundary 'separator)
+  (corfu-echo-documentation 0.25)
+  (corfu-preview-current 'insert)
+  (corfu-preselect 'prompt)
+  (corfu-popupinfo-delay '(0.5 . 0.2)))
+
+(use-package cape
+  :init
+  (add-to-list 'completion-at-point-functions #'cape-dabbrev)
+  (add-to-list 'completion-at-point-functions #'cape-file))
+
+(use-package which-key
+  :init
+  (which-key-mode)
+  :config
+  (setq which-key-idle-delay 0.3))
+
+(use-package org
+  :custom
+  (org-hide-emphasis-markers t)
+  (org-pretty-entities t)
+  (org-startup-indented t)
+  :config
+  (setq org-directory "~/org")
+  (setq org-agenda-files '("~/org")))
+
+(use-package org-modern
+  :hook (org-mode . org-modern-mode)
+  :config
+  (setq org-modern-star 'replace))
+
+(use-package dired
+  :straight (:type built-in)
+  :custom
+  (dired-listing-switches "-alh --group-directories-first")
+  (dired-dwim-target t))
+
+(use-package dired-subtree
+  :after dired
+  :bind (:map dired-mode-map
+              ("TAB" . dired-subtree-toggle)))
 
 (use-package vertico
-  :custom
-  (vertico-cycle t)
+  :straight t
   :init
   (vertico-mode)
-  :bind (:map vertico-map
-	      ("TAB" . #'minibuffer-complete)
-	      ("RET" . #'vertico-directory-enter)
-	      ("DEL" . #'vertico-directory-delete-char)
-	      ("M-DEL" . #'vertico-directory-delete-word))
-  :hook ((rfn-eshadow-update-overlay . #'vertico-directory-tidy)
-	 (minibuffer-setup . #'vertico-repeat-save))
-  :config
-  (setq vertico-resize nil
-	vertico-count 17
-	vertico-cycle t)
-  (setq-default completion-in-region-function
-		(lambda (&rest args)
-		  (apply (if vertico-mode
-			     #'consult-completion-in-region
-			   #'completion--in-region)
-			 args))))
-
-(use-package savehist
-  :init
-  (savehist-mode))
-
-(use-package emacs
   :custom
-  (context-menu-mode t)
-  (enable-recursive-minibuffers t)
-  (read-extended-command-predicate #'command-completion-default-include-p)
-  (minibuffer-prompt-properties
-   '(read-only t cursor-intangible t face minibuffer-prompt)))
+  (vertico-cycle t))
 
 (use-package orderless
-  :init
-  (setq completion-styles '(orderless basic)
-	completion-category-defaults nil
-	completion-category-overrides '((command (styles orderless))
-					(file (styles partial-completion)))
-	completion-pcm-leading-wildcard t)
+  :straight t
+  :custom
+  (completion-styles '(orderless basic))
+  (completion-category-overrides '((file (styles partial-completion)))))
+
+(use-package vertico-multiform
+  :straight (:host github :repo "minad/vertico" :files ("vertico-multiform.el"))
+  :after vertico
   :config
-  (setq orderless-matching-styles '(orderless-literal orderless-regexp orderless-flex)))
+  (vertico-multiform-mode)
+  (add-to-list 'vertico-multiform-categories '(embark-keybinding grid)))
+
+(use-package magit
+  :bind (("C-x g" . magit-status)
+         ("C-x M-g" . magit-dispatch))
+  :config
+  (setq magit-display-buffer-function #'magit-display-buffer-same-window-except-diff-v1))
+
+(use-package forge
+  :after magit
+  :config
+  ;; Gitlab settings
+  (setq forge-alist
+        '(("gitlab.com" "gitlab.com/api/v4" "gitlab.com" forge-gitlab-repository)))
+
+  ;; Set number of topics to fetch
+  (setq forge-topic-list-limit '(60 . 10))  ; (issues . merge-requests)
+
+  ;; Columns to show in topic list
+  (setq forge-topic-list-columns
+        '(("#" 5 forge-topic-list-sort-by-number (:right-align t) number nil)
+          ("Title" 60 t nil title nil)
+          ("State" 6 t nil state nil)
+          ("Updated" 10 t nil updated nil)))
+
+  ;; Auto-fetch notifications
+  (setq forge-pull-notifications t)
+
+  ;; Database location
+  (setq forge-database-file (expand-file-name "forge-database.sqlite" user-emacs-directory)))
 
 (use-package marginalia
   :bind (:map minibuffer-local-map
@@ -257,6 +348,22 @@
   :after corfu
   :config
   (setq corfu-margin-formatters '(nerd-icons-corfu-formatter)))
+
+;; Add prettier icons in completions
+(use-package kind-icon
+  :straight t
+  :after corfu
+  :custom
+  (kind-icon-default-face 'corfu-default)
+  :config
+  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+
+;; Ensure Corfu UI works over SSH and terminals
+(use-package corfu-terminal
+  :straight t
+  :after corfu
+  :init
+  (corfu-terminal-mode 1))
 
 (use-package emacs
   :init
@@ -593,26 +700,31 @@ the new drawer."
   (blamer-min-offset 70)
   :custom-face
   (blamer-face ((t :foreground "#7a88cf"
-                    :background nil
+                    :background unspecified
                     :height 140
                     :italic t)))
   :config
   (global-blamer-mode 1))
 
+(use-package consult-eglot
+  :straight t
+  :after (consult eglot)
+  :bind (("C-c C-d" . consult-eglot-symbols)))
+
 (use-package eglot
-        :straight t
-        :hook ((python-mode . eglot-ensure)
-      	 (yaml-mode . eglot-ensure))
-        :config
-        (add-to-list 'eglot-server-programs
-                     '(python-mode . ("pyright-langserver" "--stdio")))
-        (add-to-list 'eglot-server-programs
-                     '(yaml-mode . ("ansible-language-server" "--stdio")))
-        (add-hook 'python-mode-hook
-      	    (lambda ()
-                    (add-hook 'before-save-hook 'eglot-format-buffer nil t)))
-          (setq eglot-ignored-server-capabilities 
-          '(:workspaceDidChangeConfiguration)))
+  :straight t
+  :hook ((python-mode . eglot-ensure)
+         (python-ts-mode . eglot-ensure)
+         (yaml-mode . eglot-ensure))
+  :config
+  (dolist (mapping '((python-mode . ("pyright-langserver" "--stdio"))
+                     (python-ts-mode . ("pyright-langserver" "--stdio"))
+                     (yaml-mode . ("ansible-language-server" "--stdio"))))
+    (add-to-list 'eglot-server-programs mapping))
+  ;; Improve LSP responsiveness and enable PyCharm-like auto-imports
+  (setq eglot-send-changes-idle-time 0.2)
+  (setq eglot-ignored-server-capabilities nil)
+  (define-key eglot-mode-map (kbd "C-c C-r") #'eglot-rename))
 
 (use-package sideline
   :straight t
@@ -659,30 +771,36 @@ the new drawer."
 ;;   (global-flycheck-eglot-mode 1))
 
 ;; Ansible Language Server
-  (use-package ansible
-    :straight t
-    :hook ((yaml-mode . ansible)
-           (yaml-ts-mode . ansible)))
+      (use-package ansible
+        :straight t
+        :hook ((yaml-mode . ansible)
+               (yaml-ts-mode . ansible)))
 
-  (use-package yaml-mode
-    :straight t
-    :mode (("\\.ya?ml\\'" . yaml-mode)
-           ("\\.ansible\\'" . yaml-mode)))
+      (use-package yaml-mode
+        :straight t
+        :mode (("\\.ya?ml\\'" . yaml-mode)
+               ("\\.ansible\\'" . yaml-mode)))
 
- (use-package ansible-doc
-:straight t
-:hook (yaml-mode . ansible-doc-mode)
-:bind (:map ansible-doc-mode-map
-            ("C-c ?" . ansible-doc)))
+     (use-package ansible-doc
+    :straight t
+    :hook (yaml-mode . ansible-doc-mode)
+    :bind (:map ansible-doc-mode-map
+                ("C-c ?" . ansible-doc)))
 
 (add-hook 'yaml-mode-hook
       (lambda ()
         (define-key yaml-mode-map (kbd "RET") 'newline-and-indent)))
 
-(use-package pyvenv
-  :straight t
-  :config
-  (setq pyvenv-mode-line-indicator '(pyvenv-virtual-env-name ("[venv:" pyvenv-virtual-env-name "] "))))
+    ;; Enable YAML linting if available
+    (use-package flymake-yamllint
+      :straight t
+      :hook (yaml-mode . flymake-yamllint-setup))
+
+    ;; Run ansible-lint automatically when available
+    (add-hook 'yaml-mode-hook
+      (lambda ()
+        (when (executable-find "ansible-lint")
+          (flymake-mode 1))))
 
 (use-package devdocs
 :straight t
@@ -696,6 +814,194 @@ the new drawer."
           (lambda () (setq-local devdocs-current-docs '("ansible~2.11"))))
 (add-hook 'emacs-lisp-mode-hook
           (lambda () (setq-local devdocs-current-docs '("elisp")))))
+
+(when (fboundp 'treesit-available-p)
+  (use-package treesit-auto
+    :straight t
+    :demand t
+    :init
+    (setq treesit-auto-install 'prompt)
+    (setq treesit-auto-language-source-alist
+          '((bash . ("https://github.com/tree-sitter/tree-sitter-bash"))
+            (json . ("https://github.com/tree-sitter/tree-sitter-json"))
+            (python . ("https://github.com/tree-sitter/tree-sitter-python"))
+            (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
+            (yaml . ("https://github.com/ikatyang/tree-sitter-yaml"))))
+    :config
+    (treesit-auto-add-to-auto-mode-alist 'all)
+    (global-treesit-auto-mode)))
+
+(require 'project)
+
+(use-package python
+  :ensure nil
+  :hook ((python-mode . arg/python-setup)
+         (python-ts-mode . arg/python-setup))
+  :init
+  (setq python-shell-interpreter "python3"
+        python-shell-completion-native-enable nil
+        python-indent-guess-indent-offset-verbose nil)
+  (with-eval-after-load 'treesit-auto
+    (when (boundp 'major-mode-remap-alist)
+      (add-to-list 'major-mode-remap-alist
+                   '(python-mode . python-ts-mode))))
+  :config
+  (setq python-indent-offset 4
+        python-fill-docstring-style 'pep-257-nn))
+
+(defun arg/python--project-root ()
+  "Return project root for the current buffer if any."
+  (let ((proj (project-current nil)))
+    (when proj
+      (project-root proj))))
+
+(defun arg/python--auto-venv ()
+  "Activate a project-local virtual environment when available."
+  (when (and (featurep 'pyvenv)
+             (boundp 'pyvenv-virtual-env)
+             (not pyvenv-virtual-env)
+             (buffer-file-name))
+    (let ((root (arg/python--project-root)))
+      (when root
+        (catch 'venv-found
+          (dolist (dir '(".venv" ".env" "venv" "env"))
+            (let ((candidate (expand-file-name dir root)))
+              (when (file-directory-p candidate)
+                (pyvenv-activate candidate)
+                (throw 'venv-found candidate)))))))))
+
+(defun arg/python-eglot-setup ()
+  "Apply Pyright workspace configuration for the current buffer."
+  (setq-local eglot-workspace-configuration
+              (list :pyright
+                    (list :analysis
+                          (list :autoImportCompletions t
+                                :autoSearchPaths t
+                                :diagnosticMode "workspace"
+                                :typeCheckingMode "basic"
+                                :useLibraryCodeForTypes t))
+                    :python
+                    (list :analysis
+                          (list :autoImportCompletions t
+                                :autoSearchPaths t)
+                          :pythonPath python-shell-interpreter
+                          :venvPath (or (and (boundp 'pyvenv-workon-home)
+                                             pyvenv-workon-home)
+                                        (getenv "WORKON_HOME"))))))
+
+(defun arg/python-enable-black ()
+  "Enable Black formatting when available."
+  (when (and (require 'python-black nil t)
+             (executable-find python-black-command))
+    (python-black-on-save-mode 1)))
+
+(defun arg/python-enable-ruff ()
+  "Enable Ruff linting via Flymake when available."
+  (when (and (require 'flymake-ruff nil t)
+             (executable-find flymake-ruff-ruff-executable))
+    (flymake-ruff-load)))
+
+(defun arg/python-dap-setup ()
+  "Configure DAP for the current Python buffer."
+  (require 'dap-python)
+  (setq dap-python-debugger 'debugpy
+        dap-python-executable python-shell-interpreter))
+
+(defun arg/python-pytest-setup-keys ()
+  "Local keybindings for pytest helpers."
+  (local-set-key (kbd "C-c t t") #'python-pytest-dispatch)
+  (local-set-key (kbd "C-c t f") #'python-pytest-file)
+  (local-set-key (kbd "C-c t .") #'python-pytest-function))
+
+(defun arg/python-setup ()
+  "Common setup routine for Python buffers."
+  (setq-local fill-column 88)
+  (setq-local tab-width 4)
+  (arg/python-eglot-setup)
+  (arg/python--auto-venv)
+  (arg/python-enable-black)
+  (arg/python-enable-ruff)
+  (when (boundp 'completion-at-point-functions)
+    (let ((capfs (copy-sequence completion-at-point-functions)))
+      (dolist (fn '(tempel-expand eglot-completion-at-point))
+        (when (fboundp fn)
+          (setq capfs (delq fn capfs))))
+      (dolist (fn '(tempel-expand eglot-completion-at-point))
+        (when (fboundp fn)
+          (setq capfs (cons fn capfs))))
+      (setq-local completion-at-point-functions capfs))))
+
+(use-package pyvenv
+  :straight t
+  :init
+  (setenv "WORKON_HOME"
+          (or (getenv "WORKON_HOME")
+              (expand-file-name "~/.virtualenvs")))
+  :config
+  (pyvenv-mode 1)
+  (pyvenv-tracking-mode 1))
+
+(use-package python-black
+  :straight t
+  :after python
+  :custom
+  (python-black-command "black")
+  (python-black-extra-args '("--line-length" "88")))
+
+(use-package flymake-ruff
+  :straight t
+  :after python
+  :init
+  (setq flymake-ruff-ruff-executable "ruff"))
+
+(use-package dap-mode
+  :straight t
+  :commands (dap-debug dap-debug-edit-template)
+  :init
+  (setq dap-auto-configure-features
+        '(sessions locals controls tooltip))
+  :config
+  (dap-auto-configure-mode 1))
+
+(use-package dap-python
+  :ensure nil
+  :straight nil
+  :after (dap-mode python)
+  :hook ((python-mode . arg/python-dap-setup)
+         (python-ts-mode . arg/python-dap-setup)))
+
+(use-package python-pytest
+  :straight t
+  :after python
+  :commands (python-pytest-dispatch python-pytest-file python-pytest-function)
+  :hook ((python-mode . arg/python-pytest-setup-keys)
+         (python-ts-mode . arg/python-pytest-setup-keys))
+  :custom
+  (python-pytest-executable "pytest"))
+
+;; Automatically organize imports on save (PyCharm-like)
+(use-package python-isort
+  :straight t
+  :hook ((python-mode . python-isort-on-save-mode)
+         (python-ts-mode . python-isort-on-save-mode)))
+
+;; Enable auto-format and lint fix on save
+(with-eval-after-load 'python
+  (add-hook 'before-save-hook #'python-black-buffer)
+  (add-hook 'before-save-hook #'flymake-ruff-fix)
+  (define-key python-mode-map (kbd "C-c i") #'arg/python-auto-install-missing))
+
+(defun arg/python-auto-install-missing ()
+  "Install missing Python modules automatically when prompted by Eglot diagnostics."
+  (interactive)
+  (let ((pkg (thing-at-point 'symbol)))
+    (when pkg
+      (compile (format "poetry add %s" pkg)))))
+
+(use-package poetry
+  :straight t
+  :config
+  (poetry-tracking-mode 1))
 
 (use-package projectile
   :straight t
@@ -723,12 +1029,15 @@ the new drawer."
   :straight t
   :defer t
   :bind (("M-+" . tempel-complete)
-	 ("M-*" . tempel-insert))
+	    ("M-*" . tempel-insert))
   :init
+  (setq tempel-path
+        (list (expand-file-name "modules/snippets.eld" user-emacs-directory)
+              (expand-file-name "templates/*.eld" user-emacs-directory)))
   (defun tempel-setup-capf ()
     (setq-local completion-at-point-functions
-		(cons #'tempel-expand
-		      completion-at-point-functions)))
+		  (cons #'tempel-expand
+			completion-at-point-functions)))
 
   (add-hook 'conf-mode-hook 'tempel-setup-capf)
   (add-hook 'prog-mode-hook 'tempel-setup-capf)
@@ -736,3 +1045,38 @@ the new drawer."
 
 (use-package tempel-collection
   :straight t)
+
+;; Enhance Tempel integration with Corfu, Cape, and Eglot
+(with-eval-after-load 'tempel
+  (with-eval-after-load 'cape
+    (add-to-list 'completion-at-point-functions #'tempel-expand -1))
+  (with-eval-after-load 'eglot
+    (add-hook 'eglot-managed-mode-hook
+              (lambda ()
+                (add-hook 'completion-at-point-functions #'tempel-expand nil t)))))
+
+;; Natural Tab navigation inside snippets
+(with-eval-after-load 'tempel
+  (define-key tempel-map (kbd "TAB") 'tempel-next)
+  (define-key tempel-map (kbd "<tab>") 'tempel-next)
+  (define-key tempel-map (kbd "S-TAB") 'tempel-previous)
+  (define-key tempel-map (kbd "<backtab>") 'tempel-previous))
+
+;; Enable language-specific snippet hooks
+(dolist (hook '(python-mode-hook python-ts-mode-hook yaml-mode-hook ansible-hook org-mode-hook))
+  (add-hook hook 'tempel-setup-capf))
+
+;; Optional snippet menu via Embark/Consult
+(defun arg/tempel-embark ()
+  "Open Tempel snippets via Embark interface."
+  (interactive)
+  (let ((templates (tempel--templates)))
+    (consult--read (mapcar #'car templates)
+                   :prompt "Snippet: "
+                   :require-match t
+                   :history 'arg/tempel-snippet-history
+                   :state (lambda (name)
+                            (when-let ((template (alist-get name templates nil nil #'string=)))
+                              (tempel-insert template))))))
+
+(global-set-key (kbd "C-c s") #'arg/tempel-embark)
