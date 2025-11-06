@@ -2050,10 +2050,21 @@ style focus while keeping secondary panes visible.
     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 
-    #+end_src
+#+end_src
 
-    #+RESULTS:
-    | olivetti-mode | visual-line-mode | variable-pitch-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
+#+RESULTS:
+| olivetti-mode | visual-line-mode | variable-pitch-mode | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-fold-show-all append local] 5] | #[0 \300\301\302\303\304$\207 [add-hook change-major-mode-hook org-babel-show-result-all append local] 5] | org-babel-result-hide-spec | org-babel-hide-all-hashes |
+
+*** Source Blocks
+    Extend Org's language map so JSON, jq, and Restclient code blocks use their native major modes for editing and font-lock.
+    #+begin_src emacs-lisp
+    (with-eval-after-load 'org-src
+      (dolist (pair '(("json" . json)
+                      ("jq" . jq)
+                      ("restclient" . restclient)
+                      ("http" . restclient)))
+        (add-to-list 'org-src-lang-modes pair)))
+    #+end_src
 
 *** Custom Org-Mode Functions
 
