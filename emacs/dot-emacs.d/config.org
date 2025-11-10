@@ -1685,7 +1685,9 @@ style focus while keeping secondary panes visible.
        (setq forge-pull-notifications t)
 
        ;; Database location
-       (setq forge-database-file (expand-file-name "forge-database.sqlite" user-emacs-directory)))
+       (setq forge-database-file (expand-file-name "forge-database.sqlite" user-emacs-directory))
+
+      )
       #+end_src
 **** Marginalia
 
@@ -2418,9 +2420,9 @@ style focus while keeping secondary panes visible.
       :straight t
       :hook ((json-mode . eglot-ensure)
              (json-ts-mode . eglot-ensure)
-             (python-mode . eglot-ensure)
-             (python-ts-mode . eglot-ensure)
              (yaml-mode . eglot-ensure))
+      :custom
+      (eglot-autoreconnect 1)
       :config
       (dolist (mapping '((json-mode . ("vscode-json-languageserver" "--stdio"))
                          (json-ts-mode . ("vscode-json-languageserver" "--stdio"))
@@ -2612,6 +2614,65 @@ style focus while keeping secondary panes visible.
       (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)))
 #+end_src
 
+*** Verb
+    [[https://github.com/federicotdn/verb][verb]] keeps HTTP requests alongside Org notes so I can template payloads, reuse headers, and capture responses inline without leaving documentation buffers.
+#+begin_src emacs-lisp
+  (use-package verb
+    :straight t
+    :after org
+    :hook (org-mode . verb-mode)
+    :init
+    (add-hook 'verb-response-mode-hook #'visual-line-mode))
+#+end_src
+
+*** HTTP REPL
+    [[https://github.com/gregsexton/httprepl][httprepl]] launches an interactive REPL for iterating on headers, auth tokens, and bodies when I want fast feedback outside of Org tangles.
+#+begin_src emacs-lisp
+  (use-package httprepl
+    :straight t
+    :commands httprepl)
+#+end_src
+
+*** GraphQL
+    GraphQL queries deserve first-class editing with corfu-driven completions so schema exploration stays ergonomic inside Emacs.
+#+begin_src emacs-lisp
+  (defun arg/graphql-setup ()
+    "Configure indentation, completion, and LSP hooks for `graphql-mode` buffers."
+    (setq-local tab-width 2)
+    (setq-local graphql-indent-level 2)
+    (when (fboundp 'cape-keyword)
+      (add-hook 'completion-at-point-functions #'cape-keyword nil t))
+    (when (and (fboundp 'eglot-ensure)
+               (or (executable-find "graphql-lsp")
+                   (executable-find "graphql-language-service-cli")))
+      (eglot-ensure)))
+
+  (with-eval-after-load 'cape
+    (when (require 'cape-keyword nil t)
+      (unless (assoc 'graphql-mode cape-keyword-list)
+        (push '(graphql-mode
+                "query" "mutation" "subscription" "type" "interface" "union"
+                "scalar" "enum" "input" "schema" "directive" "fragment" "on"
+                "implements" "extend" "extends" "repeatable")
+              cape-keyword-list))))
+
+  (with-eval-after-load 'eglot
+    (when-let ((server (cond
+                        ((executable-find "graphql-lsp")
+                         '("graphql-lsp" "server" "-m" "stream"))
+                        ((executable-find "graphql-language-service-cli")
+                         '("graphql-language-service-cli" "server" "-m" "stream")))))
+      (unless (assoc 'graphql-mode eglot-server-programs)
+        (push `(graphql-mode . ,server) eglot-server-programs))))
+
+  (use-package graphql-mode
+    :straight t
+    :mode (("\\.graphql\\'" . graphql-mode)
+           ("\\.gql\\'" . graphql-mode)
+           ("\\.graphqls\\'" . graphql-mode))
+    :hook (graphql-mode . arg/graphql-setup))
+#+end_src
+
 *** Tree-sitter
     [[https://github.com/renzmann/treesit-auto][treesit-auto]] manages language grammar downloads and mode remapping so tree-sitter features just work.
     #+begin_src emacs-lisp
@@ -2674,6 +2735,34 @@ style focus while keeping secondary panes visible.
                     (pyvenv-activate candidate)
                     (throw 'venv-found candidate)))))))))
 
+    (defvar arg/python--pyright-missing-notified nil
+      "Tracks whether we've warned about a missing Pyright language server.")
+    (defvar arg/python--python-missing-notified nil
+      "Tracks whether we've warned about a missing Python interpreter.")
+
+    (defun arg/python--maybe-start-eglot ()
+      "Start Eglot for Python buffers when Pyright is available."
+      (let* ((pyright (executable-find "pyright-langserver"))
+             (python-command (and (boundp 'python-shell-interpreter)
+                                  python-shell-interpreter))
+             (python (if python-command
+                         (executable-find python-command)
+                       t)))
+        (cond
+         ((not pyright)
+          (unless arg/python--pyright-missing-notified
+            (setq arg/python--pyright-missing-notified t)
+            (message "[Python] Skipping Eglot: pyright-langserver not found on PATH")))
+
+         ((not python)
+          (unless arg/python--python-missing-notified
+            (setq arg/python--python-missing-notified t)
+            (message "[Python] Skipping Eglot: cannot locate %s"
+                     python-command)))
+
+         ((fboundp 'eglot-ensure)
+          (eglot-ensure)))))
+
     (defun arg/python-eglot-setup ()
       "Apply Pyright workspace configuration for the current buffer."
       (setq-local eglot-workspace-configuration
@@ -2725,6 +2814,7 @@ style focus while keeping secondary panes visible.
       (arg/python--auto-venv)
       (arg/python-enable-black)
       (arg/python-enable-ruff)
+      (arg/python--maybe-start-eglot)
       (when (boundp 'completion-at-point-functions)
         (let ((capfs (copy-sequence completion-at-point-functions)))
           (dolist (fn '(tempel-expand eglot-completion-at-point))
