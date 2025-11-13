@@ -65,7 +65,7 @@
 
 (use-package doom-modeline
   :straight t
-  :init (doom-modeline-mode 1)
+  :hook (after-init . doom-modeline-mode)
   :custom
   (doom-modeline-height 30)
   (doom-modeline-bar-width 5)
@@ -82,14 +82,14 @@
   (doom-modeline-vcs-max-length 20))
 
 (use-package zoom
-  :init
-  (zoom-mode t)
+  :hook (after-init . zoom-mode)
   :config
   (custom-set-variables
    '(zoom-size '(0.618 . 0.618))))
 
 (use-package posframe
   :straight t
+  :defer t
   :config
   ;; Global posframe settings
   
@@ -122,7 +122,13 @@
 
 (hl-line-mode t)
 
-(recentf-mode t)
+(let* ((cache-home (or (getenv "XDG_CACHE_HOME")
+                       (expand-file-name ".cache" (getenv "HOME"))))
+       (recentf-cache (expand-file-name "emacs" cache-home)))
+  (unless (file-directory-p recentf-cache)
+    (make-directory recentf-cache t))
+  (setq recentf-save-file (expand-file-name "recentf" recentf-cache))
+  (recentf-mode t))
 
 (use-package expand-region
 	:straight t
@@ -132,13 +138,11 @@
 
 (use-package beacon
   :straight t
-  :init
-  (beacon-mode 1))
+  :hook (after-init . beacon-mode))
 
 (use-package corfu
-  :init
-  (global-corfu-mode)
-  (corfu-popupinfo-mode)
+  :hook ((prog-mode . corfu-mode)
+         (prog-mode . corfu-popupinfo-mode))
   :custom
   (corfu-cycle t)
   (corfu-auto t)
@@ -156,10 +160,10 @@
   (add-to-list 'completion-at-point-functions #'cape-file))
 
 (use-package which-key
-  :init
-  (which-key-mode)
+  :hook (after-init . which-key-mode)
   :config
-  (setq which-key-idle-delay 0.3))
+  (setq which-key-idle-delay 0.3
+        which-key-max-display-columns 3))
 
 (use-package org
   :custom
@@ -866,7 +870,9 @@
   (setq forge-pull-notifications t)
 
   ;; Database location
-  (setq forge-database-file (expand-file-name "forge-database.sqlite" user-emacs-directory)))
+  (setq forge-database-file (expand-file-name "forge-database.sqlite" user-emacs-directory))
+
+ )
 
 (use-package marginalia
   :bind (:map minibuffer-local-map
@@ -1150,6 +1156,13 @@
 ;;   :hook (org-mode . olivetti-mode)) ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(with-eval-after-load 'org-src
+  (dolist (pair '(("json" . json)
+                  ("jq" . jq)
+                  ("restclient" . restclient)
+                  ("http" . restclient)))
+    (add-to-list 'org-src-lang-modes pair)))
+
 (defun arg-emacs-org-insert-drawer-correctly (arg)
   "Insert a drawer or PROPERTIES drawer with prefix ARG. Places the cursor into
 the new drawer."
@@ -1286,8 +1299,9 @@ the new drawer."
 
 (use-package git-gutter
   :straight t
+  :hook (prog-mode . git-gutter-mode)
   :config
-  (global-git-gutter-mode 1))
+  (setq git-gutter:update-interval 0.05))
 
 (use-package git-timemachine
   :straight t
@@ -1329,25 +1343,9 @@ the new drawer."
 
 (use-package diff-hl
   :straight t
+  :hook (prog-mode . diff-hl-mode)
   :config
-  (global-diff-hl-mode)
   (diff-hl-flydiff-mode))
-
-(use-package blamer
-  :straight t
-  :bind (("s-i" . blamer-show-commit-info)
-         ("C-c i" . blamer-show-posframe-commit-info))
-  :defer 20
-  :custom
-  (blamer-idle-time 0.3)
-  (blamer-min-offset 70)
-  :custom-face
-  (blamer-face ((t :foreground "#7a88cf"
-                    :background unspecified
-                    :height 140
-                    :italic t)))
-  :config
-  (global-blamer-mode 1))
 
 (use-package consult-eglot
   :straight t
@@ -1356,11 +1354,15 @@ the new drawer."
 
 (use-package eglot
   :straight t
-  :hook ((python-mode . eglot-ensure)
-         (python-ts-mode . eglot-ensure)
+  :hook ((json-mode . eglot-ensure)
+         (json-ts-mode . eglot-ensure)
          (yaml-mode . eglot-ensure))
+  :custom
+  (eglot-autoreconnect 1)
   :config
-  (dolist (mapping '((python-mode . ("pyright-langserver" "--stdio"))
+  (dolist (mapping '((json-mode . ("vscode-json-languageserver" "--stdio"))
+                     (json-ts-mode . ("vscode-json-languageserver" "--stdio"))
+                     (python-mode . ("pyright-langserver" "--stdio"))
                      (python-ts-mode . ("pyright-langserver" "--stdio"))
                      (yaml-mode . ("ansible-language-server" "--stdio"))))
     (add-to-list 'eglot-server-programs mapping))
@@ -1445,6 +1447,33 @@ the new drawer."
         (when (executable-find "ansible-lint")
           (flymake-mode 1))))
 
+(defun arg/json-setup ()
+  "Configure indentation and navigation helpers for JSON buffers."
+  (setq-local tab-width 2)
+  (setq-local evil-shift-width 2)
+  (setq-local js-indent-level 2)
+  (when (boundp 'json-ts-mode-indent-offset)
+    (setq-local json-ts-mode-indent-offset 2)))
+
+(use-package json-mode
+  :straight t
+  :mode ("\\.json\\'" . json-mode)
+  :hook ((json-mode . arg/json-setup)
+         (json-ts-mode . arg/json-setup))
+  :config
+  (setq json-reformat:indent-width 2
+        json-reformat:pretty-string? t))
+
+(use-package jq-mode
+  :straight t
+  :mode ("\\.jq\\'" . jq-mode))
+
+(use-package json-snatcher
+  :straight t
+  :after json-mode
+  :bind (:map json-mode-map
+              ("C-c C-p" . jsons-print-path)))
+
 (use-package devdocs
 :straight t
 :bind (("C-h D" . devdocs-lookup)
@@ -1458,10 +1487,82 @@ the new drawer."
 (add-hook 'emacs-lisp-mode-hook
           (lambda () (setq-local devdocs-current-docs '("elisp")))))
 
+(use-package restclient
+  :straight t
+  :mode (("\\.http\\'" . restclient-mode)
+         ("\\.rest\\'" . restclient-mode)
+         ("\\.req\\'" . restclient-mode))
+  :init
+  (add-hook 'restclient-mode-hook #'display-line-numbers-mode)
+  :config
+  (setq restclient-log-request t
+        restclient-same-buffer-response t))
+
+(use-package restclient-jq
+  :straight t
+  :after (restclient jq-mode)
+  :bind (:map restclient-mode-map
+              ("C-c C-j" . restclient-jq-interactive)))
+
+(use-package ob-restclient
+  :straight t
+  :after (restclient org)
+  :config
+  (with-eval-after-load 'org
+    (add-to-list 'org-babel-load-languages '(restclient . t))
+    (org-babel-do-load-languages 'org-babel-load-languages org-babel-load-languages)))
+
+(use-package verb
+  :straight t
+  :after org
+  :hook (org-mode . verb-mode)
+  :init
+  (add-hook 'verb-response-mode-hook #'visual-line-mode))
+
+(use-package httprepl
+  :straight t
+  :commands httprepl)
+
+(defun arg/graphql-setup ()
+  "Configure indentation, completion, and LSP hooks for `graphql-mode` buffers."
+  (setq-local tab-width 2)
+  (setq-local graphql-indent-level 2)
+  (when (fboundp 'cape-keyword)
+    (add-hook 'completion-at-point-functions #'cape-keyword nil t))
+  (when (and (fboundp 'eglot-ensure)
+             (or (executable-find "graphql-lsp")
+                 (executable-find "graphql-language-service-cli")))
+    (eglot-ensure)))
+
+(with-eval-after-load 'cape
+  (when (require 'cape-keyword nil t)
+    (unless (assoc 'graphql-mode cape-keyword-list)
+      (push '(graphql-mode
+              "query" "mutation" "subscription" "type" "interface" "union"
+              "scalar" "enum" "input" "schema" "directive" "fragment" "on"
+              "implements" "extend" "extends" "repeatable")
+            cape-keyword-list))))
+
+(with-eval-after-load 'eglot
+  (when-let ((server (cond
+                      ((executable-find "graphql-lsp")
+                       '("graphql-lsp" "server" "-m" "stream"))
+                      ((executable-find "graphql-language-service-cli")
+                       '("graphql-language-service-cli" "server" "-m" "stream")))))
+    (unless (assoc 'graphql-mode eglot-server-programs)
+      (push `(graphql-mode . ,server) eglot-server-programs))))
+
+(use-package graphql-mode
+  :straight t
+  :mode (("\\.graphql\\'" . graphql-mode)
+         ("\\.gql\\'" . graphql-mode)
+         ("\\.graphqls\\'" . graphql-mode))
+  :hook (graphql-mode . arg/graphql-setup))
+
 (when (fboundp 'treesit-available-p)
   (use-package treesit-auto
     :straight t
-    :demand t
+    :hook (after-init . global-treesit-auto-mode)
     :init
     (setq treesit-auto-install 'prompt)
     (setq treesit-auto-language-source-alist
@@ -1471,8 +1572,7 @@ the new drawer."
             (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
             (yaml . ("https://github.com/ikatyang/tree-sitter-yaml"))))
     :config
-    (treesit-auto-add-to-auto-mode-alist 'all)
-    (global-treesit-auto-mode)))
+    (treesit-auto-add-to-auto-mode-alist 'all)))
 
 (require 'project)
 
@@ -1512,6 +1612,34 @@ the new drawer."
               (when (file-directory-p candidate)
                 (pyvenv-activate candidate)
                 (throw 'venv-found candidate)))))))))
+
+(defvar arg/python--pyright-missing-notified nil
+  "Tracks whether we've warned about a missing Pyright language server.")
+(defvar arg/python--python-missing-notified nil
+  "Tracks whether we've warned about a missing Python interpreter.")
+
+(defun arg/python--maybe-start-eglot ()
+  "Start Eglot for Python buffers when Pyright is available."
+  (let* ((pyright (executable-find "pyright-langserver"))
+         (python-command (and (boundp 'python-shell-interpreter)
+                              python-shell-interpreter))
+         (python (if python-command
+                     (executable-find python-command)
+                   t)))
+    (cond
+     ((not pyright)
+      (unless arg/python--pyright-missing-notified
+        (setq arg/python--pyright-missing-notified t)
+        (message "[Python] Skipping Eglot: pyright-langserver not found on PATH")))
+
+     ((not python)
+      (unless arg/python--python-missing-notified
+        (setq arg/python--python-missing-notified t)
+        (message "[Python] Skipping Eglot: cannot locate %s"
+                 python-command)))
+
+     ((fboundp 'eglot-ensure)
+      (eglot-ensure)))))
 
 (defun arg/python-eglot-setup ()
   "Apply Pyright workspace configuration for the current buffer."
@@ -1564,6 +1692,7 @@ the new drawer."
   (arg/python--auto-venv)
   (arg/python-enable-black)
   (arg/python-enable-ruff)
+  (arg/python--maybe-start-eglot)
   (when (boundp 'completion-at-point-functions)
     (let ((capfs (copy-sequence completion-at-point-functions)))
       (dolist (fn '(tempel-expand eglot-completion-at-point))

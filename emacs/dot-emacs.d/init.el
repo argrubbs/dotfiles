@@ -16,10 +16,7 @@
          'silent 'inhibit-cookies)
       (goto-char (point-max))
       (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage)
-
-(straight-pull-recipe-repositories)
-)
+  (load bootstrap-file nil 'nomessage))
 
 (setq straight-use-package-by-default t)
 (setq enable-local-variables :all)

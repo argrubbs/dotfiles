@@ -149,23 +149,23 @@
     feature-rich and performant while remaining self-contained.
 
     #+begin_src emacs-lisp
-    (use-package doom-modeline
-      :straight t
-      :init (doom-modeline-mode 1)
-      :custom
-      (doom-modeline-height 30)
-      (doom-modeline-bar-width 5)
-      (doom-modeline-persp-name t)
-      (doom-modeline-major-mode-icon t)
-      (doom-modeline-major-mode-color-icon t)
-      (doom-modeline-buffer-state-icon t)
-      (doom-modeline-buffer-modification-icon t)
-      (doom-modeline-minor-modes nil)
-      (doom-modeline-enable-word-count t)
-      (doom-modeline-buffer-encoding t)
-      (doom-modeline-indent-info t)
-      (doom-modeline-checker-simple-format t)
-      (doom-modeline-vcs-max-length 20))
+(use-package doom-modeline
+  :straight t
+  :hook (after-init . doom-modeline-mode)
+  :custom
+  (doom-modeline-height 30)
+  (doom-modeline-bar-width 5)
+  (doom-modeline-persp-name t)
+  (doom-modeline-major-mode-icon t)
+  (doom-modeline-major-mode-color-icon t)
+  (doom-modeline-buffer-state-icon t)
+  (doom-modeline-buffer-modification-icon t)
+  (doom-modeline-minor-modes nil)
+  (doom-modeline-enable-word-count t)
+  (doom-modeline-buffer-encoding t)
+  (doom-modeline-indent-info t)
+  (doom-modeline-checker-simple-format t)
+  (doom-modeline-vcs-max-length 20))
     #+end_src
 
 *** Extras
@@ -177,8 +177,7 @@ style focus while keeping secondary panes visible.
 
      #+begin_src emacs-lisp
      (use-package zoom
-       :init
-       (zoom-mode t)
+       :hook (after-init . zoom-mode)
        :config
        (custom-set-variables
         '(zoom-size '(0.618 . 0.618))))
@@ -191,6 +190,7 @@ style focus while keeping secondary panes visible.
      #+begin_src emacs-lisp
 (use-package posframe
   :straight t
+  :defer t
   :config
   ;; Global posframe settings
   
@@ -241,7 +241,13 @@ style focus while keeping secondary panes visible.
 
     `recentf-mode` surfaces the files I touched recently so the `SPC .` prompt stays relevant.
 #+begin_src emacs-lisp
-(recentf-mode t)
+(let* ((cache-home (or (getenv "XDG_CACHE_HOME")
+                       (expand-file-name ".cache" (getenv "HOME"))))
+       (recentf-cache (expand-file-name "emacs" cache-home)))
+  (unless (file-directory-p recentf-cache)
+    (make-directory recentf-cache t))
+  (setq recentf-save-file (expand-file-name "recentf" recentf-cache))
+  (recentf-mode t))
 #+end_src
 
 ** Editing
@@ -269,10 +275,9 @@ style focus while keeping secondary panes visible.
      [[https://github.com/Malabarba/beacon][beacon]] briefly flashes the cursor position after jumps so I can orient myself after
      switching windows or buffers.
      #+begin_src emacs-lisp
-     (use-package beacon
-       :straight t
-       :init
-       (beacon-mode 1))
+(use-package beacon
+  :straight t
+  :hook (after-init . beacon-mode))
      #+end_src
 
    The next group of packages refines completion behaviour across the minibuffer and in-buffer prompts.
@@ -285,9 +290,8 @@ style focus while keeping secondary panes visible.
      module and tweak delays so suggestions feel instantaneous.
      #+begin_src emacs-lisp
 (use-package corfu
-  :init
-  (global-corfu-mode)
-  (corfu-popupinfo-mode)
+  :hook ((prog-mode . corfu-mode)
+         (prog-mode . corfu-popupinfo-mode))
   :custom
   (corfu-cycle t)
   (corfu-auto t)
@@ -326,10 +330,10 @@ style focus while keeping secondary panes visible.
      [[https://github.com/justbur/emacs-which-key][which-key]] displays pending key completions in a side window so the leader maps stay discoverable.
      #+begin_src emacs-lisp
 (use-package which-key
-  :init
-  (which-key-mode)
+  :hook (after-init . which-key-mode)
   :config
-  (setq which-key-idle-delay 0.3))
+  (setq which-key-idle-delay 0.3
+        which-key-max-display-columns 3))
      #+end_src
 
      #+RESULTS:
@@ -2310,8 +2314,9 @@ style focus while keeping secondary panes visible.
     #+begin_src emacs-lisp
         (use-package git-gutter
           :straight t
+          :hook (prog-mode . git-gutter-mode)
           :config
-          (global-git-gutter-mode 1))
+          (setq git-gutter:update-interval 0.05))
  #+end_src
 **** git-timemachine
     [[https://codeberg.org/pidu/git-timemachine][git-timemachine]] lets me step through file history inline.
@@ -2371,36 +2376,12 @@ style focus while keeping secondary panes visible.
     #+begin_src emacs-lisp
         (use-package diff-hl
           :straight t
+          :hook (prog-mode . diff-hl-mode)
           :config
-          (global-diff-hl-mode)
           (diff-hl-flydiff-mode))
 
 
     #+end_src
-**** blamer
-     [[https://github.com/Artawower/blamer.el][blamer.el]] shows inline blame metadata so I can spot who touched a line without opening Magit.
-     #+begin_src emacs-lisp
-(use-package blamer
-  :straight t
-  :bind (("s-i" . blamer-show-commit-info)
-         ("C-c i" . blamer-show-posframe-commit-info))
-  :defer 20
-  :custom
-  (blamer-idle-time 0.3)
-  (blamer-min-offset 70)
-  :custom-face
-  (blamer-face ((t :foreground "#7a88cf"
-                    :background unspecified
-                    :height 140
-                    :italic t)))
-  :config
-  (global-blamer-mode 1))
-       
-     #+end_src
-
-     #+RESULTS:
-     : blamer-show-posframe-commit-info
-
 ** Programming
    
    Language tooling centres around Eglot for LSP support, with tree-sitter text objects, sideline diagnostics, and language-specific helpers.
@@ -2679,7 +2660,7 @@ style focus while keeping secondary panes visible.
     (when (fboundp 'treesit-available-p)
       (use-package treesit-auto
         :straight t
-        :demand t
+        :hook (after-init . global-treesit-auto-mode)
         :init
         (setq treesit-auto-install 'prompt)
         (setq treesit-auto-language-source-alist
@@ -2689,8 +2670,7 @@ style focus while keeping secondary panes visible.
                 (toml . ("https://github.com/tree-sitter/tree-sitter-toml"))
                 (yaml . ("https://github.com/ikatyang/tree-sitter-yaml"))))
         :config
-        (treesit-auto-add-to-auto-mode-alist 'all)
-        (global-treesit-auto-mode)))
+        (treesit-auto-add-to-auto-mode-alist 'all)))
     #+end_src
 
 *** Python
