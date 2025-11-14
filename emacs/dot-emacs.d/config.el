@@ -197,7 +197,6 @@
   (setq evil-move-beyond-eol t
         evil-kill-on-visual-paste nil)
   (evil-set-leader '(normal visual motion emacs) (kbd "SPC"))
-  (evil-set-leader '(normal visual motion emacs) (kbd "C-SPC"))
   (evil-define-key '(normal motion) 'global (kbd "j") #'evil-next-visual-line)
   (evil-define-key '(normal motion) 'global (kbd "k") #'evil-previous-visual-line)
   (evil-define-key 'normal 'global (kbd "Q") #'evil-ex)
@@ -252,13 +251,11 @@
   (general-create-definer arg/leader
     :states '(normal visual motion emacs)
     :keymaps 'override
-    :prefix "SPC"
-    :global-prefix "C-SPC")
+    :prefix "SPC")
   (general-create-definer arg/local-leader
     :states '(normal visual)
     :keymaps 'override
-    :prefix "SPC m"
-    :global-prefix "C-SPC m")
+    :prefix "SPC m")
   (arg/leader
     "SPC" '(execute-extended-command :which-key "M-x")
     "."   '(find-file :which-key "Find file")
@@ -272,7 +269,7 @@
     "aa" '(org-agenda :which-key "Org agenda")
     "ac" '(calendar :which-key "Calendar")
     "ad" '(devdocs-lookup :which-key "DevDocs")
-    "ae" '(eglot :which-key "Eglot connect")
+    "ae" '(lsp :which-key "LSP connect")
     "am" '(arg/open-messages-buffer :which-key "Messages")
     "ap" '(list-processes :which-key "Processes")
     "as" '(arg/open-scratch-buffer :which-key "Scratch buffer")
@@ -292,24 +289,24 @@
     "bs" '(save-buffer :which-key "Save buffer")
     "bS" '(save-some-buffers :which-key "Save all buffers")
     "c" '(:ignore t :which-key "Code")
-    "ca" '(eglot-code-actions :which-key "Code actions")
-    "cA" '(eglot-format :which-key "Format region")
+    "ca" '(lsp-execute-code-action :which-key "Code actions")
+    "cA" '(lsp-format-region :which-key "Format region")
     "cc" '(compile :which-key "Compile")
     "cC" '(recompile :which-key "Recompile")
-    "cD" '(eglot-find-declaration :which-key "Goto declaration")
+    "cD" '(lsp-find-declaration :which-key "Goto declaration")
     "cd" '(xref-find-definitions :which-key "Goto definition")
     "ce" '(consult-flymake :which-key "Diagnostics")
     "cE" '(flymake-show-buffer-diagnostics :which-key "Buffer diagnostics")
-    "cf" '(eglot-format-buffer :which-key "Format buffer")
-    "cF" '(eglot-code-action-organize-imports :which-key "Organize imports")
+    "cf" '(lsp-format-buffer :which-key "Format buffer")
+    "cF" '(lsp-organize-imports :which-key "Organize imports")
     "ci" '(consult-imenu :which-key "Imenu")
     "cI" '(consult-imenu-multi :which-key "Imenu multi")
-    "cl" '(eglot :which-key "Eglot connect")
-    "cR" '(eglot-reconnect :which-key "Reconnect")
-    "cS" '(eglot-shutdown :which-key "Shutdown server")
+    "cl" '(lsp :which-key "LSP connect")
+    "cR" '(lsp-restart-workspace :which-key "Restart workspace")
+    "cS" '(lsp-workspace-shutdown :which-key "Shutdown server")
     "cT" '(treesit-explore-node-at-point :which-key "Tree-sit inspect")
     "cX" '(xref-find-references :which-key "Find references")
-    "cr" '(eglot-rename :which-key "Rename symbol")
+    "cr" '(lsp-rename :which-key "Rename symbol")
     "d" '(:ignore t :which-key "Debug")
     "db" '(dap-breakpoint-toggle :which-key "Toggle breakpoint")
     "dc" '(dap-continue :which-key "Continue")
@@ -746,19 +743,19 @@
     "s" '(org-schedule :which-key "Schedule")
     "t" '(org-todo :which-key "Todo state")))
 
-(with-eval-after-load 'eglot
+(with-eval-after-load 'lsp-mode
   (arg/local-leader
-    :keymaps 'eglot-mode-map
-    "a" '(eglot-code-actions :which-key "Code actions")
+    :keymaps 'lsp-mode-map
+    "a" '(lsp-execute-code-action :which-key "Code actions")
     "d" '(flymake-show-buffer-diagnostics :which-key "Diagnostics")
     "D" '(flymake-show-project-diagnostics :which-key "Project diagnostics")
-    "f" '(eglot-format :which-key "Format region")
-    "F" '(eglot-format-buffer :which-key "Format buffer")
-    "h" '(eglot-help-at-point :which-key "Hover")
-    "o" '(eglot-code-action-organize-imports :which-key "Organize imports")
-    "r" '(eglot-rename :which-key "Rename")
-    "R" '(eglot-reconnect :which-key "Reconnect")
-    "s" '(eglot-shutdown :which-key "Shutdown")))
+    "f" '(lsp-format-region :which-key "Format region")
+    "F" '(lsp-format-buffer :which-key "Format buffer")
+    "h" '(lsp-ui-doc-show :which-key "Hover")
+    "o" '(lsp-organize-imports :which-key "Organize imports")
+    "r" '(lsp-rename :which-key "Rename")
+    "R" '(lsp-restart-workspace :which-key "Restart workspace")
+    "s" '(lsp-workspace-shutdown :which-key "Shutdown workspace")))
 
 (with-eval-after-load 'python
   (arg/local-leader
@@ -958,69 +955,77 @@
            ("C-x C-f" . consult-dir-jump-file))))
 
 (use-package corfu
-  :straight t
-  :custom
-  (corfu-auto t)
-  (corfu-cycle t)
-  (corfu-auto-delay 0)
-  (corfu-auto-prefix 0)
-  (corfu-popupinfo-delay '(0.5 . 0.2))
-  (tab-always-indent 'complete)
-  (completion-cycle-threshold nil)
-  (corfu-echo-mode nil)
-  (defun my-corfu-complete-all ()
-    "Show all completions at point."
-    (interactive)
-    (let ((corfu-auto-prefix 0))
-      (completion-at-point)))
+    :straight t
+    :custom
+    (corfu-auto t)
+    (corfu-cycle t)
+    (corfu-auto-delay 0)
+    (corfu-auto-prefix 0)
+(corfu-popupinfo-delay '(0.5 . 0.2))
+(tab-always-indent 'complete)
+(completion-cycle-threshold nil)
+(corfu-echo-mode nil)
+(defun arg/corfu-force-popup ()
+  "Force Corfu to show completion candidates at point."
+  (interactive)
+  (cond
+   (completion-in-region-mode
+    (corfu-complete))
+   ((not (bound-and-true-p corfu-mode))
+    (completion-at-point))
+   (t
+    (pcase (run-hook-wrapped 'completion-at-point-functions #'corfu--capf-wrapper)
+      (`(,fun ,beg ,end ,table . ,plist)
+       (let ((completion-in-region-mode-predicate
+              (lambda ()
+                (let ((newbeg (car-safe (funcall fun))))
+                  (and newbeg (= newbeg beg)))))
+             (completion-extra-properties plist))
+         (corfu--setup beg end table (plist-get plist :predicate))
+         (corfu--exhibit)))
+      (_ (message "No completion available here."))))))
 
-  (global-set-key (kbd "M-/") #'my-corfu-complete-all)
-  :bind
-  (:map corfu-map
-        ("M-p" . corfu-popupinfo-scroll-down)
-        ("M-n" . corfu-popupinfo-scroll-up)
-        ("M-d" . corfu-popupinfo-toggle))
-  :init
-  (global-corfu-mode)
-  (corfu-popupinfo-mode 1)
-  (corfu-history-mode 1))
+(global-set-key (kbd "M-/") #'arg/corfu-force-popup)
+    :bind
+    (:map corfu-map
+          ("M-p" . corfu-popupinfo-scroll-down)
+          ("M-n" . corfu-popupinfo-scroll-up)
+          ("M-d" . corfu-popupinfo-toggle))
+    :init
+    (global-corfu-mode)
+    (corfu-popupinfo-mode 1)
+    (corfu-history-mode 1))
 
-(use-package nerd-icons-corfu
-  :straight t
-  :after corfu
-  :config
-  (setq corfu-margin-formatters '(nerd-icons-corfu-formatter)))
+  (use-package nerd-icons-corfu
+    :straight t
+    :after corfu
+    :config
+    (setq corfu-margin-formatters '(nerd-icons-corfu-formatter)))
 
-;; Add prettier icons in completions
-(use-package kind-icon
-  :straight t
-  :after corfu
-  :custom
-  (kind-icon-default-face 'corfu-default)
-  :config
-  (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
+  ;; Add prettier icons in completions
+  (use-package kind-icon
+    :straight t
+    :after corfu
+    :custom
+    (kind-icon-default-face 'corfu-default)
+    :config
+    (add-to-list 'corfu-margin-formatters #'kind-icon-margin-formatter))
 
-;; Ensure Corfu UI works over SSH and terminals
-(use-package corfu-terminal
-  :straight t
-  :after corfu
-  :init
-  (corfu-terminal-mode 1))
+  ;; Ensure Corfu UI works over SSH and terminals
+  (use-package emacs
+    :init
+    (setq completion-cycle-threshold 3)
+    (setq tab-always-indent 'complete)
+    (setq-default indent-tabs-mode nil)
+    (setq-default tab-width 2))
 
-(use-package emacs
-  :init
-  (setq completion-cycle-threshold 3)
-  (setq tab-always-indent 'complete)
-  (setq-default indent-tabs-mode nil)
-  (setq-default tab-width 2))
-
-(use-package dabbrev
-  :bind (("C-<tab>" . dabbrev-completion)
-         ("C-M-<tab>" . dabbrev-expand))
-  :config
-  (add-to-list 'dabbrev-ignored-buffer-regexps "\\` ") 
-  (add-to-list 'dabbrev-ignored-buffer-modes 'doc-view-mode)
-  (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode))
+  (use-package dabbrev
+    :bind (("C-<tab>" . dabbrev-completion)
+           ("C-M-<tab>" . dabbrev-expand))
+    :config
+    (add-to-list 'dabbrev-ignored-buffer-regexps "\\` ") 
+    (add-to-list 'dabbrev-ignored-buffer-modes 'doc-view-mode)
+    (add-to-list 'dabbrev-ignored-buffer-modes 'pdf-view-mode))
 
 (use-package nerd-icons-corfu
   :ensure
@@ -1052,7 +1057,7 @@
 	 ("C-c p r" . cape-rfc1345))
   
   :init
-  (advice-add 'eglot-completion-at-point :around #'cape-wrap-buster)
+  (advice-add 'lsp-completion-at-point :around #'cape-wrap-buster)
   ;;(add-hook 'completion-at-point-functions #'cape-dabbrev t)
   (add-hook 'emacs-lisp-mode-hook
 	    (lambda ()
@@ -1347,73 +1352,76 @@ the new drawer."
   :config
   (diff-hl-flydiff-mode))
 
-(use-package consult-eglot
+(use-package consult-lsp
   :straight t
-  :after (consult eglot)
-  :bind (("C-c C-d" . consult-eglot-symbols)))
+  :after (consult lsp-mode)
+  :bind (("C-c C-d" . consult-lsp-symbols)))
 
-(use-package eglot
+(use-package lsp-mode
   :straight t
-  :hook ((json-mode . eglot-ensure)
-         (json-ts-mode . eglot-ensure)
-         (yaml-mode . eglot-ensure))
+  :commands (lsp lsp-deferred)
+  :hook ((json-mode . lsp-deferred)
+         (json-ts-mode . lsp-deferred)
+         (yaml-mode . lsp-deferred)
+         (yaml-ts-mode . lsp-deferred)
+         (graphql-mode . lsp-deferred))
   :custom
-  (eglot-autoreconnect 1)
+  (lsp-idle-delay 0.4)
+  (lsp-log-io nil)
+  (lsp-enable-symbol-highlighting nil)
+  (lsp-modeline-diagnostics-enable t)
+  (lsp-headerline-breadcrumb-enable nil)
+  (lsp-completion-provider :none) ; Corfu drives CAPF
+  (lsp-lens-enable nil)
+  (lsp-file-watch-threshold 2000)
+  (lsp-keep-workspace-alive nil)
+  (lsp-eldoc-render-all nil)
+  (lsp-which-key-enable t)
   :config
-  (dolist (mapping '((json-mode . ("vscode-json-languageserver" "--stdio"))
-                     (json-ts-mode . ("vscode-json-languageserver" "--stdio"))
-                     (python-mode . ("pyright-langserver" "--stdio"))
-                     (python-ts-mode . ("pyright-langserver" "--stdio"))
-                     (yaml-mode . ("ansible-language-server" "--stdio"))))
-    (add-to-list 'eglot-server-programs mapping))
-  ;; Improve LSP responsiveness and enable PyCharm-like auto-imports
-  (setq eglot-send-changes-idle-time 0.2)
-  (setq eglot-ignored-server-capabilities nil)
-  (define-key eglot-mode-map (kbd "C-c C-r") #'eglot-rename))
+  ;; Extend watcher ignores after lsp-mode defines the default list.
+  (setq lsp-file-watch-ignored-directories
+        (append lsp-file-watch-ignored-directories
+                '("[/\\\\]\\.venv$"
+                  "[/\\\\]venv$"
+                  "[/\\\\]\\.env$"
+                  "[/\\\\]node_modules$"
+                  "[/\\\\]\\.mypy_cache$")))
+  (defun arg/lsp-mode-setup-completion ()
+    "Reuse Corfu for LSP completions and keep Orderless styles."
+    (setf (alist-get 'styles (alist-get 'lsp-capf completion-category-defaults))
+          '(orderless basic))
+    (when (and (bound-and-true-p corfu-mode)
+               (fboundp 'corfu--completion-in-region))
+      (setq-local completion-in-region-function #'corfu--completion-in-region)))
+  (add-hook 'lsp-completion-mode-hook #'arg/lsp-mode-setup-completion))
 
-(use-package sideline
+(use-package lsp-ui
   :straight t
-  :hook (flymake-mode . sideline-mode)
+  :after lsp-mode
+  :hook (lsp-mode . lsp-ui-mode)
+  :custom
+  (lsp-ui-doc-enable t)
+  (lsp-ui-doc-delay 0.3)
+  (lsp-ui-doc-position 'at-point)
+  (lsp-ui-doc-show-with-cursor nil)
+  (lsp-ui-doc-show-with-mouse t)
+  (lsp-ui-sideline-enable t)
+  (lsp-ui-sideline-show-hover t)
+  (lsp-ui-sideline-show-diagnostics t)
+  (lsp-ui-sideline-ignore-duplicate t)
+  (lsp-ui-sideline-delay 0.2)
+  (lsp-ui-peek-always-show t)
+  (lsp-ui-peek-fontify 'always)
   :config
-  (setq sideline-flymake-display-mode 'line)
-  (setq sideline-backends-right '(sideline-flymake)))
-
-(use-package sideline-flymake
-  :straight t
-  :after (sideline flymake)
-  :hook (flymake-mode . sideline-mode))
-
-      (use-package eldoc-box
-        :straight t
-        :config
-        (defun arg/eldoc-box-scroll-up ()
-          "Scroll up in `eldoc-box--frame'"
-          (interactive)
-          (with-current-buffer eldoc-box--buffer
-            (with-selected-frame eldoc-box--frame
-              (scroll-down 3))))
-        (defun arg/eldoc-box-scroll-down ()
-          "Scroll down in `eldoc-box--frame'"
-          (interactive)
-          (with-current-buffer eldoc-box--buffer
-            (with-selected-frame eldoc-box--frame
-              (scroll-up 3))))
-        :bind
-        (:map eglot-mode-map
-              ("C-k" . arg/eldoc-box-scroll-up)
-              ("C-j" . arg/eldoc-box-scroll-down)
-              ("M-h" . eldoc-box-eglot-help-at-point)))
+  (defun arg/lsp-ui-doc-hide-on-focus-change ()
+    "Hide hover doc childframes whenever the frame loses focus."
+    (add-hook 'focus-out-hook #'lsp-ui-doc-hide nil t))
+  (add-hook 'lsp-ui-doc-mode-hook #'arg/lsp-ui-doc-hide-on-focus-change))
 
 ;; (use-package flycheck
 ;; :straight t
 ;; :config
 ;; (add-hook 'after-init-hook #'global-flycheck-mode))
-
-;; (use-package flycheck-eglot
-;;   :straight t
-;;   :after (flycheck eglot)
-;;   :config
-;;   (global-flycheck-eglot-mode 1))
 
 ;; Ansible Language Server
       (use-package ansible
@@ -1517,7 +1525,13 @@ the new drawer."
   :after org
   :hook (org-mode . verb-mode)
   :init
-  (add-hook 'verb-response-mode-hook #'visual-line-mode))
+  (add-hook 'verb-response-mode-hook #'visual-line-mode)
+  :config
+  (defun arg/verb--guard-var-preview (fn &rest args)
+    "Ignore Verb var previews when point is at buffer end."
+    (unless (>= (line-beginning-position) (point-max))
+      (apply fn args)))
+  (advice-add 'verb--var-preview :around #'arg/verb--guard-var-preview))
 
 (use-package httprepl
   :straight t
@@ -1529,10 +1543,10 @@ the new drawer."
   (setq-local graphql-indent-level 2)
   (when (fboundp 'cape-keyword)
     (add-hook 'completion-at-point-functions #'cape-keyword nil t))
-  (when (and (fboundp 'eglot-ensure)
+  (when (and (fboundp 'lsp-deferred)
              (or (executable-find "graphql-lsp")
                  (executable-find "graphql-language-service-cli")))
-    (eglot-ensure)))
+    (lsp-deferred)))
 
 (with-eval-after-load 'cape
   (when (require 'cape-keyword nil t)
@@ -1542,15 +1556,6 @@ the new drawer."
               "scalar" "enum" "input" "schema" "directive" "fragment" "on"
               "implements" "extend" "extends" "repeatable")
             cape-keyword-list))))
-
-(with-eval-after-load 'eglot
-  (when-let ((server (cond
-                      ((executable-find "graphql-lsp")
-                       '("graphql-lsp" "server" "-m" "stream"))
-                      ((executable-find "graphql-language-service-cli")
-                       '("graphql-language-service-cli" "server" "-m" "stream")))))
-    (unless (assoc 'graphql-mode eglot-server-programs)
-      (push `(graphql-mode . ,server) eglot-server-programs))))
 
 (use-package graphql-mode
   :straight t
@@ -1592,6 +1597,23 @@ the new drawer."
   (setq python-indent-offset 4
         python-fill-docstring-style 'pep-257-nn))
 
+(use-package lsp-pyright
+  :straight t
+  :after (lsp-mode python)
+  :custom
+  (lsp-pyright-auto-import-completions t)
+  (lsp-pyright-auto-search-paths t)
+  (lsp-pyright-use-library-code-for-types t)
+  (lsp-pyright-typechecking-mode "basic")
+  (lsp-pyright-python-executable-cmd "python3")
+  (lsp-pyright-venv-path (or (and (boundp 'pyvenv-workon-home) pyvenv-workon-home)
+                             (getenv "WORKON_HOME")))
+  (lsp-pyright-multi-root nil)
+  :hook ((python-mode . (lambda ()
+                          (require 'lsp-pyright nil t)))
+         (python-ts-mode . (lambda ()
+                             (require 'lsp-pyright nil t)))))
+
 (defun arg/python--project-root ()
   "Return project root for the current buffer if any."
   (let ((proj (project-current nil)))
@@ -1618,8 +1640,8 @@ the new drawer."
 (defvar arg/python--python-missing-notified nil
   "Tracks whether we've warned about a missing Python interpreter.")
 
-(defun arg/python--maybe-start-eglot ()
-  "Start Eglot for Python buffers when Pyright is available."
+(defun arg/python--maybe-start-lsp ()
+  "Start LSP for Python buffers when Pyright is available."
   (let* ((pyright (executable-find "pyright-langserver"))
          (python-command (and (boundp 'python-shell-interpreter)
                               python-shell-interpreter))
@@ -1630,35 +1652,17 @@ the new drawer."
      ((not pyright)
       (unless arg/python--pyright-missing-notified
         (setq arg/python--pyright-missing-notified t)
-        (message "[Python] Skipping Eglot: pyright-langserver not found on PATH")))
+        (message "[Python] Skipping LSP: pyright-langserver not found on PATH")))
 
      ((not python)
       (unless arg/python--python-missing-notified
         (setq arg/python--python-missing-notified t)
-        (message "[Python] Skipping Eglot: cannot locate %s"
+        (message "[Python] Skipping LSP: cannot locate %s"
                  python-command)))
 
-     ((fboundp 'eglot-ensure)
-      (eglot-ensure)))))
-
-(defun arg/python-eglot-setup ()
-  "Apply Pyright workspace configuration for the current buffer."
-  (setq-local eglot-workspace-configuration
-              (list :pyright
-                    (list :analysis
-                          (list :autoImportCompletions t
-                                :autoSearchPaths t
-                                :diagnosticMode "workspace"
-                                :typeCheckingMode "basic"
-                                :useLibraryCodeForTypes t))
-                    :python
-                    (list :analysis
-                          (list :autoImportCompletions t
-                                :autoSearchPaths t)
-                          :pythonPath python-shell-interpreter
-                          :venvPath (or (and (boundp 'pyvenv-workon-home)
-                                             pyvenv-workon-home)
-                                        (getenv "WORKON_HOME"))))))
+     ((and (require 'lsp-pyright nil t)
+           (fboundp 'lsp-deferred))
+      (lsp-deferred)))))
 
 (defun arg/python-enable-black ()
   "Enable Black formatting when available."
@@ -1688,17 +1692,16 @@ the new drawer."
   "Common setup routine for Python buffers."
   (setq-local fill-column 88)
   (setq-local tab-width 4)
-  (arg/python-eglot-setup)
   (arg/python--auto-venv)
   (arg/python-enable-black)
   (arg/python-enable-ruff)
-  (arg/python--maybe-start-eglot)
+  (arg/python--maybe-start-lsp)
   (when (boundp 'completion-at-point-functions)
     (let ((capfs (copy-sequence completion-at-point-functions)))
-      (dolist (fn '(tempel-expand eglot-completion-at-point))
+      (dolist (fn '(tempel-expand lsp-completion-at-point))
         (when (fboundp fn)
           (setq capfs (delq fn capfs))))
-      (dolist (fn '(tempel-expand eglot-completion-at-point))
+      (dolist (fn '(tempel-expand lsp-completion-at-point))
         (when (fboundp fn)
           (setq capfs (cons fn capfs))))
       (setq-local completion-at-point-functions capfs))))
@@ -1764,7 +1767,7 @@ the new drawer."
   (define-key python-mode-map (kbd "C-c i") #'arg/python-auto-install-missing))
 
 (defun arg/python-auto-install-missing ()
-  "Install missing Python modules automatically when prompted by Eglot diagnostics."
+  "Install missing Python modules automatically when prompted by LSP diagnostics."
   (interactive)
   (let ((pkg (thing-at-point 'symbol)))
     (when pkg
@@ -1818,12 +1821,12 @@ the new drawer."
 (use-package tempel-collection
   :straight t)
 
-;; Enhance Tempel integration with Corfu, Cape, and Eglot
+;; Enhance Tempel integration with Corfu, Cape, and LSP
 (with-eval-after-load 'tempel
   (with-eval-after-load 'cape
     (add-to-list 'completion-at-point-functions #'tempel-expand -1))
-  (with-eval-after-load 'eglot
-    (add-hook 'eglot-managed-mode-hook
+  (with-eval-after-load 'lsp-mode
+    (add-hook 'lsp-managed-mode-hook
               (lambda ()
                 (add-hook 'completion-at-point-functions #'tempel-expand nil t)))))
 
