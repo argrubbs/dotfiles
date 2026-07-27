@@ -242,6 +242,21 @@ a quelpa or straight
 
 *** Display
 
+**** which-key
+
+which-key is built into Emacs 30+. It displays available keybindings in a
+popup after a short delay, making standard Emacs bindings (=C-x=, =C-c=,
+=C-h=, etc.) fully discoverable.
+
+#+begin_src emacs-lisp
+(use-package which-key
+  :demand t
+  :config
+  (setq which-key-idle-delay 0.4
+        which-key-max-display-columns 4)
+  (which-key-mode 1))
+#+end_src
+
 **** Declare all themes as safe
 
 To avoid being asked about setting a theme as safe, I set this
