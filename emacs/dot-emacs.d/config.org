@@ -319,18 +319,18 @@ Using show-fonts and fontaine from Prot
 
 
 #+begin_src emacs-lisp
-        (when (member "Iosevka Nerd Font Mono" (font-family-list))
-          (set-face-attribute 'default nil :family "Iosevka Nerd Font" :height 160 :weight 'semi-light)
-          (set-face-attribute 'fixed-pitch nil :family "Iosevka Nerd Font Mono"))
+        (when (member "Cascadia Code NF" (font-family-list))
+          (set-face-attribute 'default nil :family "Cascadia Code NF" :height 160 :weight 'semi-light)
+          (set-face-attribute 'fixed-pitch nil :family "Cascadia Code NF"))
 
         (when (member "Caveat" (font-family-list))
           (set-face-attribute 'font-lock-comment-face nil :font "Caveat-20"))
 
-        (when (member "Iosevka Nerd Font" (font-family-list))
-          (set-face-attribute 'variable-pitch nil :family "Iosevka Nerd Font" :height 170))
+        (when (member "Cascadia Code NF" (font-family-list))
+          (set-face-attribute 'variable-pitch nil :family "Cascadia Code NF" :height 170))
 
         ;; Resize Org headings
-      (when (member "Iosevka Nerd Font" (font-family-list))
+      (when (member "Cascadia Code NF" (font-family-list))
         (dolist (face '((org-level-1 . 1.35)
                         (org-level-2 . 1.3)
                         (org-level-3 . 1.2)
@@ -339,10 +339,10 @@ Using show-fonts and fontaine from Prot
                         (org-level-6 . 1.1)
                         (org-level-7 . 1.1)
                         (org-level-8 . 1.1)))
-          (set-face-attribute (car face) nil :font "Iosevka Nerd Font" :weight 'bold :height (cdr face)))
+          (set-face-attribute (car face) nil :font "Cascadia Code NF" :weight 'bold :height (cdr face)))
 
         ;; Make the document title a bit bigger
-        (set-face-attribute 'org-document-title nil :font "Iosevka Nerd Font" :weight
+        (set-face-attribute 'org-document-title nil :font "Cascadia Code NF" :weight
         'bold :height 1.8))
 
       (require 'org-indent)
