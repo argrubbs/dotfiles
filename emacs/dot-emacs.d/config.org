@@ -250,10 +250,95 @@ popup after a short delay, making standard Emacs bindings (=C-x=, =C-c=,
 
 #+begin_src emacs-lisp
 (use-package which-key
+  :ensure nil
   :demand t
   :config
   (setq which-key-idle-delay 0.4
-        which-key-max-display-columns 4)
+        which-key-max-display-columns 4
+        which-key-add-column-padding 1
+        which-key-sort-order 'which-key-key-order-alpha)
+
+  ;; Label C-x prefix groups
+  (which-key-add-key-based-replacements
+    "C-x RET" "encoding"
+    "C-x 4"   "other-window"
+    "C-x 5"   "frame"
+    "C-x 6"   "2C"
+    "C-x 8"   "unicode"
+    "C-x @"   "event-modifier"
+    "C-x a"   "abbrev"
+    "C-x n"   "narrow"
+    "C-x p"   "project"
+    "C-x r"   "register/bookmark"
+    "C-x t"   "tab"
+    "C-x v"   "vc"
+    "C-x w"   "highlight"
+    "C-x x"   "buffer-extra")
+
+  ;; Label C-c prefix groups
+  (which-key-add-key-based-replacements
+    "C-c !"   "flymake"
+    "C-c &"   "yas-snippet"
+    "C-c @"   "outline"
+    "C-c a"   "org-agenda"
+    "C-c c"   "copilot"
+    "C-c c c" "copilot-chat"
+    "C-c c r" "copilot-chat-region"
+    "C-c h"   "consult-history"
+    "C-c i"   "consult-info"
+    "C-c k"   "consult-kmacro"
+    "C-c m"   "consult-man"
+    "C-c n"   "org-roam"
+    "C-c n f" "roam-find-node"
+    "C-c n i" "roam-insert-link"
+    "C-c n c" "roam-capture"
+    "C-c n d" "roam-daily"
+    "C-c p"   "completion-at-point"
+    "C-c p p" "complete-at-point"
+    "C-c p f" "complete-file"
+    "C-c p d" "complete-dabbrev"
+    "C-c p k" "complete-keyword")
+
+  ;; Label C-h (help) group — overridden by helpful below
+  (which-key-add-key-based-replacements
+    "C-h"     "help"
+    "C-h f"   "describe-function"
+    "C-h v"   "describe-variable"
+    "C-h k"   "describe-key"
+    "C-h x"   "describe-command"
+    "C-h F"   "describe-function-only"
+    "C-h m"   "describe-mode"
+    "C-h b"   "describe-bindings"
+    "C-h i"   "info"
+    "C-h t"   "tutorial"
+    "C-h C-d" "helpful-at-point")
+
+  ;; Label M-g (goto) group
+  (which-key-add-key-based-replacements
+    "M-g"     "goto"
+    "M-g g"   "goto-line"
+    "M-g M-g" "goto-line"
+    "M-g e"   "consult-errors"
+    "M-g f"   "consult-flymake"
+    "M-g i"   "consult-imenu"
+    "M-g I"   "consult-imenu-multi"
+    "M-g m"   "consult-mark"
+    "M-g k"   "consult-global-mark"
+    "M-g o"   "consult-outline")
+
+  ;; Label M-s (search) group
+  (which-key-add-key-based-replacements
+    "M-s"     "search"
+    "M-s d"   "find-file"
+    "M-s g"   "ripgrep"
+    "M-s G"   "git-grep"
+    "M-s l"   "search-line"
+    "M-s L"   "search-line-all"
+    "M-s c"   "locate"
+    "M-s k"   "keep-lines"
+    "M-s u"   "focus-lines"
+    "M-s e"   "isearch-history")
+
   (which-key-mode 1))
 #+end_src
 
@@ -998,4 +1083,27 @@ starts a new chat; =C-c c r= sends the selected region as context.
                  (display-buffer-in-side-window)
                  (side . right)
                  (window-width . 0.35))))
+#+end_src
+
+** Help
+
+*** Helpful
+
+[[https://github.com/Wilfred/helpful][helpful]] replaces the built-in help buffers with richer ones that show source
+code, callers, keybindings, and links to the Info manual all in one place.
+
+#+begin_src emacs-lisp
+(use-package helpful
+  :demand t
+  :bind (;; Replace standard C-h bindings
+         ("C-h f"   . helpful-callable)
+         ("C-h v"   . helpful-variable)
+         ("C-h k"   . helpful-key)
+         ("C-h x"   . helpful-command)
+         ("C-h F"   . helpful-function)
+         ("C-h C-d" . helpful-at-point))
+  :config
+  ;; Make describe-* in other packages also use helpful
+  (setq counsel-describe-function-function #'helpful-callable
+        counsel-describe-variable-function #'helpful-variable))
 #+end_src
