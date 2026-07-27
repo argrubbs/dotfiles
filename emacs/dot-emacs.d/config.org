@@ -263,6 +263,7 @@ change it in the =(load-theme 'doom-theme-name t)= line.
 #+begin_src emacs-lisp
   ;; Install doom-themes
   (use-package doom-themes
+    :demand t
     :custom
     (doom-themes-enable-bold t)
     (doom-themes-enable-italic t)
@@ -956,7 +957,7 @@ through alternatives; =M-f= accepts by word.
 
 #+begin_src emacs-lisp
 (use-package copilot
-  :straight (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))
+  :ensure t
   :hook (prog-mode . copilot-mode)
   :bind (:map copilot-completion-map
               ("<tab>"   . copilot-accept-completion)
@@ -976,10 +977,9 @@ starts a new chat; =C-c c r= sends the selected region as context.
 (with-eval-after-load 'copilot
   (global-set-key (kbd "C-c c c") #'copilot-chat)
   (global-set-key (kbd "C-c c r") #'copilot-chat-send-region)
-  (setq copilot-chat-window-display-function
-        (lambda (buf)
-          (display-buffer buf
-                          '(display-buffer-in-side-window
-                            (side . right)
-                            (window-width . 0.35))))))
+  (add-to-list 'display-buffer-alist
+               '("\\*Copilot Chat\\*"
+                 (display-buffer-in-side-window)
+                 (side . right)
+                 (window-width . 0.35))))
 #+end_src

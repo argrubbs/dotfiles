@@ -10,8 +10,11 @@
   ;; If config is pre-compiled, then load that
   (if (file-exists-p (expand-file-name "config.elc" user-emacs-directory))
       (load-file (expand-file-name "config.elc" user-emacs-directory))
-    ;; Otherwise use org-babel to tangle and load the config
+    ;; Otherwise use org-babel to tangle and load the config.
+    ;; file-truename resolves the symlink so tangle output and the
+    ;; subsequent load both target the same real directory.
     (require 'org)
-    (org-babel-load-file (expand-file-name "config.org" user-emacs-directory))))
+    (org-babel-load-file
+     (file-truename (expand-file-name "config.org" user-emacs-directory)))))
 
 ;; init.el ends here
