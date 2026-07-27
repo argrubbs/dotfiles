@@ -108,10 +108,10 @@ Sane Defaults
 Mac Settings
 
 #+begin_src emacs-lisp
-      (setq mac-option-key-is-meta nil
-            mac-command-key-is-meta t
-    	mac-option-modifier nil
-  	mac-command-modifier 'meta)
+      (setq mac-option-key-is-meta t
+            mac-command-key-is-meta nil
+    	mac-option-modifier 'meta
+  	mac-command-modifier 'super)
 #+end_src
 
 #+RESULTS:
