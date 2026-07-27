@@ -136,3 +136,8 @@ export CPPFLAGS="-I/opt/homebrew/include"
 # Set Emacs config directory
 export EMACS_USER_DIRECTORY="$HOME/.config/emacs"
 eval "$(/opt/homebrew/bin/brew shellenv)"
+
+# nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"

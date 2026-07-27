@@ -867,7 +867,7 @@ Corfu is an in-buffer completion framework that provides a completion popup.
   (setq tab-always-indent 'complete))
 
 (use-package dabbrev
-  :bind (("C-<tab>" . dabbrev-completion)
+  :bind (("C-<tab>" . completion-at-point)
 	 ("C-M-<tab>" . dabbrev-expand))
   :config
   (add-to-list 'dabbrev-ignored-buffer-regexps "\\` ") 
@@ -938,3 +938,48 @@ Cape (Completion-at-Point Extensions) are providers for Corfu completion
 
 #+RESULTS:
 : cape-rfc1345
+
+** AI
+
+*** GitHub Copilot
+
+[[https://github.com/copilot-emacs/copilot.el][copilot.el]] provides inline ghost-text completions and an interactive chat
+interface backed by the official =@github/copilot-language-server=. After
+installing, run =M-x copilot-install-server= once to fetch the language server
+binary, then =M-x copilot-login= to authenticate.
+
+**** Inline completions
+
+Completions activate in all =prog-mode= buffers. TAB accepts a full suggestion
+(taking priority over Corfu when an overlay is visible); =C-n= / =C-p= cycle
+through alternatives; =M-f= accepts by word.
+
+#+begin_src emacs-lisp
+(use-package copilot
+  :straight (:host github :repo "copilot-emacs/copilot.el" :files ("*.el"))
+  :hook (prog-mode . copilot-mode)
+  :bind (:map copilot-completion-map
+              ("<tab>"   . copilot-accept-completion)
+              ("TAB"     . copilot-accept-completion)
+              ("C-n"     . copilot-next-completion)
+              ("C-p"     . copilot-previous-completion)
+              ("M-f"     . copilot-accept-completion-by-word)
+              ("M-<tab>" . copilot-accept-completion-by-line)))
+#+end_src
+
+**** Chat
+
+=copilot-chat= opens a streaming chat buffer in a right side window. =C-c c c=
+starts a new chat; =C-c c r= sends the selected region as context.
+
+#+begin_src emacs-lisp
+(with-eval-after-load 'copilot
+  (global-set-key (kbd "C-c c c") #'copilot-chat)
+  (global-set-key (kbd "C-c c r") #'copilot-chat-send-region)
+  (setq copilot-chat-window-display-function
+        (lambda (buf)
+          (display-buffer buf
+                          '(display-buffer-in-side-window
+                            (side . right)
+                            (window-width . 0.35))))))
+#+end_src
