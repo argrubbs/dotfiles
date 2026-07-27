@@ -1,32 +1,20 @@
-;;; disable package.el
-(setq package-enable-at-startup nil)
+;;; Package --- Summary
 
-;;; straight.el
-(defvar bootstrap-version)
-(let ((bootstrap-file
-       (expand-file-name
-        "straight/repos/straight.el/bootstrap.el"
-        (or (bound-and-true-p straight-base-dir)
-            user-emacs-directory)))
-      (bootstrap-version 7))
-  (unless (file-exists-p bootstrap-file)
-    (with-current-buffer
-        (url-retrieve-synchronously
-         "https://raw.githubusercontent.com/radian-software/straight.el/develop/install.el"
-         'silent 'inhibit-cookies)
-      (goto-char (point-max))
-      (eval-print-last-sexp)))
-  (load bootstrap-file nil 'nomessage))
+;;; Commentary:
+;; Emacs init file for loading pre-compiled config
+;; or tangling and loading literate org config tile
 
-(setq straight-use-package-by-default t)
-(setq enable-local-variables :all)
-(straight-use-package 'org)
-(require 'org)
+;; Don't attempt to find/apply special file handlers to files
+;; loaded during startup
+(let ((file-name-handler-alist nil))
+  ;; If config is pre-compiled, then load that
+  (if (file-exists-p (expand-file-name "config.elc" user-emacs-directory))
+      (load-file (expand-file-name "config.elc" user-emacs-directory))
+    ;; Otherwise use org-babel to tangle and load the config.
+    ;; file-truename resolves the symlink so tangle output and the
+    ;; subsequent load both target the same real directory.
+    (require 'org)
+    (org-babel-load-file
+     (file-truename (expand-file-name "config.org" user-emacs-directory)))))
 
-;; Load literate config
-(org-babel-load-file (expand-file-name "config.org" user-emacs-directory))
-
-;; keep emacs custom settings in separate file
-(setq custom-file (expand-file-name "custom.el" user-emacs-directory))
-(when (file-exists-p custom-file)
-  (load custom-file))
+;; init.el ends here
