@@ -77,23 +77,18 @@
 (setq display-line-numbers-type t)
 (setq sp-autodelete-pair nil)
 
-(setq doom-font (font-spec :family "Iosevka Nerd Font Mono" :size 20)
-      doom-variable-pitch-font (font-spec :family "Iosevka Nerd Font" :size 22))
-(setq doom-theme 'modus-vivendi-tinted)
-
-(use-package! gptel
+(use-package! copilot
+  :hook ((prog-mode text-mode) . copilot-mode)
+  :bind (("C-c c c" . copilot-complete)
+         :map copilot-completion-map
+         ("<tab>" . copilot-accept-completion)
+         ("TAB" . copilot-accept-completion))
   :config
-  (gptel-make-ollama "ollama"
-    :host "localhost:11434"
-    :stream t
-    :models '(qwen3:8b)))
+  (add-to-list 'completion-at-point-functions #'copilot-completion-at-point))
 
-(setq
- gptel-model 'qwen3:8b
- gptel-backend (gptel-make-ollama "LLAMARAMA"
-                 :host "localhost:11434"
-                 :stream t
-                 :models '(qwen3:8b llama3.2:3b)))
+(setq doom-font (font-spec :family "Cascadia Code NF" :size 16 :weight 'semi-light)
+      doom-variable-pitch-font (font-spec :family "Cascadia Code NF" :size 17))
+(setq doom-theme 'doom-one)
 
 ;; notmuch/mbsync/msmtp settings
 (setq message-send-mail-function 'message-send-mail-with-sendmail
@@ -106,7 +101,7 @@
   :bind (("C-c o d" . 'org-download-screenshot))
   :config
   (setq-default org-download-image-dir "./images")
-  (setq org-download-screenshot-method "spectacle -br -o %s"))
+  (setq org-download-screenshot-method "screencapture -i %s"))
 
 (require 'org-download)
 (add-hook 'dired-mode-hook 'org-download-enable)
