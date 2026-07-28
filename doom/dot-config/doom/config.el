@@ -84,7 +84,12 @@
          ("<tab>" . copilot-accept-completion)
          ("TAB" . copilot-accept-completion))
   :config
-  (add-to-list 'completion-at-point-functions #'copilot-completion-at-point))
+  (add-to-list 'completion-at-point-functions #'copilot-completion-at-point)
+  (setq copilot-chat-use-agent-mode t)
+  (setopt copilot-chat-presets
+          '(("fast" . (:model "gpt-5.4-mini" :agent-mode nil))
+            ("agent" . (:model "MAI-Code-1-Flash" :agent-mode t :auto-approve-tools t)))))
+
 
 (setq doom-font (font-spec :family "Cascadia Code NF" :size 16 :weight 'semi-light)
       doom-variable-pitch-font (font-spec :family "Cascadia Code NF" :size 17))
@@ -134,6 +139,58 @@
 (after! org-roam
   (add-hook 'org-roam-capture-new-node-hook #'org-mode))
 
+(defvar my/copilot-mode-indent-alist
+  '((python-mode . 4)
+    (js-mode . 2)
+    (typescript-mode . 2)
+    (c-mode . 4)
+    (c++-mode . 4)
+    (java-mode . 4)
+    (ruby-mode . 2)
+    (go-mode . 4)
+    (rust-mode . 4)
+    (org-mode . 2))
+  "Alist mapping major-mode symbols to indentation offsets for copilot fallback.")
+
+;; 2) A helper to find a sensible indentation offset from common variables:
+(defun my/copilot-detect-indent-from-buffer ()
+  "Return an integer indentation width inferred from buffer-local indent vars or nil."
+  (or
+   ;; Mode-specific common variables:
+   (and (boundp 'python-indent-offset) python-indent-offset)
+   (and (boundp 'js-indent-level) js-indent-level)
+   (and (boundp 'js2-basic-offset) js2-basic-offset)
+   (and (boundp 'web-mode-code-indent-offset) web-mode-code-indent-offset)
+   (and (boundp 'web-mode-markup-indent-offset) web-mode-markup-indent-offset)
+   (and (boundp 'css-indent-offset) css-indent-offset)
+   ;; Generic tab-width fallback:
+   (and (boundp 'tab-width) tab-width)))
+;; nil if nothing found
+
+
+;; 3) The fallback function to provide a safe offset. This will be used only if Copilot's
+;;    own inference failed or when we advise/override its inference function.
+(defun my/copilot-infer-indentation-offset-fallback (&rest _args)
+  "Return an indentation offset for Copilot.
+Checks `my/copilot-mode-indent-alist', then common buffer-local indent vars,
+and finally falls back to 2."
+  (or (cdr (assoc major-mode my/copilot-mode-indent-alist))
+      (my/copilot-detect-indent-from-buffer)
+      2))  ;; default fallback
+
+;; 4) Install the fallback by advising copilot's internal inference function,
+;;    but only if that function exists in your Copilot installation.
+(when (fboundp 'copilot--infer-indentation-offset)
+  ;; Use :override to replace it; this is safe because we check for function existence.
+  (advice-add 'copilot--infer-indentation-offset :override #'my/copilot-infer-indentation-offset-fallback))
+
+;; Optional: helper to remove the advice if you want to revert:
+(defun my/remove-copilot-indent-fallback-advice ()
+  "Remove the Copilot indentation fallback advice if present."
+  (interactive)
+  (when (fboundp 'copilot--infer-indentation-offset)
+    (advice-remove 'copilot--infer-indentation-offset #'my/copilot-infer-indentation-offset-fallback)
+    (message "Removed Copilot indentation fallback advice.")))
 
 
 
