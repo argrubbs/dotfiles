@@ -139,6 +139,8 @@
 (after! org-roam
   (add-hook 'org-roam-capture-new-node-hook #'org-mode))
 
+;; Copilot tweaks
+;; 1) A mapping of major modes to indentation offsets for Copilot fallback:
 (defvar my/copilot-mode-indent-alist
   '((python-mode . 4)
     (js-mode . 2)
